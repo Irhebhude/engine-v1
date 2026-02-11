@@ -88,6 +88,7 @@ const Index = () => {
           >
             <p>Founded by <span className="text-foreground">Prosper Ozoya Irhebhude</span> • POI Foundation</p>
             <p className="mt-1">AI-First Search • Privacy Focused • Open Intelligence</p>
+            <p className="mt-2"><a href="/policies" className="text-primary hover:underline">Policies & Governance</a></p>
           </motion.div>
         </div>
       </main>
