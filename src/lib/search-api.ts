@@ -1,9 +1,10 @@
-type Msg = { role: "user" | "assistant" | "system"; content: string };
-
 const BASE = import.meta.env.VITE_SUPABASE_URL;
 const KEY = import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY;
 const CHAT_URL = `${BASE}/functions/v1/search-ai`;
 const WEB_SEARCH_URL = `${BASE}/functions/v1/web-search`;
+const SUMMARIZE_URL = `${BASE}/functions/v1/summarize-url`;
+
+export type SearchMode = "default" | "deep_research" | "code" | "academic" | "business";
 
 export interface WebResult {
   url: string;
@@ -38,10 +39,14 @@ export async function webSearch(query: string, limit = 10): Promise<WebResult[]>
 
 export async function streamSearch({
   query,
+  mode = "default",
+  context = [],
   onDelta,
   onDone,
 }: {
   query: string;
+  mode?: SearchMode;
+  context?: string[];
   onDelta: (text: string) => void;
   onDone: () => void;
 }) {
@@ -51,18 +56,12 @@ export async function streamSearch({
       "Content-Type": "application/json",
       Authorization: `Bearer ${KEY}`,
     },
-    body: JSON.stringify({ query }),
+    body: JSON.stringify({ query, mode, context }),
   });
 
-  if (resp.status === 429) {
-    throw new Error("Rate limit exceeded. Please try again in a moment.");
-  }
-  if (resp.status === 402) {
-    throw new Error("Usage limit reached. Please add credits.");
-  }
-  if (!resp.ok || !resp.body) {
-    throw new Error("Failed to start search");
-  }
+  if (resp.status === 429) throw new Error("Rate limit exceeded. Please try again in a moment.");
+  if (resp.status === 402) throw new Error("Usage limit reached. Please add credits.");
+  if (!resp.ok || !resp.body) throw new Error("Failed to start search");
 
   const reader = resp.body.getReader();
   const decoder = new TextDecoder();
@@ -84,10 +83,7 @@ export async function streamSearch({
       if (!line.startsWith("data: ")) continue;
 
       const jsonStr = line.slice(6).trim();
-      if (jsonStr === "[DONE]") {
-        streamDone = true;
-        break;
-      }
+      if (jsonStr === "[DONE]") { streamDone = true; break; }
 
       try {
         const parsed = JSON.parse(jsonStr);
@@ -100,7 +96,6 @@ export async function streamSearch({
     }
   }
 
-  // Final flush
   if (textBuffer.trim()) {
     for (let raw of textBuffer.split("\n")) {
       if (!raw) continue;
@@ -118,4 +113,23 @@ export async function streamSearch({
   }
 
   onDone();
+}
+
+export async function summarizeUrl(url: string): Promise<string> {
+  const resp = await fetch(SUMMARIZE_URL, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${KEY}`,
+    },
+    body: JSON.stringify({ url }),
+  });
+
+  if (!resp.ok) {
+    const data = await resp.json().catch(() => ({}));
+    throw new Error(data.error || "Failed to summarize URL");
+  }
+
+  const data = await resp.json();
+  return data.summary;
 }

@@ -1,9 +1,13 @@
+import { useState } from "react";
 import { Link, useLocation } from "react-router-dom";
-import { Zap } from "lucide-react";
+import { Zap, Clock } from "lucide-react";
+import SearchHistory from "@/components/SearchHistory";
+import { useNavigate } from "react-router-dom";
 
 const Header = () => {
   const location = useLocation();
-  const isHome = location.pathname === "/";
+  const navigate = useNavigate();
+  const [showHistory, setShowHistory] = useState(false);
 
   return (
     <header className="fixed top-0 left-0 right-0 z-50 glass border-b border-border/30">
@@ -17,10 +21,30 @@ const Header = () => {
           </span>
         </Link>
 
-        <nav className="flex items-center gap-6 text-sm">
+        <nav className="flex items-center gap-4 text-sm relative">
+          <button
+            onClick={() => setShowHistory(!showHistory)}
+            className="flex items-center gap-1.5 text-muted-foreground hover:text-foreground transition-colors"
+            title="Search History"
+          >
+            <Clock className="w-4 h-4" />
+            <span className="hidden sm:inline">History</span>
+          </button>
           <span className="text-muted-foreground hidden sm:block">
             by <span className="text-foreground font-medium">POI Foundation</span>
           </span>
+          {showHistory && (
+            <div className="absolute right-0 top-full mt-2 w-80">
+              <SearchHistory
+                isOpen={showHistory}
+                onClose={() => setShowHistory(false)}
+                onSelect={(q) => {
+                  setShowHistory(false);
+                  navigate(`/search?q=${encodeURIComponent(q)}`);
+                }}
+              />
+            </div>
+          )}
         </nav>
       </div>
     </header>
