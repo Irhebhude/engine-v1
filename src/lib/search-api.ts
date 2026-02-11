@@ -1,6 +1,40 @@
 type Msg = { role: "user" | "assistant" | "system"; content: string };
 
-const CHAT_URL = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/search-ai`;
+const BASE = import.meta.env.VITE_SUPABASE_URL;
+const KEY = import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY;
+const CHAT_URL = `${BASE}/functions/v1/search-ai`;
+const WEB_SEARCH_URL = `${BASE}/functions/v1/web-search`;
+
+export interface WebResult {
+  url: string;
+  title: string;
+  description: string;
+  markdown?: string;
+}
+
+export async function webSearch(query: string, limit = 10): Promise<WebResult[]> {
+  const resp = await fetch(WEB_SEARCH_URL, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${KEY}`,
+    },
+    body: JSON.stringify({ query, limit }),
+  });
+
+  if (!resp.ok) {
+    console.error("Web search failed:", resp.status);
+    return [];
+  }
+
+  const data = await resp.json();
+  return (data.data || []).map((r: any) => ({
+    url: r.url || "",
+    title: r.title || r.metadata?.title || "",
+    description: r.description || r.metadata?.description || "",
+    markdown: r.markdown || "",
+  }));
+}
 
 export async function streamSearch({
   query,
@@ -15,7 +49,7 @@ export async function streamSearch({
     method: "POST",
     headers: {
       "Content-Type": "application/json",
-      Authorization: `Bearer ${import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY}`,
+      Authorization: `Bearer ${KEY}`,
     },
     body: JSON.stringify({ query }),
   });
