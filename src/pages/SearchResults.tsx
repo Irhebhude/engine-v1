@@ -6,8 +6,12 @@ import Header from "@/components/Header";
 import SearchBar from "@/components/SearchBar";
 import AIAnswer from "@/components/AIAnswer";
 import WebSearchResults from "@/components/WebSearchResults";
+import SearchModeSelector from "@/components/SearchModeSelector";
+import ToolsMenu from "@/components/ToolsMenu";
+import UrlSummarizer from "@/components/UrlSummarizer";
 import { streamSearch, webSearch } from "@/lib/search-api";
-import type { WebResult } from "@/lib/search-api";
+import type { SearchMode, WebResult } from "@/lib/search-api";
+import { addSearchToHistory, getRecentQueries } from "@/lib/search-context";
 import { useToast } from "@/hooks/use-toast";
 
 const SearchResults = () => {
@@ -20,12 +24,13 @@ const SearchResults = () => {
   const [isStreaming, setIsStreaming] = useState(false);
   const [searchTime, setSearchTime] = useState<number | null>(null);
   const [error, setError] = useState<string | null>(null);
-
   const [webResults, setWebResults] = useState<WebResult[]>([]);
   const [isWebLoading, setIsWebLoading] = useState(false);
+  const [mode, setMode] = useState<SearchMode>("default");
+  const [showSummarizer, setShowSummarizer] = useState(false);
 
   const performSearch = useCallback(
-    async (q: string) => {
+    async (q: string, searchMode: SearchMode = mode) => {
       setAnswer("");
       setIsStreaming(true);
       setError(null);
@@ -34,7 +39,10 @@ const SearchResults = () => {
       const start = performance.now();
       let accumulated = "";
 
-      // Fire both searches in parallel
+      // Save to context memory
+      addSearchToHistory(q, searchMode);
+      const recentContext = getRecentQueries(5);
+
       const webPromise = webSearch(q).then((results) => {
         setWebResults(results);
         setIsWebLoading(false);
@@ -44,6 +52,8 @@ const SearchResults = () => {
         try {
           await streamSearch({
             query: q,
+            mode: searchMode,
+            context: recentContext,
             onDelta: (chunk) => {
               accumulated += chunk;
               setAnswer(accumulated);
@@ -56,17 +66,13 @@ const SearchResults = () => {
         } catch (e: any) {
           setIsStreaming(false);
           setError(e.message);
-          toast({
-            title: "Search Error",
-            description: e.message,
-            variant: "destructive",
-          });
+          toast({ title: "Search Error", description: e.message, variant: "destructive" });
         }
       })();
 
       await Promise.allSettled([webPromise, aiPromise]);
     },
-    [toast]
+    [toast, mode]
   );
 
   useEffect(() => {
@@ -77,36 +83,43 @@ const SearchResults = () => {
     navigate(`/search?q=${encodeURIComponent(newQuery)}`);
   };
 
+  const handleModeChange = (newMode: SearchMode) => {
+    setMode(newMode);
+    if (query) performSearch(query, newMode);
+  };
+
+  const handleToolAction = (action: string) => {
+    if (action === "summarize") setShowSummarizer(true);
+  };
+
+  const modeLabel = mode !== "default" ? ` • ${mode.replace("_", " ").toUpperCase()} MODE` : "";
+
   return (
     <div className="min-h-screen bg-background">
       <Header />
 
-      {/* Search bar area */}
       <div className="pt-20 pb-4 px-4 border-b border-border/30 glass">
         <div className="container mx-auto max-w-4xl">
+          <div className="flex items-center gap-3 mb-3">
+            <div className="flex-1">
+              <SearchModeSelector activeMode={mode} onChange={handleModeChange} />
+            </div>
+            <ToolsMenu onSelectMode={handleModeChange} onAction={handleToolAction} />
+          </div>
           <SearchBar onSearch={handleNewSearch} isLoading={isStreaming} compact initialQuery={query} />
         </div>
       </div>
 
-      {/* Results */}
       <main className="container mx-auto max-w-4xl px-4 py-8">
         {searchTime && !isStreaming && (
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            className="flex items-center gap-2 text-xs text-muted-foreground mb-6"
-          >
+          <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="flex items-center gap-2 text-xs text-muted-foreground mb-6">
             <Clock className="w-3 h-3" />
-            AI answer generated in {(searchTime / 1000).toFixed(2)}s
+            AI answer generated in {(searchTime / 1000).toFixed(2)}s{modeLabel}
           </motion.div>
         )}
 
         {error && (
-          <motion.div
-            initial={{ opacity: 0, y: 10 }}
-            animate={{ opacity: 1, y: 0 }}
-            className="glass rounded-2xl p-6 border-destructive/30 mb-6"
-          >
+          <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className="glass rounded-2xl p-6 border-destructive/30 mb-6">
             <div className="flex items-center gap-3 text-destructive">
               <AlertCircle className="w-5 h-5" />
               <p className="font-medium">{error}</p>
@@ -115,14 +128,14 @@ const SearchResults = () => {
         )}
 
         <AIAnswer answer={answer} isStreaming={isStreaming} query={query} />
-
         <WebSearchResults results={webResults} isLoading={isWebLoading} />
 
-        {/* Powered by footer */}
         <div className="text-center mt-12 text-xs text-muted-foreground">
           SEARCH-POI • AI-First Intelligence • POI Foundation
         </div>
       </main>
+
+      <UrlSummarizer isOpen={showSummarizer} onClose={() => setShowSummarizer(false)} />
     </div>
   );
 };
