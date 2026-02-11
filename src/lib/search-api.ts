@@ -3,6 +3,8 @@ const KEY = import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY;
 const CHAT_URL = `${BASE}/functions/v1/search-ai`;
 const WEB_SEARCH_URL = `${BASE}/functions/v1/web-search`;
 const SUMMARIZE_URL = `${BASE}/functions/v1/summarize-url`;
+const IMAGE_SEARCH_URL = `${BASE}/functions/v1/image-search`;
+const VIDEO_SEARCH_URL = `${BASE}/functions/v1/video-search`;
 
 export type SearchMode = "default" | "deep_research" | "code" | "academic" | "business";
 
@@ -132,4 +134,61 @@ export async function summarizeUrl(url: string): Promise<string> {
 
   const data = await resp.json();
   return data.summary;
+}
+
+export interface ImageResult {
+  url: string;
+  alt: string;
+  sourceUrl: string;
+  sourceTitle: string;
+  domain: string;
+  isThumbnail?: boolean;
+}
+
+export async function imageSearch(query: string, limit = 20): Promise<ImageResult[]> {
+  const resp = await fetch(IMAGE_SEARCH_URL, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${KEY}`,
+    },
+    body: JSON.stringify({ query, limit }),
+  });
+
+  if (!resp.ok) {
+    console.error("Image search failed:", resp.status);
+    return [];
+  }
+
+  const data = await resp.json();
+  return data.images || [];
+}
+
+export interface VideoResult {
+  url: string;
+  title: string;
+  description: string;
+  thumbnail: string;
+  platform: string;
+  domain: string;
+  videoId?: string;
+}
+
+export async function videoSearch(query: string, limit = 20): Promise<VideoResult[]> {
+  const resp = await fetch(VIDEO_SEARCH_URL, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${KEY}`,
+    },
+    body: JSON.stringify({ query, limit }),
+  });
+
+  if (!resp.ok) {
+    console.error("Video search failed:", resp.status);
+    return [];
+  }
+
+  const data = await resp.json();
+  return data.videos || [];
 }

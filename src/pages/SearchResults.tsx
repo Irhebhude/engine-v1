@@ -1,24 +1,35 @@
 import { useState, useEffect, useCallback } from "react";
 import { useSearchParams, useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
-import { Clock, AlertCircle } from "lucide-react";
+import { Clock, AlertCircle, Globe, Image, Video } from "lucide-react";
 import Header from "@/components/Header";
 import SearchBar from "@/components/SearchBar";
 import AIAnswer from "@/components/AIAnswer";
 import WebSearchResults from "@/components/WebSearchResults";
+import ImageSearchResults from "@/components/ImageSearchResults";
+import VideoSearchResults from "@/components/VideoSearchResults";
 import SearchModeSelector from "@/components/SearchModeSelector";
 import ToolsMenu from "@/components/ToolsMenu";
 import UrlSummarizer from "@/components/UrlSummarizer";
-import { streamSearch, webSearch } from "@/lib/search-api";
-import type { SearchMode, WebResult } from "@/lib/search-api";
+import { streamSearch, webSearch, imageSearch, videoSearch } from "@/lib/search-api";
+import type { SearchMode, WebResult, ImageResult as ImageResultType, VideoResult as VideoResultType } from "@/lib/search-api";
 import { addSearchToHistory, getRecentQueries } from "@/lib/search-context";
 import { useToast } from "@/hooks/use-toast";
+
+type SearchTab = "web" | "images" | "videos";
+
+const TAB_CONFIG: { id: SearchTab; label: string; icon: React.ElementType }[] = [
+  { id: "web", label: "Web", icon: Globe },
+  { id: "images", label: "Images", icon: Image },
+  { id: "videos", label: "Videos", icon: Video },
+];
 
 const SearchResults = () => {
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
   const { toast } = useToast();
   const query = searchParams.get("q") || "";
+  const initialTab = (searchParams.get("tab") as SearchTab) || "web";
 
   const [answer, setAnswer] = useState("");
   const [isStreaming, setIsStreaming] = useState(false);
@@ -26,28 +37,27 @@ const SearchResults = () => {
   const [error, setError] = useState<string | null>(null);
   const [webResults, setWebResults] = useState<WebResult[]>([]);
   const [isWebLoading, setIsWebLoading] = useState(false);
+  const [imageResults, setImageResults] = useState<ImageResultType[]>([]);
+  const [isImageLoading, setIsImageLoading] = useState(false);
+  const [videoResults, setVideoResults] = useState<VideoResultType[]>([]);
+  const [isVideoLoading, setIsVideoLoading] = useState(false);
   const [mode, setMode] = useState<SearchMode>("default");
   const [showSummarizer, setShowSummarizer] = useState(false);
+  const [activeTab, setActiveTab] = useState<SearchTab>(initialTab);
 
   const performSearch = useCallback(
-    async (q: string, searchMode: SearchMode = mode) => {
+    async (q: string, searchMode: SearchMode = mode, tab: SearchTab = activeTab) => {
       setAnswer("");
       setIsStreaming(true);
       setError(null);
-      setWebResults([]);
-      setIsWebLoading(true);
+      setSearchTime(null);
       const start = performance.now();
       let accumulated = "";
 
-      // Save to context memory
       addSearchToHistory(q, searchMode);
       const recentContext = getRecentQueries(5);
 
-      const webPromise = webSearch(q).then((results) => {
-        setWebResults(results);
-        setIsWebLoading(false);
-      }).catch(() => setIsWebLoading(false));
-
+      // Always run AI stream
       const aiPromise = (async () => {
         try {
           await streamSearch({
@@ -70,9 +80,25 @@ const SearchResults = () => {
         }
       })();
 
-      await Promise.allSettled([webPromise, aiPromise]);
+      // Run tab-specific search
+      if (tab === "web") {
+        setWebResults([]);
+        setIsWebLoading(true);
+        const webPromise = webSearch(q).then((r) => { setWebResults(r); setIsWebLoading(false); }).catch(() => setIsWebLoading(false));
+        await Promise.allSettled([webPromise, aiPromise]);
+      } else if (tab === "images") {
+        setImageResults([]);
+        setIsImageLoading(true);
+        const imgPromise = imageSearch(q).then((r) => { setImageResults(r); setIsImageLoading(false); }).catch(() => setIsImageLoading(false));
+        await Promise.allSettled([imgPromise, aiPromise]);
+      } else if (tab === "videos") {
+        setVideoResults([]);
+        setIsVideoLoading(true);
+        const vidPromise = videoSearch(q).then((r) => { setVideoResults(r); setIsVideoLoading(false); }).catch(() => setIsVideoLoading(false));
+        await Promise.allSettled([vidPromise, aiPromise]);
+      }
     },
-    [toast, mode]
+    [toast, mode, activeTab]
   );
 
   useEffect(() => {
@@ -80,16 +106,26 @@ const SearchResults = () => {
   }, [query, performSearch]);
 
   const handleNewSearch = (newQuery: string) => {
-    navigate(`/search?q=${encodeURIComponent(newQuery)}`);
+    navigate(`/search?q=${encodeURIComponent(newQuery)}&tab=${activeTab}`);
   };
 
   const handleModeChange = (newMode: SearchMode) => {
     setMode(newMode);
-    if (query) performSearch(query, newMode);
+    if (query) performSearch(query, newMode, activeTab);
+  };
+
+  const handleTabChange = (tab: SearchTab) => {
+    setActiveTab(tab);
+    if (query) {
+      navigate(`/search?q=${encodeURIComponent(query)}&tab=${tab}`, { replace: true });
+      performSearch(query, mode, tab);
+    }
   };
 
   const handleToolAction = (action: string) => {
     if (action === "summarize") setShowSummarizer(true);
+    if (action === "images") handleTabChange("images");
+    if (action === "videos") handleTabChange("videos");
   };
 
   const modeLabel = mode !== "default" ? ` • ${mode.replace("_", " ").toUpperCase()} MODE` : "";
@@ -107,6 +143,28 @@ const SearchResults = () => {
             <ToolsMenu onSelectMode={handleModeChange} onAction={handleToolAction} />
           </div>
           <SearchBar onSearch={handleNewSearch} isLoading={isStreaming} compact initialQuery={query} />
+
+          {/* Search tabs */}
+          <div className="flex items-center gap-1 mt-3 -mb-4 pb-0">
+            {TAB_CONFIG.map((tab) => {
+              const Icon = tab.icon;
+              const isActive = activeTab === tab.id;
+              return (
+                <button
+                  key={tab.id}
+                  onClick={() => handleTabChange(tab.id)}
+                  className={`flex items-center gap-1.5 px-4 py-2 text-sm font-medium rounded-t-lg transition-colors border-b-2 ${
+                    isActive
+                      ? "border-primary text-primary bg-primary/5"
+                      : "border-transparent text-muted-foreground hover:text-foreground hover:bg-accent/10"
+                  }`}
+                >
+                  <Icon className="w-3.5 h-3.5" />
+                  {tab.label}
+                </button>
+              );
+            })}
+          </div>
         </div>
       </div>
 
@@ -128,7 +186,10 @@ const SearchResults = () => {
         )}
 
         <AIAnswer answer={answer} isStreaming={isStreaming} query={query} />
-        <WebSearchResults results={webResults} isLoading={isWebLoading} />
+
+        {activeTab === "web" && <WebSearchResults results={webResults} isLoading={isWebLoading} />}
+        {activeTab === "images" && <ImageSearchResults results={imageResults} isLoading={isImageLoading} />}
+        {activeTab === "videos" && <VideoSearchResults results={videoResults} isLoading={isVideoLoading} />}
 
         <div className="text-center mt-12 text-xs text-muted-foreground">
           SEARCH-POI • AI-First Intelligence • POI Foundation

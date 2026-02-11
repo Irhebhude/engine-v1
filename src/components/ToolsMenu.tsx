@@ -11,7 +11,11 @@ import {
   FileText,
   Shield,
   Sparkles,
+  Image,
+  Video,
+  ScrollText,
 } from "lucide-react";
+import { useNavigate } from "react-router-dom";
 import type { SearchMode } from "@/lib/search-api";
 
 interface Tool {
@@ -35,11 +39,24 @@ const TOOLS: { category: string; items: Tool[] }[] = [
     ],
   },
   {
+    category: "Media Search",
+    items: [
+      { id: "images", label: "Image Search", description: "Real-time web image discovery", icon: Image, action: "images" },
+      { id: "videos", label: "Video Search", description: "Live video search & preview", icon: Video, action: "videos" },
+    ],
+  },
+  {
     category: "Intelligence Tools",
     items: [
       { id: "summarize", label: "Website Summarizer", description: "AI-powered page understanding", icon: FileText, action: "summarize" },
       { id: "web", label: "Live Web Results", description: "Real-time internet search", icon: Globe, action: "web" },
       { id: "trust", label: "Trust & Safety", description: "Source credibility analysis", icon: Shield, action: "trust" },
+    ],
+  },
+  {
+    category: "Governance",
+    items: [
+      { id: "policies", label: "Policies & Governance", description: "Responsible AI framework", icon: ScrollText, action: "policies" },
     ],
   },
 ];
@@ -51,6 +68,7 @@ interface ToolsMenuProps {
 
 const ToolsMenu = ({ onSelectMode, onAction }: ToolsMenuProps) => {
   const [isOpen, setIsOpen] = useState(false);
+  const navigate = useNavigate();
 
   return (
     <div className="relative">
@@ -64,45 +82,59 @@ const ToolsMenu = ({ onSelectMode, onAction }: ToolsMenuProps) => {
 
       <AnimatePresence>
         {isOpen && (
-          <motion.div
-            initial={{ opacity: 0, y: -8, scale: 0.95 }}
-            animate={{ opacity: 1, y: 0, scale: 1 }}
-            exit={{ opacity: 0, y: -8, scale: 0.95 }}
-            className="absolute right-0 top-full mt-2 w-72 glass rounded-xl overflow-hidden z-50 glow-box"
-          >
-            {TOOLS.map((category) => (
-              <div key={category.category}>
-                <div className="px-4 py-2 text-[10px] font-semibold uppercase tracking-widest text-muted-foreground border-b border-border/30">
-                  {category.category}
+          <>
+            {/* Backdrop to close menu */}
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              className="fixed inset-0 z-40"
+              onClick={() => setIsOpen(false)}
+            />
+            <motion.div
+              initial={{ opacity: 0, y: -8, scale: 0.95 }}
+              animate={{ opacity: 1, y: 0, scale: 1 }}
+              exit={{ opacity: 0, y: -8, scale: 0.95 }}
+              className="absolute right-0 top-full mt-2 w-72 glass rounded-xl overflow-hidden z-50 glow-box max-h-[70vh] overflow-y-auto"
+            >
+              {TOOLS.map((category) => (
+                <div key={category.category}>
+                  <div className="px-4 py-2 text-[10px] font-semibold uppercase tracking-widest text-muted-foreground border-b border-border/30">
+                    {category.category}
+                  </div>
+                  {category.items.map((tool) => {
+                    const Icon = tool.icon;
+                    return (
+                      <button
+                        key={tool.id}
+                        onClick={() => {
+                          if (tool.action === "policies") {
+                            navigate("/policies");
+                          } else {
+                            if (tool.mode) onSelectMode(tool.mode);
+                            if (tool.action) onAction(tool.action);
+                          }
+                          setIsOpen(false);
+                        }}
+                        className="flex items-center gap-3 w-full px-4 py-3 text-left hover:bg-accent/20 transition-colors"
+                      >
+                        <div className="p-1.5 rounded-lg bg-primary/10">
+                          <Icon className="w-3.5 h-3.5 text-primary" />
+                        </div>
+                        <div>
+                          <div className="text-sm font-medium text-foreground">{tool.label}</div>
+                          <div className="text-[11px] text-muted-foreground">{tool.description}</div>
+                        </div>
+                      </button>
+                    );
+                  })}
                 </div>
-                {category.items.map((tool) => {
-                  const Icon = tool.icon;
-                  return (
-                    <button
-                      key={tool.id}
-                      onClick={() => {
-                        if (tool.mode) onSelectMode(tool.mode);
-                        if (tool.action) onAction(tool.action);
-                        setIsOpen(false);
-                      }}
-                      className="flex items-center gap-3 w-full px-4 py-3 text-left hover:bg-accent/20 transition-colors"
-                    >
-                      <div className="p-1.5 rounded-lg bg-primary/10">
-                        <Icon className="w-3.5 h-3.5 text-primary" />
-                      </div>
-                      <div>
-                        <div className="text-sm font-medium text-foreground">{tool.label}</div>
-                        <div className="text-[11px] text-muted-foreground">{tool.description}</div>
-                      </div>
-                    </button>
-                  );
-                })}
+              ))}
+              <div className="px-4 py-2 text-[10px] text-muted-foreground border-t border-border/30">
+                SEARCH-POI • POI Foundation
               </div>
-            ))}
-            <div className="px-4 py-2 text-[10px] text-muted-foreground border-t border-border/30">
-              SEARCH-POI • POI Foundation
-            </div>
-          </motion.div>
+            </motion.div>
+          </>
         )}
       </AnimatePresence>
     </div>
