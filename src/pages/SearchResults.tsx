@@ -5,7 +5,9 @@ import { Clock, AlertCircle } from "lucide-react";
 import Header from "@/components/Header";
 import SearchBar from "@/components/SearchBar";
 import AIAnswer from "@/components/AIAnswer";
-import { streamSearch } from "@/lib/search-api";
+import WebSearchResults from "@/components/WebSearchResults";
+import { streamSearch, webSearch } from "@/lib/search-api";
+import type { WebResult } from "@/lib/search-api";
 import { useToast } from "@/hooks/use-toast";
 
 const SearchResults = () => {
@@ -19,35 +21,50 @@ const SearchResults = () => {
   const [searchTime, setSearchTime] = useState<number | null>(null);
   const [error, setError] = useState<string | null>(null);
 
+  const [webResults, setWebResults] = useState<WebResult[]>([]);
+  const [isWebLoading, setIsWebLoading] = useState(false);
+
   const performSearch = useCallback(
     async (q: string) => {
       setAnswer("");
       setIsStreaming(true);
       setError(null);
+      setWebResults([]);
+      setIsWebLoading(true);
       const start = performance.now();
       let accumulated = "";
 
-      try {
-        await streamSearch({
-          query: q,
-          onDelta: (chunk) => {
-            accumulated += chunk;
-            setAnswer(accumulated);
-          },
-          onDone: () => {
-            setIsStreaming(false);
-            setSearchTime(Math.round(performance.now() - start));
-          },
-        });
-      } catch (e: any) {
-        setIsStreaming(false);
-        setError(e.message);
-        toast({
-          title: "Search Error",
-          description: e.message,
-          variant: "destructive",
-        });
-      }
+      // Fire both searches in parallel
+      const webPromise = webSearch(q).then((results) => {
+        setWebResults(results);
+        setIsWebLoading(false);
+      }).catch(() => setIsWebLoading(false));
+
+      const aiPromise = (async () => {
+        try {
+          await streamSearch({
+            query: q,
+            onDelta: (chunk) => {
+              accumulated += chunk;
+              setAnswer(accumulated);
+            },
+            onDone: () => {
+              setIsStreaming(false);
+              setSearchTime(Math.round(performance.now() - start));
+            },
+          });
+        } catch (e: any) {
+          setIsStreaming(false);
+          setError(e.message);
+          toast({
+            title: "Search Error",
+            description: e.message,
+            variant: "destructive",
+          });
+        }
+      })();
+
+      await Promise.allSettled([webPromise, aiPromise]);
     },
     [toast]
   );
@@ -98,6 +115,8 @@ const SearchResults = () => {
         )}
 
         <AIAnswer answer={answer} isStreaming={isStreaming} query={query} />
+
+        <WebSearchResults results={webResults} isLoading={isWebLoading} />
 
         {/* Powered by footer */}
         <div className="text-center mt-12 text-xs text-muted-foreground">
