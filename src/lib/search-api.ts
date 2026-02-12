@@ -5,6 +5,7 @@ const WEB_SEARCH_URL = `${BASE}/functions/v1/web-search`;
 const SUMMARIZE_URL = `${BASE}/functions/v1/summarize-url`;
 const IMAGE_SEARCH_URL = `${BASE}/functions/v1/image-search`;
 const VIDEO_SEARCH_URL = `${BASE}/functions/v1/video-search`;
+const NEWS_SEARCH_URL = `${BASE}/functions/v1/news-search`;
 
 export type SearchMode = "default" | "deep_research" | "code" | "academic" | "business";
 
@@ -191,4 +192,32 @@ export async function videoSearch(query: string, limit = 20): Promise<VideoResul
 
   const data = await resp.json();
   return data.videos || [];
+}
+
+export interface NewsResult {
+  url: string;
+  title: string;
+  description: string;
+  domain: string;
+  publishedAt?: string | null;
+  favicon?: string;
+}
+
+export async function newsSearch(query: string, limit = 20): Promise<NewsResult[]> {
+  const resp = await fetch(NEWS_SEARCH_URL, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${KEY}`,
+    },
+    body: JSON.stringify({ query, limit }),
+  });
+
+  if (!resp.ok) {
+    console.error("News search failed:", resp.status);
+    return [];
+  }
+
+  const data = await resp.json();
+  return data.news || [];
 }

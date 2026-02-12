@@ -1,27 +1,29 @@
 import { useState, useEffect, useCallback } from "react";
 import { useSearchParams, useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
-import { Clock, AlertCircle, Globe, Image, Video } from "lucide-react";
+import { Clock, AlertCircle, Globe, Image, Video, Newspaper } from "lucide-react";
 import Header from "@/components/Header";
 import SearchBar from "@/components/SearchBar";
 import AIAnswer from "@/components/AIAnswer";
 import WebSearchResults from "@/components/WebSearchResults";
 import ImageSearchResults from "@/components/ImageSearchResults";
 import VideoSearchResults from "@/components/VideoSearchResults";
+import NewsSearchResults from "@/components/NewsSearchResults";
 import SearchModeSelector from "@/components/SearchModeSelector";
 import ToolsMenu from "@/components/ToolsMenu";
 import UrlSummarizer from "@/components/UrlSummarizer";
-import { streamSearch, webSearch, imageSearch, videoSearch } from "@/lib/search-api";
-import type { SearchMode, WebResult, ImageResult as ImageResultType, VideoResult as VideoResultType } from "@/lib/search-api";
+import { streamSearch, webSearch, imageSearch, videoSearch, newsSearch } from "@/lib/search-api";
+import type { SearchMode, WebResult, ImageResult as ImageResultType, VideoResult as VideoResultType, NewsResult as NewsResultType } from "@/lib/search-api";
 import { addSearchToHistory, getRecentQueries } from "@/lib/search-context";
 import { useToast } from "@/hooks/use-toast";
 
-type SearchTab = "web" | "images" | "videos";
+type SearchTab = "web" | "images" | "videos" | "news";
 
 const TAB_CONFIG: { id: SearchTab; label: string; icon: React.ElementType }[] = [
   { id: "web", label: "Web", icon: Globe },
   { id: "images", label: "Images", icon: Image },
   { id: "videos", label: "Videos", icon: Video },
+  { id: "news", label: "News", icon: Newspaper },
 ];
 
 const SearchResults = () => {
@@ -41,6 +43,8 @@ const SearchResults = () => {
   const [isImageLoading, setIsImageLoading] = useState(false);
   const [videoResults, setVideoResults] = useState<VideoResultType[]>([]);
   const [isVideoLoading, setIsVideoLoading] = useState(false);
+  const [newsResults, setNewsResults] = useState<NewsResultType[]>([]);
+  const [isNewsLoading, setIsNewsLoading] = useState(false);
   const [mode, setMode] = useState<SearchMode>("default");
   const [showSummarizer, setShowSummarizer] = useState(false);
   const [activeTab, setActiveTab] = useState<SearchTab>(initialTab);
@@ -96,6 +100,11 @@ const SearchResults = () => {
         setIsVideoLoading(true);
         const vidPromise = videoSearch(q).then((r) => { setVideoResults(r); setIsVideoLoading(false); }).catch(() => setIsVideoLoading(false));
         await Promise.allSettled([vidPromise, aiPromise]);
+      } else if (tab === "news") {
+        setNewsResults([]);
+        setIsNewsLoading(true);
+        const newsPromise = newsSearch(q).then((r) => { setNewsResults(r); setIsNewsLoading(false); }).catch(() => setIsNewsLoading(false));
+        await Promise.allSettled([newsPromise, aiPromise]);
       }
     },
     [toast, mode, activeTab]
@@ -126,6 +135,7 @@ const SearchResults = () => {
     if (action === "summarize") setShowSummarizer(true);
     if (action === "images") handleTabChange("images");
     if (action === "videos") handleTabChange("videos");
+    if (action === "news") handleTabChange("news");
   };
 
   const modeLabel = mode !== "default" ? ` • ${mode.replace("_", " ").toUpperCase()} MODE` : "";
@@ -190,6 +200,7 @@ const SearchResults = () => {
         {activeTab === "web" && <WebSearchResults results={webResults} isLoading={isWebLoading} />}
         {activeTab === "images" && <ImageSearchResults results={imageResults} isLoading={isImageLoading} />}
         {activeTab === "videos" && <VideoSearchResults results={videoResults} isLoading={isVideoLoading} />}
+        {activeTab === "news" && <NewsSearchResults results={newsResults} isLoading={isNewsLoading} />}
 
         <div className="text-center mt-12 text-xs text-muted-foreground">
           SEARCH-POI • AI-First Intelligence • POI Foundation
