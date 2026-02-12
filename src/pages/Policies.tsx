@@ -1,6 +1,7 @@
 import { motion } from "framer-motion";
 import { Shield, Brain, Lock, Eye, Scale, Globe } from "lucide-react";
 import Header from "@/components/Header";
+import AdSense from "@/components/AdSense";
 import {
   Accordion,
   AccordionContent,
@@ -149,6 +150,8 @@ const Policies = () => {
               );
             })}
           </div>
+
+          <AdSense adSlot="YOUR_AD_SLOT_4" adFormat="auto" className="mt-8" />
 
           <motion.div
             initial={{ opacity: 0 }}
