@@ -5,6 +5,7 @@ import { Brain, Zap, Globe, Shield, Cpu, Layers } from "lucide-react";
 import SearchBar from "@/components/SearchBar";
 import FeatureCard from "@/components/FeatureCard";
 import Header from "@/components/Header";
+import AdSense from "@/components/AdSense";
 import heroBg from "@/assets/hero-bg.jpg";
 
 const FEATURES = [
@@ -78,6 +79,9 @@ const Index = () => {
               <FeatureCard key={feature.title} {...feature} delay={0.1 * i} />
             ))}
           </div>
+
+          {/* Ad placement */}
+          <AdSense adSlot="YOUR_AD_SLOT_1" adFormat="horizontal" className="mt-12" />
 
           {/* Footer */}
           <motion.div

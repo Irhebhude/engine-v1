@@ -12,6 +12,7 @@ import NewsSearchResults from "@/components/NewsSearchResults";
 import SearchModeSelector from "@/components/SearchModeSelector";
 import ToolsMenu from "@/components/ToolsMenu";
 import UrlSummarizer from "@/components/UrlSummarizer";
+import AdSense from "@/components/AdSense";
 import { streamSearch, webSearch, imageSearch, videoSearch, newsSearch } from "@/lib/search-api";
 import type { SearchMode, WebResult, ImageResult as ImageResultType, VideoResult as VideoResultType, NewsResult as NewsResultType } from "@/lib/search-api";
 import { addSearchToHistory, getRecentQueries } from "@/lib/search-context";
@@ -197,10 +198,16 @@ const SearchResults = () => {
 
         <AIAnswer answer={answer} isStreaming={isStreaming} query={query} />
 
+        {/* Top ad */}
+        <AdSense adSlot="YOUR_AD_SLOT_2" adFormat="horizontal" className="mb-6" />
+
         {activeTab === "web" && <WebSearchResults results={webResults} isLoading={isWebLoading} />}
         {activeTab === "images" && <ImageSearchResults results={imageResults} isLoading={isImageLoading} />}
         {activeTab === "videos" && <VideoSearchResults results={videoResults} isLoading={isVideoLoading} />}
         {activeTab === "news" && <NewsSearchResults results={newsResults} isLoading={isNewsLoading} />}
+
+        {/* Bottom ad */}
+        <AdSense adSlot="YOUR_AD_SLOT_3" adFormat="auto" className="mt-8" />
 
         <div className="text-center mt-12 text-xs text-muted-foreground">
           SEARCH-POI • AI-First Intelligence • POI Foundation
