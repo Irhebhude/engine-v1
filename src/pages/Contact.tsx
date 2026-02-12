@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { motion } from "framer-motion";
-import { Mail, Briefcase, User, Send, CheckCircle, AlertCircle } from "lucide-react";
+import { Mail, Briefcase, Phone, MessageCircle, Globe, MapPin, Send, CheckCircle, AlertCircle } from "lucide-react";
 import { z } from "zod";
 import Header from "@/components/Header";
 import AdSense from "@/components/AdSense";
@@ -19,9 +19,12 @@ const contactSchema = z.object({
 type ContactForm = z.infer<typeof contactSchema>;
 
 const CONTACTS = [
-  { icon: Mail, label: "Support Email", value: "support@searchpoi.app", href: "mailto:support@searchpoi.app" },
+  { icon: Mail, label: "Email", value: "infosearchpoi@gmail.com", href: "mailto:infosearchpoi@gmail.com" },
+  { icon: Phone, label: "Call Line", value: "+2348114472622", href: "tel:+2348114472622" },
+  { icon: MessageCircle, label: "WhatsApp", value: "+234 9167113584", href: "https://wa.me/2349167113584" },
+  { icon: Globe, label: "Website", value: "searchpoi.lovable.app", href: "https://searchpoi.lovable.app/" },
   { icon: Briefcase, label: "Business Inquiries", value: "businesssearchpoi@gmail.com", href: "mailto:businesssearchpoi@gmail.com" },
-  { icon: User, label: "Founder Contact", value: "poifoundationunlimited@gmail.com", href: "mailto:poifoundationunlimited@gmail.com" },
+  { icon: MapPin, label: "Office", value: "Lagos, Nigeria 🇳🇬", href: undefined },
 ];
 
 const Contact = () => {
@@ -70,22 +73,25 @@ const Contact = () => {
               Contact <span className="gradient-text">SEARCH-POI</span>
             </h1>
             <p className="text-muted-foreground max-w-xl mx-auto">
-              We'd love to hear from you. Whether you have feedback, feature requests, partnership inquiries, or technical support needs, feel free to reach out.
+              We'd love to hear from you 💙 Whether you have feedback, feature requests, partnership inquiries, or technical support needs, feel free to reach out.
             </p>
           </motion.div>
 
           <div className="grid lg:grid-cols-5 gap-8">
             {/* Contact Info */}
             <motion.div initial={{ opacity: 0, x: -20 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: 0.15 }} className="lg:col-span-2 space-y-4">
-              {CONTACTS.map((c) => (
-                <a key={c.label} href={c.href} className="glass rounded-xl p-4 flex items-start gap-3 border border-border/30 block hover:border-primary/40 transition-colors">
-                  <c.icon className="w-5 h-5 text-primary mt-0.5 shrink-0" />
-                  <div>
-                    <p className="text-xs text-muted-foreground">{c.label}</p>
-                    <p className="text-sm font-medium text-foreground break-all">{c.value}</p>
-                  </div>
-                </a>
-              ))}
+              {CONTACTS.map((c) => {
+                const Wrapper = c.href ? "a" : "div";
+                return (
+                  <Wrapper key={c.label} {...(c.href ? { href: c.href, target: c.href.startsWith("http") ? "_blank" : undefined, rel: c.href.startsWith("http") ? "noopener noreferrer" : undefined } : {})} className="glass rounded-xl p-4 flex items-start gap-3 border border-border/30 block hover:border-primary/40 transition-colors">
+                    <c.icon className="w-5 h-5 text-primary mt-0.5 shrink-0" />
+                    <div>
+                      <p className="text-xs text-muted-foreground">{c.label}</p>
+                      <p className="text-sm font-medium text-foreground break-all">{c.value}</p>
+                    </div>
+                  </Wrapper>
+                );
+              })}
             </motion.div>
 
             {/* Form */}
