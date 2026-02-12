@@ -13,7 +13,7 @@ declare global {
   }
 }
 
-const PUBLISHER_ID = "ca-pub-XXXXXXXXXXXXXXXX"; // Replace with your AdSense Publisher ID
+const PUBLISHER_ID = "ca-pub-1716723449964920";
 
 const AdSense = ({
   adSlot,
