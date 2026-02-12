@@ -22,6 +22,8 @@ const Header = () => {
         </Link>
 
         <nav className="flex items-center gap-4 text-sm relative">
+          <Link to="/about" className="text-muted-foreground hover:text-foreground transition-colors hidden sm:inline">About</Link>
+          <Link to="/contact" className="text-muted-foreground hover:text-foreground transition-colors hidden sm:inline">Contact</Link>
           <button
             onClick={() => setShowHistory(!showHistory)}
             className="flex items-center gap-1.5 text-muted-foreground hover:text-foreground transition-colors"
@@ -30,9 +32,6 @@ const Header = () => {
             <Clock className="w-4 h-4" />
             <span className="hidden sm:inline">History</span>
           </button>
-          <span className="text-muted-foreground hidden sm:block">
-            by <span className="text-foreground font-medium">POI Foundation</span>
-          </span>
           {showHistory && (
             <div className="absolute right-0 top-full mt-2 w-80">
               <SearchHistory
