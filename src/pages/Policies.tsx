@@ -151,7 +151,7 @@ const Policies = () => {
             })}
           </div>
 
-          <AdSense adSlot="YOUR_AD_SLOT_4" adFormat="auto" className="mt-8" />
+          <AdSense adSlot="9944378861" adFormat="auto" className="mt-8" />
 
           <motion.div
             initial={{ opacity: 0 }}

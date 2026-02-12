@@ -81,7 +81,7 @@ const Index = () => {
           </div>
 
           {/* Ad placement */}
-          <AdSense adSlot="YOUR_AD_SLOT_1" adFormat="horizontal" className="mt-12" />
+          <AdSense adSlot="9944378861" adFormat="horizontal" className="mt-12" />
 
           {/* Footer */}
           <motion.div

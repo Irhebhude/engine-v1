@@ -199,7 +199,7 @@ const SearchResults = () => {
         <AIAnswer answer={answer} isStreaming={isStreaming} query={query} />
 
         {/* Top ad */}
-        <AdSense adSlot="YOUR_AD_SLOT_2" adFormat="horizontal" className="mb-6" />
+        <AdSense adSlot="9944378861" adFormat="horizontal" className="mb-6" />
 
         {activeTab === "web" && <WebSearchResults results={webResults} isLoading={isWebLoading} />}
         {activeTab === "images" && <ImageSearchResults results={imageResults} isLoading={isImageLoading} />}
@@ -207,7 +207,7 @@ const SearchResults = () => {
         {activeTab === "news" && <NewsSearchResults results={newsResults} isLoading={isNewsLoading} />}
 
         {/* Bottom ad */}
-        <AdSense adSlot="YOUR_AD_SLOT_3" adFormat="auto" className="mt-8" />
+        <AdSense adSlot="9944378861" adFormat="auto" className="mt-8" />
 
         <div className="text-center mt-12 text-xs text-muted-foreground">
           SEARCH-POI • AI-First Intelligence • POI Foundation
