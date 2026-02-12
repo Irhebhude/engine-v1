@@ -41,6 +41,39 @@ export type Database = {
         }
         Relationships: []
       }
+      feedback: {
+        Row: {
+          ai_response: string | null
+          category: string
+          created_at: string
+          email: string
+          full_name: string
+          id: string
+          message: string
+          rating: number | null
+        }
+        Insert: {
+          ai_response?: string | null
+          category?: string
+          created_at?: string
+          email: string
+          full_name: string
+          id?: string
+          message: string
+          rating?: number | null
+        }
+        Update: {
+          ai_response?: string | null
+          category?: string
+          created_at?: string
+          email?: string
+          full_name?: string
+          id?: string
+          message?: string
+          rating?: number | null
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
