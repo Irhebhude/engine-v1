@@ -13,6 +13,7 @@ import {
   Sparkles,
   Image,
   Video,
+  Newspaper,
   ScrollText,
 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
@@ -43,6 +44,7 @@ const TOOLS: { category: string; items: Tool[] }[] = [
     items: [
       { id: "images", label: "Image Search", description: "Real-time web image discovery", icon: Image, action: "images" },
       { id: "videos", label: "Video Search", description: "Live video search & preview", icon: Video, action: "videos" },
+      { id: "news", label: "News Search", description: "Real-time news aggregation", icon: Newspaper, action: "news" },
     ],
   },
   {
