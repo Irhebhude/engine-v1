@@ -24,6 +24,7 @@ const Header = () => {
         <nav className="flex items-center gap-4 text-sm relative">
           <Link to="/about" className="text-muted-foreground hover:text-foreground transition-colors hidden sm:inline">About</Link>
           <Link to="/contact" className="text-muted-foreground hover:text-foreground transition-colors hidden sm:inline">Contact</Link>
+          <Link to="/feedback" className="text-muted-foreground hover:text-foreground transition-colors hidden sm:inline">Feedback</Link>
           <button
             onClick={() => setShowHistory(!showHistory)}
             className="flex items-center gap-1.5 text-muted-foreground hover:text-foreground transition-colors"

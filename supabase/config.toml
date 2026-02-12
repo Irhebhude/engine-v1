@@ -11,3 +11,6 @@ verify_jwt = false
 
 [functions.news-search]
 verify_jwt = false
+
+[functions.feedback-ai]
+verify_jwt = false
