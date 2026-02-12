@@ -1,13 +1,19 @@
 import { useState } from "react";
-import { Link, useLocation } from "react-router-dom";
-import { Zap, Clock } from "lucide-react";
+import { Link, useLocation, useNavigate } from "react-router-dom";
+import { Zap, Clock, Menu, X } from "lucide-react";
 import SearchHistory from "@/components/SearchHistory";
-import { useNavigate } from "react-router-dom";
+
+const NAV_LINKS = [
+  { to: "/about", label: "About" },
+  { to: "/contact", label: "Contact" },
+  { to: "/feedback", label: "Feedback" },
+];
 
 const Header = () => {
   const location = useLocation();
   const navigate = useNavigate();
   const [showHistory, setShowHistory] = useState(false);
+  const [mobileOpen, setMobileOpen] = useState(false);
 
   return (
     <header className="fixed top-0 left-0 right-0 z-50 glass border-b border-border/30">
@@ -21,17 +27,18 @@ const Header = () => {
           </span>
         </Link>
 
-        <nav className="flex items-center gap-4 text-sm relative">
-          <Link to="/about" className="text-muted-foreground hover:text-foreground transition-colors hidden sm:inline">About</Link>
-          <Link to="/contact" className="text-muted-foreground hover:text-foreground transition-colors hidden sm:inline">Contact</Link>
-          <Link to="/feedback" className="text-muted-foreground hover:text-foreground transition-colors hidden sm:inline">Feedback</Link>
+        {/* Desktop nav */}
+        <nav className="hidden sm:flex items-center gap-4 text-sm relative">
+          {NAV_LINKS.map((l) => (
+            <Link key={l.to} to={l.to} className="text-muted-foreground hover:text-foreground transition-colors">{l.label}</Link>
+          ))}
           <button
             onClick={() => setShowHistory(!showHistory)}
             className="flex items-center gap-1.5 text-muted-foreground hover:text-foreground transition-colors"
             title="Search History"
           >
             <Clock className="w-4 h-4" />
-            <span className="hidden sm:inline">History</span>
+            <span>History</span>
           </button>
           {showHistory && (
             <div className="absolute right-0 top-full mt-2 w-80">
@@ -46,7 +53,31 @@ const Header = () => {
             </div>
           )}
         </nav>
+
+        {/* Mobile hamburger */}
+        <button
+          className="sm:hidden p-2 text-muted-foreground hover:text-foreground transition-colors"
+          onClick={() => setMobileOpen(!mobileOpen)}
+          aria-label="Toggle menu"
+        >
+          {mobileOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
+        </button>
       </div>
+
+      {/* Mobile dropdown */}
+      {mobileOpen && (
+        <div className="sm:hidden glass border-t border-border/30 px-4 py-3 flex flex-col gap-3 text-sm">
+          {NAV_LINKS.map((l) => (
+            <Link key={l.to} to={l.to} onClick={() => setMobileOpen(false)} className="text-muted-foreground hover:text-foreground transition-colors">{l.label}</Link>
+          ))}
+          <button
+            onClick={() => { setMobileOpen(false); setShowHistory(!showHistory); }}
+            className="flex items-center gap-1.5 text-muted-foreground hover:text-foreground transition-colors"
+          >
+            <Clock className="w-4 h-4" /> History
+          </button>
+        </div>
+      )}
     </header>
   );
 };
