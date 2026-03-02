@@ -12,6 +12,7 @@ import NewsSearchResults from "@/components/NewsSearchResults";
 import SearchModeSelector from "@/components/SearchModeSelector";
 import ToolsMenu from "@/components/ToolsMenu";
 import UrlSummarizer from "@/components/UrlSummarizer";
+import BlueprintGenerator from "@/components/BlueprintGenerator";
 import AdSense from "@/components/AdSense";
 import { streamSearch, webSearch, imageSearch, videoSearch, newsSearch } from "@/lib/search-api";
 import type { SearchMode, WebResult, ImageResult as ImageResultType, VideoResult as VideoResultType, NewsResult as NewsResultType } from "@/lib/search-api";
@@ -48,6 +49,7 @@ const SearchResults = () => {
   const [isNewsLoading, setIsNewsLoading] = useState(false);
   const [mode, setMode] = useState<SearchMode>("default");
   const [showSummarizer, setShowSummarizer] = useState(false);
+  const [showBlueprint, setShowBlueprint] = useState(false);
   const [activeTab, setActiveTab] = useState<SearchTab>(initialTab);
 
   const performSearch = useCallback(
@@ -134,6 +136,7 @@ const SearchResults = () => {
 
   const handleToolAction = (action: string) => {
     if (action === "summarize") setShowSummarizer(true);
+    if (action === "blueprint") setShowBlueprint(true);
     if (action === "images") handleTabChange("images");
     if (action === "videos") handleTabChange("videos");
     if (action === "news") handleTabChange("news");
@@ -215,6 +218,7 @@ const SearchResults = () => {
       </main>
 
       <UrlSummarizer isOpen={showSummarizer} onClose={() => setShowSummarizer(false)} />
+      <BlueprintGenerator isOpen={showBlueprint} onClose={() => setShowBlueprint(false)} initialQuery={query} />
     </div>
   );
 };
