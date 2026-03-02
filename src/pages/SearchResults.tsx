@@ -1,7 +1,7 @@
 import { useState, useEffect, useCallback } from "react";
 import { useSearchParams, useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
-import { Clock, AlertCircle, Globe, Image, Video, Newspaper } from "lucide-react";
+import { Clock, AlertCircle, Globe, Image, Video, Newspaper, Cpu } from "lucide-react";
 import Header from "@/components/Header";
 import SearchBar from "@/components/SearchBar";
 import AIAnswer from "@/components/AIAnswer";
@@ -41,6 +41,9 @@ const SearchResults = () => {
   const [error, setError] = useState<string | null>(null);
   const [webResults, setWebResults] = useState<WebResult[]>([]);
   const [isWebLoading, setIsWebLoading] = useState(false);
+  const [isLoadingMore, setIsLoadingMore] = useState(false);
+  const [webPage, setWebPage] = useState(1);
+  const [hasMoreWeb, setHasMoreWeb] = useState(true);
   const [imageResults, setImageResults] = useState<ImageResultType[]>([]);
   const [isImageLoading, setIsImageLoading] = useState(false);
   const [videoResults, setVideoResults] = useState<VideoResultType[]>([]);
@@ -91,7 +94,9 @@ const SearchResults = () => {
       if (tab === "web") {
         setWebResults([]);
         setIsWebLoading(true);
-        const webPromise = webSearch(q).then((r) => { setWebResults(r); setIsWebLoading(false); }).catch(() => setIsWebLoading(false));
+        setWebPage(1);
+        setHasMoreWeb(true);
+        const webPromise = webSearch(q).then((r) => { setWebResults(r); setIsWebLoading(false); if (r.length < 10) setHasMoreWeb(false); }).catch(() => setIsWebLoading(false));
         await Promise.allSettled([webPromise, aiPromise]);
       } else if (tab === "images") {
         setImageResults([]);
@@ -116,6 +121,30 @@ const SearchResults = () => {
   useEffect(() => {
     if (query) performSearch(query);
   }, [query, performSearch]);
+
+  const handleLoadMoreWeb = useCallback(async () => {
+    if (!query || isLoadingMore) return;
+    setIsLoadingMore(true);
+    const nextPage = webPage + 1;
+    try {
+      const moreResults = await webSearch(query, 10);
+      if (moreResults.length === 0) {
+        setHasMoreWeb(false);
+      } else {
+        setWebResults((prev) => {
+          const existingUrls = new Set(prev.map(r => r.url));
+          const newResults = moreResults.filter(r => !existingUrls.has(r.url));
+          if (newResults.length === 0) setHasMoreWeb(false);
+          return [...prev, ...newResults];
+        });
+        setWebPage(nextPage);
+      }
+    } catch {
+      // silently fail
+    } finally {
+      setIsLoadingMore(false);
+    }
+  }, [query, webPage, isLoadingMore]);
 
   const handleNewSearch = (newQuery: string) => {
     navigate(`/search?q=${encodeURIComponent(newQuery)}&tab=${activeTab}`);
@@ -204,10 +233,31 @@ const SearchResults = () => {
         {/* Top ad */}
         <AdSense adSlot="9944378861" adFormat="horizontal" className="mb-6" />
 
-        {activeTab === "web" && <WebSearchResults results={webResults} isLoading={isWebLoading} />}
+        {activeTab === "web" && (
+          <WebSearchResults
+            results={webResults}
+            isLoading={isWebLoading}
+            onLoadMore={handleLoadMoreWeb}
+            isLoadingMore={isLoadingMore}
+            hasMore={hasMoreWeb}
+          />
+        )}
         {activeTab === "images" && <ImageSearchResults results={imageResults} isLoading={isImageLoading} />}
         {activeTab === "videos" && <VideoSearchResults results={videoResults} isLoading={isVideoLoading} />}
         {activeTab === "news" && <NewsSearchResults results={newsResults} isLoading={isNewsLoading} />}
+
+        {/* Blueprint Generator quick-access button */}
+        {query && !isStreaming && (
+          <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="mt-6">
+            <button
+              onClick={() => setShowBlueprint(true)}
+              className="flex items-center gap-2 px-5 py-3 rounded-xl border border-primary/20 bg-primary/5 hover:bg-primary/10 transition-all text-sm font-medium text-foreground group"
+            >
+              <Cpu className="w-4 h-4 text-primary group-hover:scale-110 transition-transform" />
+              Generate Blueprint for "{query.length > 40 ? query.slice(0, 40) + '…' : query}"
+            </button>
+          </motion.div>
+        )}
 
         {/* Bottom ad */}
         <AdSense adSlot="9944378861" adFormat="auto" className="mt-8" />
