@@ -12,6 +12,7 @@ import {
   Shield,
   Sparkles,
   Image,
+  Cpu,
   Video,
   Newspaper,
   ScrollText,
@@ -50,6 +51,7 @@ const TOOLS: { category: string; items: Tool[] }[] = [
   {
     category: "Intelligence Tools",
     items: [
+      { id: "blueprint", label: "Blueprint Generator", description: "AI technical schematics & build guides", icon: Cpu, action: "blueprint" },
       { id: "summarize", label: "Website Summarizer", description: "AI-powered page understanding", icon: FileText, action: "summarize" },
       { id: "web", label: "Live Web Results", description: "Real-time internet search", icon: Globe, action: "web" },
       { id: "trust", label: "Trust & Safety", description: "Source credibility analysis", icon: Shield, action: "trust" },
