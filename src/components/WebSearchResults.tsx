@@ -10,10 +10,7 @@ export interface WebResult {
   markdown?: string;
 }
 
-interface WebSearchResultsProps {
-  results: WebResult[];
-  isLoading: boolean;
-}
+// Props defined inline below
 
 const getDomain = (url: string) => {
   try { return new URL(url).hostname.replace("www.", ""); } catch { return url; }
@@ -28,7 +25,15 @@ const getBreadcrumb = (url: string) => {
   } catch { return url; }
 };
 
-const WebSearchResults = ({ results, isLoading }: WebSearchResultsProps) => {
+interface WebSearchResultsProps {
+  results: WebResult[];
+  isLoading: boolean;
+  onLoadMore?: () => void;
+  isLoadingMore?: boolean;
+  hasMore?: boolean;
+}
+
+const WebSearchResults = ({ results, isLoading, onLoadMore, isLoadingMore, hasMore = true }: WebSearchResultsProps) => {
   const [summarizing, setSummarizing] = useState<string | null>(null);
   const [summaries, setSummaries] = useState<Record<string, string>>({});
 
@@ -122,6 +127,29 @@ const WebSearchResults = ({ results, isLoading }: WebSearchResultsProps) => {
           )}
         </motion.div>
       ))}
+
+      {/* See more results button */}
+      {results.length >= 5 && hasMore && onLoadMore && (
+        <div className="flex justify-center mt-8 mb-4">
+          <button
+            onClick={onLoadMore}
+            disabled={isLoadingMore}
+            className="flex items-center gap-2 px-8 py-3 rounded-full border border-border/50 bg-accent/5 hover:bg-accent/15 text-sm font-medium text-foreground transition-all hover:shadow-md disabled:opacity-50"
+          >
+            {isLoadingMore ? (
+              <>
+                <Loader2 className="w-4 h-4 animate-spin" />
+                Loading more results…
+              </>
+            ) : (
+              <>
+                <Globe className="w-4 h-4 text-primary" />
+                See more results
+              </>
+            )}
+          </button>
+        </div>
+      )}
     </div>
   );
 };
