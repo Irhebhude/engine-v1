@@ -1,5 +1,6 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
+import { aiWithFailover } from "../_shared/ai-failover.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -22,51 +23,32 @@ serve(async (req) => {
     const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
     if (!LOVABLE_API_KEY) throw new Error("LOVABLE_API_KEY not configured");
 
-    // Generate AI response
-    const aiResponse = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
-      method: "POST",
-      headers: {
-        Authorization: `Bearer ${LOVABLE_API_KEY}`,
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        model: "google/gemini-3-flash-preview",
-        messages: [
-          {
-            role: "system",
-            content: `You are the SEARCH-POI support assistant. You help users with feedback, bug reports, feature requests, and complaints. 
+    const { response } = await aiWithFailover({
+      messages: [
+        {
+          role: "system",
+          content: `You are the SEARCH-POI support assistant. You help users with feedback, bug reports, feature requests, and complaints. 
 Always:
 1. Acknowledge the user's message warmly
 2. Provide a helpful, specific response
 3. Suggest next steps if applicable
 4. Keep responses concise (2-4 paragraphs max)
 Be professional, friendly, and solution-oriented. Sign off as "SEARCH-POI Support Team".`,
-          },
-          {
-            role: "user",
-            content: `Category: ${category || "general"}\nFrom: ${full_name}\nMessage: ${message}`,
-          },
-        ],
-      }),
+        },
+        {
+          role: "user",
+          content: `Category: ${category || "general"}\nFrom: ${full_name}\nMessage: ${message}`,
+        },
+      ],
+      chain: "fast",
+      apiKey: LOVABLE_API_KEY,
     });
 
-    if (!aiResponse.ok) {
-      const status = aiResponse.status;
-      if (status === 429) {
-        return new Response(JSON.stringify({ error: "Rate limited, please try again later." }), {
-          status: 429, headers: { ...corsHeaders, "Content-Type": "application/json" },
-        });
-      }
-      if (status === 402) {
-        return new Response(JSON.stringify({ error: "Service temporarily unavailable." }), {
-          status: 402, headers: { ...corsHeaders, "Content-Type": "application/json" },
-        });
-      }
-      throw new Error(`AI gateway error: ${status}`);
+    let aiReply = "Thank you for your feedback. Our team will review it shortly.";
+    if (response.ok) {
+      const aiData = await response.json();
+      aiReply = aiData.choices?.[0]?.message?.content || aiReply;
     }
-
-    const aiData = await aiResponse.json();
-    const aiReply = aiData.choices?.[0]?.message?.content || "Thank you for your feedback. Our team will review it shortly.";
 
     // Store in database
     const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
