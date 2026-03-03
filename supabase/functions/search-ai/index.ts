@@ -1,4 +1,5 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
+import { aiWithFailover } from "../_shared/ai-failover.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -106,11 +107,8 @@ serve(async (req) => {
     if (!LOVABLE_API_KEY) throw new Error("LOVABLE_API_KEY is not configured");
 
     const systemPrompt = MODE_PROMPTS[mode] || MODE_PROMPTS.default;
-
-    // Build contextual messages
     const messages: any[] = [{ role: "system", content: systemPrompt }];
 
-    // Add session context if provided (recent searches for smarter results)
     if (context.length > 0) {
       const contextStr = context.slice(-5).join(", ");
       messages.push({
@@ -121,42 +119,27 @@ serve(async (req) => {
 
     messages.push({ role: "user", content: query });
 
-    const response = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
-      method: "POST",
-      headers: {
-        Authorization: `Bearer ${LOVABLE_API_KEY}`,
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        model: mode === "deep_research" ? "google/gemini-2.5-flash" : "google/gemini-3-flash-preview",
-        messages,
-        stream: true,
-      }),
+    const chain = mode === "deep_research" ? "powerful" : "fast";
+
+    const { response, model } = await aiWithFailover({
+      messages,
+      chain,
+      stream: true,
+      apiKey: LOVABLE_API_KEY,
     });
 
     if (!response.ok) {
-      if (response.status === 429) {
-        return new Response(JSON.stringify({ error: "Rate limit exceeded" }), {
-          status: 429,
-          headers: { ...corsHeaders, "Content-Type": "application/json" },
-        });
-      }
-      if (response.status === 402) {
-        return new Response(JSON.stringify({ error: "Payment required" }), {
-          status: 402,
-          headers: { ...corsHeaders, "Content-Type": "application/json" },
-        });
-      }
+      const status = response.status;
       const t = await response.text();
-      console.error("AI gateway error:", response.status, t);
-      return new Response(JSON.stringify({ error: "AI gateway error" }), {
-        status: 500,
+      console.error(`AI error (model: ${model}):`, status, t);
+      return new Response(JSON.stringify({ error: status === 429 ? "Rate limit exceeded" : status === 402 ? "Payment required" : "AI gateway error" }), {
+        status,
         headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
     }
 
     return new Response(response.body, {
-      headers: { ...corsHeaders, "Content-Type": "text/event-stream" },
+      headers: { ...corsHeaders, "Content-Type": "text/event-stream", "X-AI-Model": model },
     });
   } catch (e) {
     console.error("search-ai error:", e);

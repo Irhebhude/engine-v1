@@ -1,4 +1,5 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
+import { aiWithFailover } from "../_shared/ai-failover.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -51,22 +52,14 @@ serve(async (req) => {
       });
     }
 
-    // Truncate to ~8000 chars to fit context window
     const truncated = markdown.slice(0, 8000);
 
-    // Step 2: Summarize with AI
-    const aiResp = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
-      method: "POST",
-      headers: {
-        Authorization: `Bearer ${LOVABLE_API_KEY}`,
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        model: "google/gemini-3-flash-preview",
-        messages: [
-          {
-            role: "system",
-            content: `You are SEARCH-POI Website Understanding Engine. Analyze the following web page content and provide:
+    // Step 2: Summarize with AI + failover
+    const { response, model } = await aiWithFailover({
+      messages: [
+        {
+          role: "system",
+          content: `You are SEARCH-POI Website Understanding Engine. Analyze the following web page content and provide:
 
 ## Summary
 A clear, concise summary (3-5 sentences)
@@ -81,25 +74,25 @@ List the main topics covered
 Rate the content reliability: High / Medium / Low with brief reasoning
 
 Be concise and factual.`,
-          },
-          { role: "user", content: `Analyze this webpage:\n\n${truncated}` },
-        ],
-      }),
+        },
+        { role: "user", content: `Analyze this webpage:\n\n${truncated}` },
+      ],
+      chain: "fast",
+      apiKey: LOVABLE_API_KEY,
     });
 
-    if (!aiResp.ok) {
-      const t = await aiResp.text();
-      console.error("AI error:", aiResp.status, t);
+    if (!response.ok) {
+      console.error("AI error:", response.status);
       return new Response(JSON.stringify({ error: "AI summarization failed" }), {
         status: 500,
         headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
     }
 
-    const aiData = await aiResp.json();
+    const aiData = await response.json();
     const summary = aiData.choices?.[0]?.message?.content || "Could not generate summary.";
 
-    return new Response(JSON.stringify({ summary, url: formattedUrl }), {
+    return new Response(JSON.stringify({ summary, url: formattedUrl, model }), {
       headers: { ...corsHeaders, "Content-Type": "application/json" },
     });
   } catch (e) {
