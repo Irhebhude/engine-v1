@@ -53,14 +53,17 @@ const AIAnswer = ({ answer, isStreaming, query }: AIAnswerProps) => {
               Thinking...
             </span>
           ) : answer ? (
-            <button
-              onClick={handleCopy}
-              className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-xs text-muted-foreground hover:text-foreground hover:bg-accent/20 transition-colors"
-              title="Copy AI response"
-            >
-              {copied ? <Check className="w-3.5 h-3.5 text-green-500" /> : <Copy className="w-3.5 h-3.5" />}
-              {copied ? "Copied!" : "Copy"}
-            </button>
+            <div className="flex items-center gap-2">
+              <ShareButtons text={answer} query={query} />
+              <button
+                onClick={handleCopy}
+                className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-xs text-muted-foreground hover:text-foreground hover:bg-accent/20 transition-colors"
+                title="Copy AI response"
+              >
+                {copied ? <Check className="w-3.5 h-3.5 text-green-500" /> : <Copy className="w-3.5 h-3.5" />}
+                {copied ? "Copied!" : "Copy"}
+              </button>
+            </div>
           ) : null}
         </div>
       </div>
