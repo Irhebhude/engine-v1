@@ -32,8 +32,9 @@ const Referral = () => {
   const [referralDetails, setReferralDetails] = useState<ReferralDetail[]>([]);
   const [loading, setLoading] = useState(true);
 
+  const publishedUrl = "https://search-poi.lovable.app";
   const referralLink = profile?.referral_code
-    ? `${window.location.origin}/auth?ref=${profile.referral_code}`
+    ? `${publishedUrl}/auth?ref=${profile.referral_code}`
     : "";
 
   useEffect(() => {
