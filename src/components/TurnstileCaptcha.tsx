@@ -16,7 +16,7 @@ interface TurnstileCaptchaProps {
 }
 
 // Use Cloudflare Turnstile test key for now — replace with your real site key in production
-const SITE_KEY = "1x00000000000000000000AA";
+const SITE_KEY = "0x4AAAAAACoCUaSTI918Bqoa";
 
 const TurnstileCaptcha = ({ onVerify, onExpire }: TurnstileCaptchaProps) => {
   const containerRef = useRef<HTMLDivElement>(null);
