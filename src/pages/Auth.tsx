@@ -63,8 +63,8 @@ const Auth = () => {
       if (error) {
         toast({ title: "Signup Failed", description: error, variant: "destructive" });
       } else {
-        setEmailSent(true);
-        toast({ title: "Check your email!", description: "We sent you a verification link." });
+        toast({ title: "Welcome to SEARCH-POI!", description: "Your account has been created successfully." });
+        navigate("/");
       }
     }
     setLoading(false);
