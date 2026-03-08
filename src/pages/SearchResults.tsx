@@ -16,6 +16,7 @@ import ToolsMenu from "@/components/ToolsMenu";
 import UrlSummarizer from "@/components/UrlSummarizer";
 import BlueprintGenerator from "@/components/BlueprintGenerator";
 import AdSense from "@/components/AdSense";
+import ReferralGate from "@/components/ReferralGate";
 import SEOHead from "@/components/SEOHead";
 import { streamSearch, webSearch, imageSearch, videoSearch, newsSearch } from "@/lib/search-api";
 import type { SearchMode, WebResult, ImageResult as ImageResultType, VideoResult as VideoResultType, NewsResult as NewsResultType } from "@/lib/search-api";
@@ -180,6 +181,7 @@ const SearchResults = () => {
   const modeLabel = mode !== "default" ? ` • ${mode.replace("_", " ").toUpperCase()} MODE` : "";
 
   return (
+    <ReferralGate>
     <div className="min-h-screen bg-background">
       <SEOHead title={`${query} — SEARCH-POI Results`} description={`AI-powered search results for "${query}". Get instant answers, web results, images, videos & news.`} path={`/search?q=${encodeURIComponent(query)}`} />
       <Header />
@@ -277,6 +279,7 @@ const SearchResults = () => {
       <UrlSummarizer isOpen={showSummarizer} onClose={() => setShowSummarizer(false)} />
       <BlueprintGenerator isOpen={showBlueprint} onClose={() => setShowBlueprint(false)} initialQuery={query} />
     </div>
+    </ReferralGate>
   );
 };
 
