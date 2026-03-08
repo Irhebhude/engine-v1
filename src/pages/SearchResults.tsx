@@ -181,6 +181,7 @@ const SearchResults = () => {
   const modeLabel = mode !== "default" ? ` • ${mode.replace("_", " ").toUpperCase()} MODE` : "";
 
   return (
+    <ReferralGate>
     <div className="min-h-screen bg-background">
       <SEOHead title={`${query} — SEARCH-POI Results`} description={`AI-powered search results for "${query}". Get instant answers, web results, images, videos & news.`} path={`/search?q=${encodeURIComponent(query)}`} />
       <Header />
