@@ -1,9 +1,10 @@
-import { useState } from "react";
+import { useState, useCallback } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { motion } from "framer-motion";
 import { Zap, Mail, Lock, User, Eye, EyeOff, Gift } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 import SEOHead from "@/components/SEOHead";
+import TurnstileCaptcha from "@/components/TurnstileCaptcha";
 import { useToast } from "@/hooks/use-toast";
 
 const Auth = () => {
