@@ -3,6 +3,8 @@ import { useSearchParams, useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
 import { Clock, AlertCircle, Globe, Image, Video, Newspaper, Cpu } from "lucide-react";
 import Header from "@/components/Header";
+import { useAuth } from "@/contexts/AuthContext";
+import { supabase } from "@/integrations/supabase/client";
 import SearchBar from "@/components/SearchBar";
 import AIAnswer from "@/components/AIAnswer";
 import WebSearchResults from "@/components/WebSearchResults";
@@ -67,6 +69,9 @@ const SearchResults = () => {
 
       addSearchToHistory(q, searchMode);
       const recentContext = getRecentQueries(5);
+
+      // Track search count for referral verification
+      supabase.rpc("increment_search_count" as any).then(() => {});
 
       // Always run AI stream
       const aiPromise = (async () => {
