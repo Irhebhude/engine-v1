@@ -1,7 +1,8 @@
 import { useState } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
-import { Zap, Clock, Menu, X } from "lucide-react";
+import { Zap, Clock, Menu, X, Gift, LogOut, User } from "lucide-react";
 import SearchHistory from "@/components/SearchHistory";
+import { useAuth } from "@/contexts/AuthContext";
 
 const NAV_LINKS = [
   { to: "/about", label: "About" },
@@ -12,6 +13,7 @@ const NAV_LINKS = [
 const Header = () => {
   const location = useLocation();
   const navigate = useNavigate();
+  const { user, profile, signOut } = useAuth();
   const [showHistory, setShowHistory] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
 
@@ -32,6 +34,16 @@ const Header = () => {
           {NAV_LINKS.map((l) => (
             <Link key={l.to} to={l.to} className="text-muted-foreground hover:text-foreground transition-colors">{l.label}</Link>
           ))}
+
+          {/* Referral button - always visible */}
+          <Link
+            to="/referral"
+            className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-primary/10 text-primary hover:bg-primary/20 transition-colors font-medium"
+          >
+            <Gift className="w-3.5 h-3.5" />
+            Refer & Earn
+          </Link>
+
           <button
             onClick={() => setShowHistory(!showHistory)}
             className="flex items-center gap-1.5 text-muted-foreground hover:text-foreground transition-colors"
@@ -40,6 +52,31 @@ const Header = () => {
             <Clock className="w-4 h-4" />
             <span>History</span>
           </button>
+
+          {/* Auth buttons */}
+          {user ? (
+            <div className="flex items-center gap-2">
+              <Link to="/referral" className="flex items-center gap-1.5 text-muted-foreground hover:text-foreground transition-colors" title="My Profile">
+                <User className="w-4 h-4" />
+                <span className="max-w-[80px] truncate">{profile?.display_name || "Account"}</span>
+              </Link>
+              <button
+                onClick={signOut}
+                className="text-muted-foreground hover:text-foreground transition-colors"
+                title="Sign out"
+              >
+                <LogOut className="w-4 h-4" />
+              </button>
+            </div>
+          ) : (
+            <Link
+              to="/auth"
+              className="px-3 py-1.5 rounded-lg bg-primary text-primary-foreground text-sm font-medium hover:bg-primary/90 transition-colors"
+            >
+              Sign In
+            </Link>
+          )}
+
           {showHistory && (
             <div className="absolute right-0 top-full mt-2 w-80">
               <SearchHistory
@@ -70,12 +107,30 @@ const Header = () => {
           {NAV_LINKS.map((l) => (
             <Link key={l.to} to={l.to} onClick={() => setMobileOpen(false)} className="text-muted-foreground hover:text-foreground transition-colors">{l.label}</Link>
           ))}
+          <Link to="/referral" onClick={() => setMobileOpen(false)} className="flex items-center gap-1.5 text-primary font-medium">
+            <Gift className="w-4 h-4" /> Refer & Earn
+          </Link>
           <button
             onClick={() => { setMobileOpen(false); setShowHistory(!showHistory); }}
             className="flex items-center gap-1.5 text-muted-foreground hover:text-foreground transition-colors"
           >
             <Clock className="w-4 h-4" /> History
           </button>
+          {user ? (
+            <>
+              <div className="flex items-center gap-1.5 text-muted-foreground">
+                <User className="w-4 h-4" />
+                <span>{profile?.display_name || user.email}</span>
+              </div>
+              <button onClick={() => { setMobileOpen(false); signOut(); }} className="flex items-center gap-1.5 text-muted-foreground hover:text-foreground">
+                <LogOut className="w-4 h-4" /> Sign Out
+              </button>
+            </>
+          ) : (
+            <Link to="/auth" onClick={() => setMobileOpen(false)} className="text-primary font-medium">
+              Sign In / Sign Up
+            </Link>
+          )}
         </div>
       )}
     </header>
