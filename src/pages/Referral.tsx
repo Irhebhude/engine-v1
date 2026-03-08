@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
-import { Gift, Copy, Check, Users, Trophy, Share2, ExternalLink } from "lucide-react";
+import { Gift, Copy, Check, Users, Trophy, Share2, ExternalLink, ShieldAlert, ShieldCheck } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
 import Header from "@/components/Header";
@@ -14,11 +14,22 @@ interface ReferralData {
   rewards: number;
 }
 
+interface ReferralDetail {
+  referred_id: string;
+  referred_display_name: string | null;
+  referred_ip: string | null;
+  referrer_ip: string | null;
+  status: string;
+  created_at: string;
+  is_flagged: boolean;
+}
+
 const Referral = () => {
   const { user, profile, loading: authLoading } = useAuth();
   const { toast } = useToast();
   const [copied, setCopied] = useState(false);
   const [stats, setStats] = useState<ReferralData>({ total: 0, verified: 0, pending: 0, rewards: 0 });
+  const [referralDetails, setReferralDetails] = useState<ReferralDetail[]>([]);
   const [loading, setLoading] = useState(true);
 
   const referralLink = profile?.referral_code
@@ -41,6 +52,13 @@ const Referral = () => {
         pending: referrals.filter((r: any) => r.status === "pending").length,
         rewards: rewardsRes.data?.length || 0,
       });
+
+      // Fetch detailed referral info with IP check
+      const { data: details } = await supabase.rpc("get_referral_details", { referrer_uid: user.id });
+      if (details) {
+        setReferralDetails(details as ReferralDetail[]);
+      }
+
       setLoading(false);
     };
 
@@ -101,7 +119,7 @@ const Referral = () => {
                   {[
                     { step: "1", text: "Sign up for a free SEARCH-POI account" },
                     { step: "2", text: "Share your unique referral link with friends" },
-                    { step: "3", text: "Friends sign up and verify their email" },
+                    { step: "3", text: "Friends sign up and complete CAPTCHA verification" },
                     { step: "4", text: "After 10 verified referrals, you get a free month!" },
                   ].map((item) => (
                     <div key={item.step} className="flex items-start gap-3">
@@ -189,6 +207,65 @@ const Referral = () => {
               ))}
             </div>
 
+            {/* Referred Users List with IP Status */}
+            {referralDetails.length > 0 && (
+              <div className="glass rounded-2xl p-6 border border-border/30 mb-6">
+                <h3 className="text-sm font-semibold text-foreground mb-4 flex items-center gap-2">
+                  <Users className="w-4 h-4 text-primary" /> Referred Users
+                </h3>
+                <div className="space-y-3">
+                  {referralDetails.map((detail) => (
+                    <div
+                      key={detail.referred_id}
+                      className={`flex items-center justify-between p-3 rounded-xl border ${
+                        detail.is_flagged
+                          ? "border-destructive/40 bg-destructive/5"
+                          : "border-border/30 bg-secondary/20"
+                      }`}
+                    >
+                      <div className="flex items-center gap-3">
+                        {/* Blinking status indicator */}
+                        <div className="relative flex items-center justify-center">
+                          {detail.is_flagged ? (
+                            <>
+                              <span className="absolute inline-flex h-4 w-4 rounded-full bg-destructive/60 animate-ping" />
+                              <span className="relative inline-flex h-3 w-3 rounded-full bg-destructive" />
+                            </>
+                          ) : (
+                            <>
+                              <span className="absolute inline-flex h-4 w-4 rounded-full bg-green-400/60 animate-ping" />
+                              <span className="relative inline-flex h-3 w-3 rounded-full bg-green-500" />
+                            </>
+                          )}
+                        </div>
+                        <div>
+                          <p className="text-sm font-medium text-foreground">
+                            {detail.referred_display_name || "Anonymous"}
+                          </p>
+                          <p className="text-xs text-muted-foreground capitalize">
+                            {detail.status}
+                          </p>
+                        </div>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        {detail.is_flagged ? (
+                          <div className="flex items-center gap-1.5 text-destructive">
+                            <ShieldAlert className="w-4 h-4" />
+                            <span className="text-xs font-semibold">Flagged</span>
+                          </div>
+                        ) : (
+                          <div className="flex items-center gap-1.5 text-green-500">
+                            <ShieldCheck className="w-4 h-4" />
+                            <span className="text-xs font-semibold">Legit</span>
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+
             {/* Progress to next reward */}
             <div className="glass rounded-2xl p-6 border border-border/30">
               <div className="flex items-center justify-between mb-3">
@@ -215,7 +292,7 @@ const Referral = () => {
             {/* Anti-fraud notice */}
             <div className="mt-6 p-4 rounded-xl bg-secondary/30 border border-border/20">
               <p className="text-xs text-muted-foreground leading-relaxed">
-                <strong className="text-foreground">Fair Play Policy:</strong> Referrals are only counted when the referred user verifies their email and performs at least 3 searches. Fake or duplicate accounts will not be counted.
+                <strong className="text-foreground">Fair Play Policy:</strong> Referrals are verified via IP address and search activity. Users sharing the same IP as you will be flagged. Only unique, real users with 3+ searches count toward your referral goal.
               </p>
             </div>
           </motion.div>
