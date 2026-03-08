@@ -279,7 +279,7 @@ const SearchResults = () => {
       <UrlSummarizer isOpen={showSummarizer} onClose={() => setShowSummarizer(false)} />
       <BlueprintGenerator isOpen={showBlueprint} onClose={() => setShowBlueprint(false)} initialQuery={query} />
     </div>
-    </ReferralGate>
+    </>
   );
 };
 
