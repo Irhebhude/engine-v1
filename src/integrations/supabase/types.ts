@@ -84,6 +84,7 @@ export type Database = {
           referral_code: string
           referred_by: string | null
           search_count: number
+          signup_ip: string | null
           updated_at: string
           username: string | null
         }
@@ -96,6 +97,7 @@ export type Database = {
           referral_code?: string
           referred_by?: string | null
           search_count?: number
+          signup_ip?: string | null
           updated_at?: string
           username?: string | null
         }
@@ -108,6 +110,7 @@ export type Database = {
           referral_code?: string
           referred_by?: string | null
           search_count?: number
+          signup_ip?: string | null
           updated_at?: string
           username?: string | null
         }
@@ -203,11 +206,24 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      get_referral_details: {
+        Args: { referrer_uid: string }
+        Returns: {
+          created_at: string
+          is_flagged: boolean
+          referred_display_name: string
+          referred_id: string
+          referred_ip: string
+          referrer_ip: string
+          status: string
+        }[]
+      }
       increment_search_count: { Args: never; Returns: undefined }
       process_referral: {
         Args: { referral_code_input: string }
         Returns: boolean
       }
+      update_signup_ip: { Args: { ip_address: string }; Returns: undefined }
       verify_referral: { Args: never; Returns: undefined }
     }
     Enums: {

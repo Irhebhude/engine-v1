@@ -63,6 +63,17 @@ const Auth = () => {
       if (error) {
         toast({ title: "Signup Failed", description: error, variant: "destructive" });
       } else {
+        // Capture IP address after signup
+        try {
+          const ipRes = await fetch("https://api.ipify.org?format=json");
+          const ipData = await ipRes.json();
+          if (ipData.ip) {
+            const { supabase } = await import("@/integrations/supabase/client");
+            await supabase.rpc("update_signup_ip", { ip_address: ipData.ip });
+          }
+        } catch (e) {
+          console.warn("Could not capture IP:", e);
+        }
         toast({ title: "Welcome to SEARCH-POI!", description: "Your account has been created successfully." });
         navigate("/");
       }
