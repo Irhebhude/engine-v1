@@ -79,7 +79,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   }, []);
 
   const signUp = async (email: string, password: string, displayName: string, referralCode?: string) => {
-    const { error } = await supabase.auth.signUp({
+    const { data, error } = await supabase.auth.signUp({
       email,
       password,
       options: {
@@ -89,10 +89,12 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     });
     if (error) return { error: error.message };
 
-    // Process referral code if provided
-    if (referralCode) {
-      // Store in localStorage to process after email verification
-      localStorage.setItem("pending_referral_code", referralCode);
+    // Process referral code immediately since email is auto-confirmed
+    if (referralCode && data.user) {
+      // Small delay to let the profile trigger complete
+      setTimeout(async () => {
+        await supabase.rpc("process_referral", { referral_code_input: referralCode });
+      }, 1000);
     }
 
     return { error: null };
