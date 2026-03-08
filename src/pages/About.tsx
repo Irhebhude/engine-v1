@@ -1,6 +1,7 @@
 import { motion } from "framer-motion";
 import { Brain, Target, Eye, Zap, Shield, Gauge, Users, Sparkles, Search, Image, Video, Newspaper, Bot } from "lucide-react";
 import Header from "@/components/Header";
+import SEOHead from "@/components/SEOHead";
 import AdSense from "@/components/AdSense";
 
 const CORE_VALUES = [
