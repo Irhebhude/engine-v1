@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { motion } from "framer-motion";
 import { Brain, Loader2, Copy, Check } from "lucide-react";
+import ShareButtons from "@/components/ShareButtons";
 
 interface AIAnswerProps {
   answer: string;
