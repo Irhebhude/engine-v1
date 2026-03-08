@@ -71,7 +71,7 @@ const SearchResults = () => {
       const recentContext = getRecentQueries(5);
 
       // Track search count for referral verification
-      supabase.rpc("increment_search_count").then(() => {}).catch(() => {});
+      supabase.rpc("increment_search_count" as any).then(() => {});
 
       // Always run AI stream
       const aiPromise = (async () => {
