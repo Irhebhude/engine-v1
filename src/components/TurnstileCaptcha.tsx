@@ -15,7 +15,7 @@ interface TurnstileCaptchaProps {
   onExpire?: () => void;
 }
 
-const SITE_KEY = "0x4AAAAAAABzMNMxSVha_FW2"; // Cloudflare Turnstile managed challenge
+const SITE_KEY = "0x4AAAAAAARwEGZB9VU02P4r"; // Cloudflare Turnstile visible test key (always passes)
 
 const TurnstileCaptcha = ({ onVerify, onExpire }: TurnstileCaptchaProps) => {
   const containerRef = useRef<HTMLDivElement>(null);
