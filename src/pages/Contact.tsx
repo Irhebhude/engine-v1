@@ -65,6 +65,7 @@ const Contact = () => {
 
   return (
     <div className="min-h-screen bg-background">
+      <SEOHead title="Contact SEARCH-POI — Get In Touch" description="Contact the SEARCH-POI team for feedback, partnerships, or support. We'd love to hear from you." path="/contact" />
       <Header />
       <main className="pt-20 pb-16 px-4">
         <div className="container mx-auto max-w-4xl">

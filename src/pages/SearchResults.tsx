@@ -176,6 +176,7 @@ const SearchResults = () => {
 
   return (
     <div className="min-h-screen bg-background">
+      <SEOHead title={`${query} — SEARCH-POI Results`} description={`AI-powered search results for "${query}". Get instant answers, web results, images, videos & news.`} path={`/search?q=${encodeURIComponent(query)}`} />
       <Header />
 
       <div className="pt-20 pb-4 px-4 border-b border-border/30 glass">
