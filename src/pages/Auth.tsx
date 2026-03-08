@@ -22,7 +22,15 @@ const Auth = () => {
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
   const [emailSent, setEmailSent] = useState(false);
+  const [captchaToken, setCaptchaToken] = useState<string | null>(null);
 
+  const handleCaptchaVerify = useCallback((token: string) => {
+    setCaptchaToken(token);
+  }, []);
+
+  const handleCaptchaExpire = useCallback(() => {
+    setCaptchaToken(null);
+  }, []);
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
