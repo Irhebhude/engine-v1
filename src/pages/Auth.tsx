@@ -189,9 +189,14 @@ const Auth = () => {
             </div>
           )}
 
+          {/* CAPTCHA for signup only */}
+          {!isLogin && (
+            <TurnstileCaptcha onVerify={handleCaptchaVerify} onExpire={handleCaptchaExpire} />
+          )}
+
           <button
             type="submit"
-            disabled={loading}
+            disabled={loading || (!isLogin && !captchaToken)}
             className="w-full py-2.5 rounded-xl bg-primary text-primary-foreground font-semibold hover:bg-primary/90 transition-colors disabled:opacity-50"
           >
             {loading ? "Please wait..." : isLogin ? "Sign In" : "Create Account"}
