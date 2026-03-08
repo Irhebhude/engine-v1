@@ -27,6 +27,7 @@ const Index = () => {
 
   return (
     <div className="min-h-screen bg-background relative overflow-hidden">
+      <SEOHead title="SEARCH-POI — AI-Powered Search Engine | Smarter Than Google" description="Get instant AI answers, deep research reports, tech blueprints & real-time web results. The next-gen search engine by POI Foundation." path="/" />
       <Header />
 
       {/* Hero background */}

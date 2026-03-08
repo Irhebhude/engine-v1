@@ -1,6 +1,7 @@
 import { motion } from "framer-motion";
 import { Shield, Brain, Lock, Eye, Scale, Globe } from "lucide-react";
 import Header from "@/components/Header";
+import SEOHead from "@/components/SEOHead";
 import AdSense from "@/components/AdSense";
 import {
   Accordion,

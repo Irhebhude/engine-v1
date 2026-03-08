@@ -3,6 +3,7 @@ import { motion } from "framer-motion";
 import { Mail, Briefcase, Phone, MessageCircle, Globe, MapPin, Send, CheckCircle, AlertCircle } from "lucide-react";
 import { z } from "zod";
 import Header from "@/components/Header";
+import SEOHead from "@/components/SEOHead";
 import AdSense from "@/components/AdSense";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";

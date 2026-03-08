@@ -3,6 +3,7 @@ import { motion } from "framer-motion";
 import { MessageSquare, Bug, Lightbulb, AlertTriangle, Send, Bot, Star, CheckCircle, AlertCircle, Loader2 } from "lucide-react";
 import ReactMarkdown from "react-markdown";
 import Header from "@/components/Header";
+import SEOHead from "@/components/SEOHead";
 import AdSense from "@/components/AdSense";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
