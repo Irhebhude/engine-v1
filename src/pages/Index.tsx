@@ -6,6 +6,7 @@ import SearchBar from "@/components/SearchBar";
 import FeatureCard from "@/components/FeatureCard";
 import Header from "@/components/Header";
 import AdSense from "@/components/AdSense";
+import SEOHead from "@/components/SEOHead";
 import heroBg from "@/assets/hero-bg.jpg";
 
 const FEATURES = [
