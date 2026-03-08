@@ -6,6 +6,7 @@ import SearchBar from "@/components/SearchBar";
 import FeatureCard from "@/components/FeatureCard";
 import Header from "@/components/Header";
 import AdSense from "@/components/AdSense";
+import SEOHead from "@/components/SEOHead";
 import heroBg from "@/assets/hero-bg.jpg";
 
 const FEATURES = [
@@ -26,6 +27,7 @@ const Index = () => {
 
   return (
     <div className="min-h-screen bg-background relative overflow-hidden">
+      <SEOHead title="SEARCH-POI — AI-Powered Search Engine | Smarter Than Google" description="Get instant AI answers, deep research reports, tech blueprints & real-time web results. The next-gen search engine by POI Foundation." path="/" />
       <Header />
 
       {/* Hero background */}

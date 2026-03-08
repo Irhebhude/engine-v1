@@ -14,6 +14,7 @@ import ToolsMenu from "@/components/ToolsMenu";
 import UrlSummarizer from "@/components/UrlSummarizer";
 import BlueprintGenerator from "@/components/BlueprintGenerator";
 import AdSense from "@/components/AdSense";
+import SEOHead from "@/components/SEOHead";
 import { streamSearch, webSearch, imageSearch, videoSearch, newsSearch } from "@/lib/search-api";
 import type { SearchMode, WebResult, ImageResult as ImageResultType, VideoResult as VideoResultType, NewsResult as NewsResultType } from "@/lib/search-api";
 import { addSearchToHistory, getRecentQueries } from "@/lib/search-context";
@@ -175,6 +176,7 @@ const SearchResults = () => {
 
   return (
     <div className="min-h-screen bg-background">
+      <SEOHead title={`${query} — SEARCH-POI Results`} description={`AI-powered search results for "${query}". Get instant answers, web results, images, videos & news.`} path={`/search?q=${encodeURIComponent(query)}`} />
       <Header />
 
       <div className="pt-20 pb-4 px-4 border-b border-border/30 glass">

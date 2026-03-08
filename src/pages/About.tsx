@@ -1,6 +1,7 @@
 import { motion } from "framer-motion";
 import { Brain, Target, Eye, Zap, Shield, Gauge, Users, Sparkles, Search, Image, Video, Newspaper, Bot } from "lucide-react";
 import Header from "@/components/Header";
+import SEOHead from "@/components/SEOHead";
 import AdSense from "@/components/AdSense";
 
 const CORE_VALUES = [
@@ -27,6 +28,7 @@ const fadeUp = {
 
 const About = () => (
   <div className="min-h-screen bg-background">
+    <SEOHead title="About SEARCH-POI — AI Search Engine by POI Foundation" description="Learn about SEARCH-POI, the next-gen AI search engine founded by Prosper Ozoya Irhebhude. Our mission, vision, and core values." path="/about" />
     <Header />
     <main className="pt-20 pb-16 px-4">
       <div className="container mx-auto max-w-4xl">

@@ -3,6 +3,7 @@ import { motion } from "framer-motion";
 import { MessageSquare, Bug, Lightbulb, AlertTriangle, Send, Bot, Star, CheckCircle, AlertCircle, Loader2 } from "lucide-react";
 import ReactMarkdown from "react-markdown";
 import Header from "@/components/Header";
+import SEOHead from "@/components/SEOHead";
 import AdSense from "@/components/AdSense";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -77,6 +78,7 @@ const Feedback = () => {
 
   return (
     <div className="min-h-screen bg-background">
+      <SEOHead title="Feedback — Help Improve SEARCH-POI" description="Share your feedback, report bugs, or suggest features for SEARCH-POI. Your input shapes the future of AI search." path="/feedback" />
       <Header />
       <main className="pt-20 pb-16 px-4">
         <div className="container mx-auto max-w-3xl">

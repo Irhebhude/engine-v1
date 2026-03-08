@@ -3,6 +3,7 @@ import { motion } from "framer-motion";
 import { Mail, Briefcase, Phone, MessageCircle, Globe, MapPin, Send, CheckCircle, AlertCircle } from "lucide-react";
 import { z } from "zod";
 import Header from "@/components/Header";
+import SEOHead from "@/components/SEOHead";
 import AdSense from "@/components/AdSense";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -64,6 +65,7 @@ const Contact = () => {
 
   return (
     <div className="min-h-screen bg-background">
+      <SEOHead title="Contact SEARCH-POI — Get In Touch" description="Contact the SEARCH-POI team for feedback, partnerships, or support. We'd love to hear from you." path="/contact" />
       <Header />
       <main className="pt-20 pb-16 px-4">
         <div className="container mx-auto max-w-4xl">
