@@ -4,6 +4,7 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { AuthProvider } from "@/contexts/AuthContext";
+import ReferralGate from "@/components/ReferralGate";
 import Index from "./pages/Index";
 import SearchResults from "./pages/SearchResults";
 import NotFound from "./pages/NotFound";
@@ -24,14 +25,17 @@ const App = () => (
         <Sonner />
         <BrowserRouter>
           <Routes>
-            <Route path="/" element={<Index />} />
-            <Route path="/search" element={<SearchResults />} />
-            <Route path="/policies" element={<Policies />} />
-            <Route path="/about" element={<About />} />
-            <Route path="/contact" element={<Contact />} />
-            <Route path="/feedback" element={<Feedback />} />
+            {/* Public routes - accessible without referral gate */}
             <Route path="/auth" element={<Auth />} />
             <Route path="/referral" element={<Referral />} />
+            <Route path="/policies" element={<Policies />} />
+
+            {/* Protected routes - locked behind referral gate */}
+            <Route path="/" element={<ReferralGate><Index /></ReferralGate>} />
+            <Route path="/search" element={<ReferralGate><SearchResults /></ReferralGate>} />
+            <Route path="/about" element={<ReferralGate><About /></ReferralGate>} />
+            <Route path="/contact" element={<ReferralGate><Contact /></ReferralGate>} />
+            <Route path="/feedback" element={<ReferralGate><Feedback /></ReferralGate>} />
             <Route path="*" element={<NotFound />} />
           </Routes>
         </BrowserRouter>
