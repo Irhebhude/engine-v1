@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
 import { Brain, Zap, Globe, Shield, Cpu, Layers } from "lucide-react";
 import SearchBar from "@/components/SearchBar";
+import ReferralGate from "@/components/ReferralGate";
 import FeatureCard from "@/components/FeatureCard";
 import Header from "@/components/Header";
 import AdSense from "@/components/AdSense";
