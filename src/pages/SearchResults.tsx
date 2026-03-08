@@ -70,6 +70,9 @@ const SearchResults = () => {
       addSearchToHistory(q, searchMode);
       const recentContext = getRecentQueries(5);
 
+      // Track search count for referral verification
+      supabase.rpc("increment_search_count").then(() => {}).catch(() => {});
+
       // Always run AI stream
       const aiPromise = (async () => {
         try {
