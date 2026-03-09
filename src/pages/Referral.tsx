@@ -47,9 +47,23 @@ const Referral = () => {
       ]);
 
       const referrals = referralsRes.data || [];
+
+      // Fetch detailed referral info with IP check
+      const { data: details } = await supabase.rpc("get_referral_details", { referrer_uid: user.id });
+      const detailsList = (details || []) as ReferralDetail[];
+      setReferralDetails(detailsList);
+
+      // Flagged IDs should not count as verified
+      const flaggedIds = new Set(
+        detailsList.filter((d) => d.is_flagged).map((d) => d.referred_id)
+      );
+      const legitimateVerified = referrals.filter(
+        (r: any) => (r.status === "verified" || r.status === "rewarded") && !flaggedIds.has(r.referred_id)
+      ).length;
+
       setStats({
         total: referrals.length,
-        verified: referrals.filter((r: any) => r.status === "verified" || r.status === "rewarded").length,
+        verified: legitimateVerified,
         pending: referrals.filter((r: any) => r.status === "pending").length,
         rewards: rewardsRes.data?.length || 0,
       });

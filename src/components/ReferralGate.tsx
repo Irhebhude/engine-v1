@@ -41,7 +41,7 @@ const ReferralGate = ({ children }: ReferralGateProps) => {
       const legitimateCount = (data || []).filter(
         (r: any) => (r.status === "verified" || r.status === "rewarded") && !flaggedIds.has(r.referred_id)
       ).length;
-      setVerifiedCount(verified);
+      setVerifiedCount(legitimateCount);
       setChecking(false);
     };
     fetchCount();

@@ -74,8 +74,7 @@ const Auth = () => {
         } catch (e) {
           console.warn("Could not capture IP:", e);
         }
-        toast({ title: "Welcome to SEARCH-POI!", description: "Your account has been created successfully." });
-        navigate("/");
+        setEmailSent(true);
       }
     }
     setLoading(false);
