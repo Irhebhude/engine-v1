@@ -26,10 +26,22 @@ const ReferralGate = ({ children }: ReferralGateProps) => {
         .from("referrals")
         .select("status")
         .eq("referrer_id", user.id);
+      // Only count non-flagged verified/rewarded referrals
       const verified = (data || []).filter(
-        (r: any) => r.status === "verified" || r.status === "rewarded"
+        (r: any) => (r.status === "verified" || r.status === "rewarded")
       ).length;
-      setVerifiedCount(verified);
+
+      // Also check via RPC for IP-based flagging
+      const { data: details } = await supabase.rpc("get_referral_details", { referrer_uid: user.id });
+      const flaggedIds = new Set(
+        (details || []).filter((d: any) => d.is_flagged).map((d: any) => d.referred_id)
+      );
+      
+      // Subtract flagged from verified count
+      const legitimateCount = (data || []).filter(
+        (r: any) => (r.status === "verified" || r.status === "rewarded") && !flaggedIds.has(r.referred_id)
+      ).length;
+      setVerifiedCount(legitimateCount);
       setChecking(false);
     };
     fetchCount();
