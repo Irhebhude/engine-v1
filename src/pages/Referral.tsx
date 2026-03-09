@@ -68,11 +68,6 @@ const Referral = () => {
         rewards: rewardsRes.data?.length || 0,
       });
 
-      // Fetch detailed referral info with IP check
-      const { data: details } = await supabase.rpc("get_referral_details", { referrer_uid: user.id });
-      if (details) {
-        setReferralDetails(details as ReferralDetail[]);
-      }
 
       setLoading(false);
     };
