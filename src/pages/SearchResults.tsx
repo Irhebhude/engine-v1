@@ -260,13 +260,20 @@ const SearchResults = () => {
 
         {/* Blueprint Generator quick-access button */}
         {query && !isStreaming && (
-          <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="mt-6">
+          <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="mt-6 flex flex-wrap gap-3">
             <button
               onClick={() => setShowBlueprint(true)}
               className="flex items-center gap-2 px-5 py-3 rounded-xl border border-primary/20 bg-primary/5 hover:bg-primary/10 transition-all text-sm font-medium text-foreground group"
             >
               <Cpu className="w-4 h-4 text-primary group-hover:scale-110 transition-transform" />
-              Generate Blueprint for "{query.length > 40 ? query.slice(0, 40) + '…' : query}"
+              Generate Blueprint
+            </button>
+            <button
+              onClick={() => setShowBuildGuide(true)}
+              className="flex items-center gap-2 px-5 py-3 rounded-xl border border-primary/20 bg-primary/5 hover:bg-primary/10 transition-all text-sm font-medium text-foreground group"
+            >
+              <Hammer className="w-4 h-4 text-primary group-hover:scale-110 transition-transform" />
+              Build Guide Video
             </button>
           </motion.div>
         )}
