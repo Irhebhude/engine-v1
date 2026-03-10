@@ -281,6 +281,7 @@ const SearchResults = () => {
 
       <UrlSummarizer isOpen={showSummarizer} onClose={() => setShowSummarizer(false)} />
       <BlueprintGenerator isOpen={showBlueprint} onClose={() => setShowBlueprint(false)} initialQuery={query} />
+      <BuildGuideViewer isOpen={showBuildGuide} onClose={() => setShowBuildGuide(false)} initialQuery={query} />
     </div>
     </>
   );
