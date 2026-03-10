@@ -16,6 +16,7 @@ import {
   Video,
   Newspaper,
   ScrollText,
+  Hammer,
 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import type { SearchMode } from "@/lib/search-api";
@@ -52,6 +53,7 @@ const TOOLS: { category: string; items: Tool[] }[] = [
     category: "Intelligence Tools",
     items: [
       { id: "blueprint", label: "Blueprint Generator", description: "AI technical schematics & build guides", icon: Cpu, action: "blueprint" },
+      { id: "buildguide", label: "Build Guide Video", description: "AI step-by-step video build instructions", icon: Hammer, action: "buildguide" },
       { id: "summarize", label: "Website Summarizer", description: "AI-powered page understanding", icon: FileText, action: "summarize" },
       { id: "web", label: "Live Web Results", description: "Real-time internet search", icon: Globe, action: "web" },
       { id: "trust", label: "Trust & Safety", description: "Source credibility analysis", icon: Shield, action: "trust" },

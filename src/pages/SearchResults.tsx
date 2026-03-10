@@ -1,7 +1,7 @@
 import { useState, useEffect, useCallback } from "react";
 import { useSearchParams, useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
-import { Clock, AlertCircle, Globe, Image, Video, Newspaper, Cpu } from "lucide-react";
+import { Clock, AlertCircle, Globe, Image, Video, Newspaper, Cpu, Hammer } from "lucide-react";
 import Header from "@/components/Header";
 import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
@@ -15,6 +15,7 @@ import SearchModeSelector from "@/components/SearchModeSelector";
 import ToolsMenu from "@/components/ToolsMenu";
 import UrlSummarizer from "@/components/UrlSummarizer";
 import BlueprintGenerator from "@/components/BlueprintGenerator";
+import BuildGuideViewer from "@/components/BuildGuideViewer";
 import AdSense from "@/components/AdSense";
 
 import SEOHead from "@/components/SEOHead";
@@ -57,6 +58,7 @@ const SearchResults = () => {
   const [mode, setMode] = useState<SearchMode>("default");
   const [showSummarizer, setShowSummarizer] = useState(false);
   const [showBlueprint, setShowBlueprint] = useState(false);
+  const [showBuildGuide, setShowBuildGuide] = useState(false);
   const [activeTab, setActiveTab] = useState<SearchTab>(initialTab);
 
   const performSearch = useCallback(
@@ -173,6 +175,7 @@ const SearchResults = () => {
   const handleToolAction = (action: string) => {
     if (action === "summarize") setShowSummarizer(true);
     if (action === "blueprint") setShowBlueprint(true);
+    if (action === "buildguide") setShowBuildGuide(true);
     if (action === "images") handleTabChange("images");
     if (action === "videos") handleTabChange("videos");
     if (action === "news") handleTabChange("news");
@@ -257,13 +260,20 @@ const SearchResults = () => {
 
         {/* Blueprint Generator quick-access button */}
         {query && !isStreaming && (
-          <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="mt-6">
+          <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="mt-6 flex flex-wrap gap-3">
             <button
               onClick={() => setShowBlueprint(true)}
               className="flex items-center gap-2 px-5 py-3 rounded-xl border border-primary/20 bg-primary/5 hover:bg-primary/10 transition-all text-sm font-medium text-foreground group"
             >
               <Cpu className="w-4 h-4 text-primary group-hover:scale-110 transition-transform" />
-              Generate Blueprint for "{query.length > 40 ? query.slice(0, 40) + '…' : query}"
+              Generate Blueprint
+            </button>
+            <button
+              onClick={() => setShowBuildGuide(true)}
+              className="flex items-center gap-2 px-5 py-3 rounded-xl border border-primary/20 bg-primary/5 hover:bg-primary/10 transition-all text-sm font-medium text-foreground group"
+            >
+              <Hammer className="w-4 h-4 text-primary group-hover:scale-110 transition-transform" />
+              Build Guide Video
             </button>
           </motion.div>
         )}
@@ -278,6 +288,7 @@ const SearchResults = () => {
 
       <UrlSummarizer isOpen={showSummarizer} onClose={() => setShowSummarizer(false)} />
       <BlueprintGenerator isOpen={showBlueprint} onClose={() => setShowBlueprint(false)} initialQuery={query} />
+      <BuildGuideViewer isOpen={showBuildGuide} onClose={() => setShowBuildGuide(false)} initialQuery={query} />
     </div>
     </>
   );
