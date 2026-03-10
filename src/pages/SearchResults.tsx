@@ -15,6 +15,7 @@ import SearchModeSelector from "@/components/SearchModeSelector";
 import ToolsMenu from "@/components/ToolsMenu";
 import UrlSummarizer from "@/components/UrlSummarizer";
 import BlueprintGenerator from "@/components/BlueprintGenerator";
+import BuildGuideViewer from "@/components/BuildGuideViewer";
 import AdSense from "@/components/AdSense";
 
 import SEOHead from "@/components/SEOHead";
