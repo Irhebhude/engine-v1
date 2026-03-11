@@ -3,7 +3,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import {
   Hammer, X, Loader2, ChevronLeft, ChevronRight, Play, Pause,
   Clock, Wrench, Package, AlertTriangle, Lightbulb, Video,
-  ExternalLink, Sparkles, RotateCcw
+  ExternalLink, Sparkles, RotateCcw, Download, Share2, Copy, Check
 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 
