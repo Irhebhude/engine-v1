@@ -4,6 +4,8 @@ import { Zap, Clock, Menu, X, Gift, LogOut, User, Shield } from "lucide-react";
 import SearchHistory from "@/components/SearchHistory";
 import { useAuth } from "@/contexts/AuthContext";
 
+const ADMIN_EMAIL = "prosperozoya50@gmail.com";
+
 const NAV_LINKS = [
   { to: "/about", label: "About" },
   { to: "/contact", label: "Contact" },
