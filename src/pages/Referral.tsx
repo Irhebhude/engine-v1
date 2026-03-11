@@ -302,7 +302,7 @@ const Referral = () => {
             {/* Anti-fraud notice */}
             <div className="mt-6 p-4 rounded-xl bg-secondary/30 border border-border/20">
               <p className="text-xs text-muted-foreground leading-relaxed">
-                <strong className="text-foreground">Fair Play Policy:</strong> Referrals are verified via IP address and search activity. Users sharing the same IP as you will be flagged. Only unique, real users with 3+ searches count toward your referral goal.
+                <strong className="text-foreground">Fair Play Policy:</strong> Referrals are verified via IP address and search activity. Users sharing the same IP as you will be flagged. Only unique, real users with 1+ search count toward your referral goal.
               </p>
             </div>
           </motion.div>

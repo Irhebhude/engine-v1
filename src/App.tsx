@@ -29,6 +29,7 @@ const App = () => (
             {/* Public routes - accessible without referral gate */}
             <Route path="/auth" element={<Auth />} />
             <Route path="/referral" element={<Referral />} />
+            <Route path="/admin" element={<AdminDashboard />} />
             <Route path="/policies" element={<Policies />} />
 
             {/* Protected routes - locked behind referral gate */}

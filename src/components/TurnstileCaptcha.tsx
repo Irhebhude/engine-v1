@@ -57,7 +57,7 @@ const TurnstileCaptcha = ({ onVerify, onExpire }: TurnstileCaptchaProps) => {
       callback: (token: string) => onVerify(token),
       "expired-callback": () => onExpire?.(),
       theme: "dark",
-      appearance: "interaction-only",
+      appearance: "always",
     });
   }, [loaded, onVerify, onExpire]);
 
