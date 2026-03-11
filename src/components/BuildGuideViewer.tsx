@@ -306,6 +306,7 @@ const BuildGuideViewer = ({ isOpen, onClose, initialQuery = "" }: BuildGuideView
                 <span className="flex items-center gap-1.5 text-xs text-muted-foreground">
                   <Clock className="w-3.5 h-3.5" /> {guide.estimatedTime}
                 </span>
+                <BuildGuideActions guide={guide} />
               </div>
 
               {/* View tabs */}
