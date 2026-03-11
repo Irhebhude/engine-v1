@@ -46,6 +46,17 @@ const Header = () => {
             Refer & Earn
           </Link>
 
+          {/* Admin dashboard - only for admin */}
+          {user?.email === ADMIN_EMAIL && (
+            <Link
+              to="/admin"
+              className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-destructive/10 text-destructive hover:bg-destructive/20 transition-colors font-medium"
+            >
+              <Shield className="w-3.5 h-3.5" />
+              Admin
+            </Link>
+          )}
+
           <button
             onClick={() => setShowHistory(!showHistory)}
             className="flex items-center gap-1.5 text-muted-foreground hover:text-foreground transition-colors"
