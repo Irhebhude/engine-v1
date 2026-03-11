@@ -1,8 +1,10 @@
 import { useState } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
-import { Zap, Clock, Menu, X, Gift, LogOut, User } from "lucide-react";
+import { Zap, Clock, Menu, X, Gift, LogOut, User, Shield } from "lucide-react";
 import SearchHistory from "@/components/SearchHistory";
 import { useAuth } from "@/contexts/AuthContext";
+
+const ADMIN_EMAIL = "prosperozoya50@gmail.com";
 
 const NAV_LINKS = [
   { to: "/about", label: "About" },
@@ -43,6 +45,17 @@ const Header = () => {
             <Gift className="w-3.5 h-3.5" />
             Refer & Earn
           </Link>
+
+          {/* Admin dashboard - only for admin */}
+          {user?.email === ADMIN_EMAIL && (
+            <Link
+              to="/admin"
+              className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-destructive/10 text-destructive hover:bg-destructive/20 transition-colors font-medium"
+            >
+              <Shield className="w-3.5 h-3.5" />
+              Admin
+            </Link>
+          )}
 
           <button
             onClick={() => setShowHistory(!showHistory)}
@@ -110,6 +123,11 @@ const Header = () => {
           <Link to="/referral" onClick={() => setMobileOpen(false)} className="flex items-center gap-1.5 text-primary font-medium">
             <Gift className="w-4 h-4" /> Refer & Earn
           </Link>
+          {user?.email === ADMIN_EMAIL && (
+            <Link to="/admin" onClick={() => setMobileOpen(false)} className="flex items-center gap-1.5 text-destructive font-medium">
+              <Shield className="w-4 h-4" /> Admin Dashboard
+            </Link>
+          )}
           <button
             onClick={() => { setMobileOpen(false); setShowHistory(!showHistory); }}
             className="flex items-center gap-1.5 text-muted-foreground hover:text-foreground transition-colors"

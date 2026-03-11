@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState, useCallback } from "react";
 
 declare global {
   interface Window {
@@ -7,6 +7,7 @@ declare global {
       reset: (widgetId: string) => void;
       remove: (widgetId: string) => void;
     };
+    onTurnstileLoad?: () => void;
   }
 }
 
@@ -15,53 +16,94 @@ interface TurnstileCaptchaProps {
   onExpire?: () => void;
 }
 
-// Use Cloudflare Turnstile test key for now — replace with your real site key in production
 const SITE_KEY = "0x4AAAAAACoCUaSTI918Bqoa";
 
 const TurnstileCaptcha = ({ onVerify, onExpire }: TurnstileCaptchaProps) => {
   const containerRef = useRef<HTMLDivElement>(null);
   const widgetIdRef = useRef<string | null>(null);
-  const [loaded, setLoaded] = useState(false);
+  const onVerifyRef = useRef(onVerify);
+  const onExpireRef = useRef(onExpire);
+  const [ready, setReady] = useState(!!window.turnstile);
+
+  // Keep refs updated without causing re-renders
+  onVerifyRef.current = onVerify;
+  onExpireRef.current = onExpire;
 
   useEffect(() => {
-    // Load Turnstile script
-    if (document.querySelector('script[src*="turnstile"]')) {
-      setLoaded(true);
+    if (window.turnstile) {
+      setReady(true);
       return;
     }
 
+    // Check if script is already loading
+    const existing = document.querySelector('script[src*="turnstile"]');
+    if (existing) {
+      // Script exists but turnstile not ready yet — poll for it
+      const poll = setInterval(() => {
+        if (window.turnstile) {
+          setReady(true);
+          clearInterval(poll);
+        }
+      }, 100);
+      return () => clearInterval(poll);
+    }
+
+    // Load script with onload callback
+    window.onTurnstileLoad = () => setReady(true);
     const script = document.createElement("script");
-    script.src = "https://challenges.cloudflare.com/turnstile/v0/api.js?render=explicit";
+    script.src = "https://challenges.cloudflare.com/turnstile/v0/api.js?render=explicit&onload=onTurnstileLoad";
     script.async = true;
-    script.onload = () => setLoaded(true);
     document.head.appendChild(script);
 
     return () => {
-      // Cleanup widget on unmount
-      if (widgetIdRef.current && window.turnstile) {
-        window.turnstile.remove(widgetIdRef.current);
-      }
+      window.onTurnstileLoad = undefined;
     };
   }, []);
 
   useEffect(() => {
-    if (!loaded || !containerRef.current || !window.turnstile) return;
+    if (!ready || !containerRef.current || !window.turnstile) return;
 
-    // Clear any existing widget
+    // Remove existing widget if any
     if (widgetIdRef.current) {
-      window.turnstile.remove(widgetIdRef.current);
+      try {
+        window.turnstile.remove(widgetIdRef.current);
+      } catch {}
+      widgetIdRef.current = null;
     }
 
-    widgetIdRef.current = window.turnstile.render(containerRef.current, {
-      sitekey: SITE_KEY,
-      callback: (token: string) => onVerify(token),
-      "expired-callback": () => onExpire?.(),
-      theme: "dark",
-      appearance: "always",
-    });
-  }, [loaded, onVerify, onExpire]);
+    // Small delay to ensure DOM is ready
+    const timer = setTimeout(() => {
+      if (!containerRef.current || !window.turnstile) return;
+      
+      widgetIdRef.current = window.turnstile.render(containerRef.current, {
+        sitekey: SITE_KEY,
+        callback: (token: string) => onVerifyRef.current(token),
+        "expired-callback": () => onExpireRef.current?.(),
+        theme: "dark",
+        appearance: "always",
+        size: "normal",
+      });
+    }, 100);
 
-  return <div ref={containerRef} className="flex justify-center my-2" />;
+    return () => {
+      clearTimeout(timer);
+      if (widgetIdRef.current && window.turnstile) {
+        try {
+          window.turnstile.remove(widgetIdRef.current);
+        } catch {}
+        widgetIdRef.current = null;
+      }
+    };
+  }, [ready]);
+
+  return (
+    <div className="flex justify-center my-3">
+      <div ref={containerRef} />
+      {!ready && (
+        <p className="text-xs text-muted-foreground animate-pulse">Loading verification...</p>
+      )}
+    </div>
+  );
 };
 
 export default TurnstileCaptcha;
