@@ -206,6 +206,27 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      get_admin_user_stats: {
+        Args: never
+        Returns: {
+          active_users: number
+          inactive_users: number
+          total_users: number
+        }[]
+      }
+      get_admin_users_list: {
+        Args: never
+        Returns: {
+          created_at: string
+          display_name: string
+          email_verified: boolean
+          referral_code: string
+          search_count: number
+          signup_ip: string
+          updated_at: string
+          user_id: string
+        }[]
+      }
       get_referral_details: {
         Args: { referrer_uid: string }
         Returns: {

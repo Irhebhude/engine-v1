@@ -14,6 +14,7 @@ import Contact from "./pages/Contact";
 import Feedback from "./pages/Feedback";
 import Auth from "./pages/Auth";
 import Referral from "./pages/Referral";
+import AdminDashboard from "./pages/AdminDashboard";
 
 const queryClient = new QueryClient();
 
@@ -28,6 +29,7 @@ const App = () => (
             {/* Public routes - accessible without referral gate */}
             <Route path="/auth" element={<Auth />} />
             <Route path="/referral" element={<Referral />} />
+            <Route path="/admin" element={<AdminDashboard />} />
             <Route path="/policies" element={<Policies />} />
 
             {/* Protected routes - locked behind referral gate */}

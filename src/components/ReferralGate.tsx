@@ -57,13 +57,16 @@ const ReferralGate = ({ children }: ReferralGateProps) => {
     return <GateUI message="Sign up and refer 10 real users to unlock SEARCH-POI." showSignUp />;
   }
 
-  // Has 10+ verified referrals — unlocked
+  // Has 10+ verified referrals — fully unlocked
   if (verifiedCount !== null && verifiedCount >= 10) return <>{children}</>;
 
-  // Logged in but not enough referrals
+  // New user gets 1 free search — allow access if search_count < 1
+  if (profile && profile.search_count < 1) return <>{children}</>;
+
+  // Used their 1 free search but doesn't have 10 referrals — locked
   return (
     <GateUI
-      message={`You have ${verifiedCount ?? 0}/10 verified referrals. Refer ${10 - (verifiedCount ?? 0)} more real users to unlock SEARCH-POI!`}
+      message={`You've used your 1 free search. You have ${verifiedCount ?? 0}/10 verified referrals. Refer ${10 - (verifiedCount ?? 0)} more real users to re-unlock SEARCH-POI!`}
       showReferral
     />
   );
@@ -99,7 +102,7 @@ const GateUI = ({
         <ol className="text-sm text-muted-foreground space-y-2 list-decimal list-inside">
           <li>Share your unique referral link with friends</li>
           <li>Friends sign up (CAPTCHA verified)</li>
-          <li>Each friend must perform at least 3 searches to prove they're real</li>
+          <li>Each friend must perform at least 1 free search to prove they're real</li>
           <li>After 10 verified referrals, access unlocks automatically!</li>
         </ol>
       </div>
