@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
-import { Zap, Clock, Menu, X, Gift, LogOut, User } from "lucide-react";
+import { Zap, Clock, Menu, X, Gift, LogOut, User, Shield } from "lucide-react";
 import SearchHistory from "@/components/SearchHistory";
 import { useAuth } from "@/contexts/AuthContext";
 
