@@ -60,6 +60,7 @@ const SearchResults = () => {
   const [showSummarizer, setShowSummarizer] = useState(false);
   const [showBlueprint, setShowBlueprint] = useState(false);
   const [showBuildGuide, setShowBuildGuide] = useState(false);
+  const [showLocation, setShowLocation] = useState(false);
   const [activeTab, setActiveTab] = useState<SearchTab>(initialTab);
 
   const performSearch = useCallback(
