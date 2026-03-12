@@ -1,10 +1,9 @@
-import { useState, useCallback } from "react";
+import { useState } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { motion } from "framer-motion";
 import { Zap, Mail, Lock, User, Eye, EyeOff, Gift } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 import SEOHead from "@/components/SEOHead";
-import TurnstileCaptcha from "@/components/TurnstileCaptcha";
 import { useToast } from "@/hooks/use-toast";
 
 const Auth = () => {
@@ -22,15 +21,6 @@ const Auth = () => {
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
   const [emailSent, setEmailSent] = useState(false);
-  const [captchaToken, setCaptchaToken] = useState<string | null>(null);
-
-  const handleCaptchaVerify = useCallback((token: string) => {
-    setCaptchaToken(token);
-  }, []);
-
-  const handleCaptchaExpire = useCallback(() => {
-    setCaptchaToken(null);
-  }, []);
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
@@ -44,11 +34,6 @@ const Auth = () => {
         navigate("/");
       }
     } else {
-      if (!captchaToken) {
-        toast({ title: "Verification required", description: "Please complete the CAPTCHA challenge", variant: "destructive" });
-        setLoading(false);
-        return;
-      }
       if (!displayName.trim()) {
         toast({ title: "Name required", description: "Please enter your display name", variant: "destructive" });
         setLoading(false);
@@ -199,14 +184,9 @@ const Auth = () => {
             </div>
           )}
 
-          {/* CAPTCHA for signup only */}
-          {!isLogin && (
-            <TurnstileCaptcha onVerify={handleCaptchaVerify} onExpire={handleCaptchaExpire} />
-          )}
-
           <button
             type="submit"
-            disabled={loading || (!isLogin && !captchaToken)}
+            disabled={loading}
             className="w-full py-2.5 rounded-xl bg-primary text-primary-foreground font-semibold hover:bg-primary/90 transition-colors disabled:opacity-50"
           >
             {loading ? "Please wait..." : isLogin ? "Sign In" : "Create Account"}

@@ -129,7 +129,7 @@ const Referral = () => {
                   {[
                     { step: "1", text: "Sign up for a free SEARCH-POI account" },
                     { step: "2", text: "Share your unique referral link with friends" },
-                    { step: "3", text: "Friends sign up and complete CAPTCHA verification" },
+                    { step: "3", text: "Friends sign up and create an account" },
                     { step: "4", text: "After 10 verified referrals, you get a free month!" },
                   ].map((item) => (
                     <div key={item.step} className="flex items-start gap-3">

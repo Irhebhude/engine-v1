@@ -101,7 +101,7 @@ const GateUI = ({
         </h3>
         <ol className="text-sm text-muted-foreground space-y-2 list-decimal list-inside">
           <li>Share your unique referral link with friends</li>
-          <li>Friends sign up (CAPTCHA verified)</li>
+          <li>Friends sign up and create an account</li>
           <li>Each friend must perform at least 1 free search to prove they're real</li>
           <li>After 10 verified referrals, access unlocks automatically!</li>
         </ol>
