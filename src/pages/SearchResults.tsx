@@ -16,6 +16,7 @@ import ToolsMenu from "@/components/ToolsMenu";
 import UrlSummarizer from "@/components/UrlSummarizer";
 import BlueprintGenerator from "@/components/BlueprintGenerator";
 import BuildGuideViewer from "@/components/BuildGuideViewer";
+import LocationSearch from "@/components/LocationSearch";
 import AdSense from "@/components/AdSense";
 
 import SEOHead from "@/components/SEOHead";
