@@ -1,15 +1,6 @@
 import { useState, useRef, useEffect } from "react";
-import { Search, Mic, Sparkles, ArrowRight } from "lucide-react";
-import { motion, AnimatePresence } from "framer-motion";
-
-const SUGGESTIONS = [
-  "What is quantum computing?",
-  "Latest AI breakthroughs 2026",
-  "How does blockchain work?",
-  "Best programming languages to learn",
-  "Climate change solutions",
-  "History of the internet",
-];
+import { Search, Sparkles } from "lucide-react";
+import SearchAutocomplete from "@/components/SearchAutocomplete";
 
 interface SearchBarProps {
   onSearch: (query: string) => void;
@@ -24,10 +15,6 @@ const SearchBar = ({ onSearch, isLoading, compact, initialQuery = "" }: SearchBa
   const [showSuggestions, setShowSuggestions] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
 
-  const filteredSuggestions = SUGGESTIONS.filter((s) =>
-    s.toLowerCase().includes(query.toLowerCase())
-  ).slice(0, 4);
-
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (query.trim() && !isLoading) {
@@ -36,7 +23,7 @@ const SearchBar = ({ onSearch, isLoading, compact, initialQuery = "" }: SearchBa
     }
   };
 
-  const handleSuggestionClick = (suggestion: string) => {
+  const handleSuggestionSelect = (suggestion: string) => {
     setQuery(suggestion);
     onSearch(suggestion);
     setShowSuggestions(false);
@@ -91,28 +78,12 @@ const SearchBar = ({ onSearch, isLoading, compact, initialQuery = "" }: SearchBa
         </div>
       </form>
 
-      <AnimatePresence>
-        {showSuggestions && query.length > 0 && filteredSuggestions.length > 0 && (
-          <motion.div
-            initial={{ opacity: 0, y: -8 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -8 }}
-            className="absolute top-full mt-2 w-full glass rounded-xl overflow-hidden z-50"
-          >
-            {filteredSuggestions.map((suggestion, i) => (
-              <button
-                key={i}
-                onMouseDown={() => handleSuggestionClick(suggestion)}
-                className="flex items-center gap-3 w-full px-5 py-3 text-left hover:bg-accent/30 transition-colors text-secondary-foreground"
-              >
-                <Search className="w-4 h-4 text-muted-foreground" />
-                <span>{suggestion}</span>
-                <ArrowRight className="w-4 h-4 ml-auto text-muted-foreground" />
-              </button>
-            ))}
-          </motion.div>
-        )}
-      </AnimatePresence>
+      <SearchAutocomplete
+        query={query}
+        isOpen={showSuggestions}
+        onSelect={handleSuggestionSelect}
+        onClose={() => setShowSuggestions(false)}
+      />
     </div>
   );
 };

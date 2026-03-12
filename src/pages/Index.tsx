@@ -1,12 +1,15 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
-import { Brain, Zap, Globe, Shield, Cpu, Layers } from "lucide-react";
+import { Brain, Zap, Globe, Shield, Cpu, Layers, MapPin } from "lucide-react";
 import SearchBar from "@/components/SearchBar";
 import FeatureCard from "@/components/FeatureCard";
 import Header from "@/components/Header";
 import AdSense from "@/components/AdSense";
 import SEOHead from "@/components/SEOHead";
+import LiveActivityFeed from "@/components/LiveActivityFeed";
+import TrendingTopics from "@/components/TrendingTopics";
+import LocationSearch from "@/components/LocationSearch";
 import heroBg from "@/assets/hero-bg.jpg";
 
 const FEATURES = [
@@ -20,6 +23,7 @@ const FEATURES = [
 
 const Index = () => {
   const navigate = useNavigate();
+  const [showLocationSearch, setShowLocationSearch] = useState(false);
 
   const handleSearch = (query: string) => {
     navigate(`/search?q=${encodeURIComponent(query)}`);
@@ -27,7 +31,11 @@ const Index = () => {
 
   return (
     <div className="min-h-screen bg-background relative overflow-hidden">
-      <SEOHead title="SEARCH-POI — AI-Powered Search Engine | Smarter Than Google" description="Get instant AI answers, deep research reports, tech blueprints & real-time web results. The next-gen search engine by POI Foundation." path="/" />
+      <SEOHead
+        title="SEARCH-POI — AI-Powered Search Engine | Smarter Than Google"
+        description="Get instant AI answers, deep research reports, tech blueprints & real-time web results. The next-gen search engine by POI Foundation."
+        path="/"
+      />
       <Header />
 
       {/* Hero background */}
@@ -70,13 +78,33 @@ const Index = () => {
 
             <SearchBar onSearch={handleSearch} />
 
-            <p className="text-xs text-muted-foreground mt-4">
-              Powered by multi-model AI • Built by POI Foundation
-            </p>
+            <div className="flex items-center justify-center gap-4 mt-4">
+              <p className="text-xs text-muted-foreground">
+                Powered by multi-model AI • Built by POI Foundation
+              </p>
+              <button
+                onClick={() => setShowLocationSearch(true)}
+                className="flex items-center gap-1 text-xs text-primary hover:text-primary/80 transition-colors"
+              >
+                <MapPin className="w-3 h-3" />
+                Location Search
+              </button>
+            </div>
+          </motion.div>
+
+          {/* Real-time widgets */}
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.5 }}
+            className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-12"
+          >
+            <TrendingTopics />
+            <LiveActivityFeed />
           </motion.div>
 
           {/* Features grid */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 mt-20">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 mt-8">
             {FEATURES.map((feature, i) => (
               <FeatureCard key={feature.title} {...feature} delay={0.1 * i} />
             ))}
@@ -98,6 +126,8 @@ const Index = () => {
           </motion.div>
         </div>
       </main>
+
+      <LocationSearch isOpen={showLocationSearch} onClose={() => setShowLocationSearch(false)} />
     </div>
   );
 };
