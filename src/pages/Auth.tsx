@@ -34,11 +34,6 @@ const Auth = () => {
         navigate("/");
       }
     } else {
-      if (!captchaToken) {
-        toast({ title: "Verification required", description: "Please complete the CAPTCHA challenge", variant: "destructive" });
-        setLoading(false);
-        return;
-      }
       if (!displayName.trim()) {
         toast({ title: "Name required", description: "Please enter your display name", variant: "destructive" });
         setLoading(false);
