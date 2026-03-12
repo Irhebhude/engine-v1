@@ -201,6 +201,93 @@ export type Database = {
           },
         ]
       }
+      search_activity: {
+        Row: {
+          created_at: string
+          id: string
+          query: string
+          search_mode: string
+          user_id: string | null
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          query: string
+          search_mode?: string
+          user_id?: string | null
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          query?: string
+          search_mode?: string
+          user_id?: string | null
+        }
+        Relationships: []
+      }
+      trending_content: {
+        Row: {
+          category: string
+          content: string
+          created_at: string
+          description: string
+          id: string
+          keywords: string[] | null
+          slug: string
+          title: string
+          updated_at: string
+          view_count: number
+        }
+        Insert: {
+          category?: string
+          content: string
+          created_at?: string
+          description: string
+          id?: string
+          keywords?: string[] | null
+          slug: string
+          title: string
+          updated_at?: string
+          view_count?: number
+        }
+        Update: {
+          category?: string
+          content?: string
+          created_at?: string
+          description?: string
+          id?: string
+          keywords?: string[] | null
+          slug?: string
+          title?: string
+          updated_at?: string
+          view_count?: number
+        }
+        Relationships: []
+      }
+      trending_searches: {
+        Row: {
+          created_at: string
+          id: string
+          last_searched_at: string
+          query: string
+          search_count: number
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          last_searched_at?: string
+          query: string
+          search_count?: number
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          last_searched_at?: string
+          query?: string
+          search_count?: number
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
@@ -240,6 +327,10 @@ export type Database = {
         }[]
       }
       increment_search_count: { Args: never; Returns: undefined }
+      log_search_activity: {
+        Args: { search_mode?: string; search_query: string }
+        Returns: undefined
+      }
       process_referral: {
         Args: { referral_code_input: string }
         Returns: boolean

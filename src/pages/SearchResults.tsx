@@ -1,7 +1,7 @@
 import { useState, useEffect, useCallback } from "react";
 import { useSearchParams, useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
-import { Clock, AlertCircle, Globe, Image, Video, Newspaper, Cpu, Hammer } from "lucide-react";
+import { Clock, AlertCircle, Globe, Image, Video, Newspaper, Cpu, Hammer, MapPin } from "lucide-react";
 import Header from "@/components/Header";
 import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
@@ -16,6 +16,7 @@ import ToolsMenu from "@/components/ToolsMenu";
 import UrlSummarizer from "@/components/UrlSummarizer";
 import BlueprintGenerator from "@/components/BlueprintGenerator";
 import BuildGuideViewer from "@/components/BuildGuideViewer";
+import LocationSearch from "@/components/LocationSearch";
 import AdSense from "@/components/AdSense";
 
 import SEOHead from "@/components/SEOHead";
@@ -59,6 +60,7 @@ const SearchResults = () => {
   const [showSummarizer, setShowSummarizer] = useState(false);
   const [showBlueprint, setShowBlueprint] = useState(false);
   const [showBuildGuide, setShowBuildGuide] = useState(false);
+  const [showLocation, setShowLocation] = useState(false);
   const [activeTab, setActiveTab] = useState<SearchTab>(initialTab);
 
   const performSearch = useCallback(
@@ -73,8 +75,9 @@ const SearchResults = () => {
       addSearchToHistory(q, searchMode);
       const recentContext = getRecentQueries(5);
 
-      // Track search count for referral verification
+      // Track search count for referral verification + log activity
       supabase.rpc("increment_search_count" as any).then(() => {});
+      supabase.rpc("log_search_activity" as any, { search_query: q, search_mode: searchMode }).then(() => {});
 
       // Always run AI stream
       const aiPromise = (async () => {
@@ -176,6 +179,7 @@ const SearchResults = () => {
     if (action === "summarize") setShowSummarizer(true);
     if (action === "blueprint") setShowBlueprint(true);
     if (action === "buildguide") setShowBuildGuide(true);
+    if (action === "location") setShowLocation(true);
     if (action === "images") handleTabChange("images");
     if (action === "videos") handleTabChange("videos");
     if (action === "news") handleTabChange("news");
@@ -289,6 +293,7 @@ const SearchResults = () => {
       <UrlSummarizer isOpen={showSummarizer} onClose={() => setShowSummarizer(false)} />
       <BlueprintGenerator isOpen={showBlueprint} onClose={() => setShowBlueprint(false)} initialQuery={query} />
       <BuildGuideViewer isOpen={showBuildGuide} onClose={() => setShowBuildGuide(false)} initialQuery={query} />
+      <LocationSearch isOpen={showLocation} onClose={() => setShowLocation(false)} initialQuery={query} />
     </div>
     </>
   );
