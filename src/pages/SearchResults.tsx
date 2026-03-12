@@ -179,6 +179,7 @@ const SearchResults = () => {
     if (action === "summarize") setShowSummarizer(true);
     if (action === "blueprint") setShowBlueprint(true);
     if (action === "buildguide") setShowBuildGuide(true);
+    if (action === "location") setShowLocation(true);
     if (action === "images") handleTabChange("images");
     if (action === "videos") handleTabChange("videos");
     if (action === "news") handleTabChange("news");
