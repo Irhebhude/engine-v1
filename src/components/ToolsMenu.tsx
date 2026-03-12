@@ -17,6 +17,7 @@ import {
   Newspaper,
   ScrollText,
   Hammer,
+  MapPin,
 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import type { SearchMode } from "@/lib/search-api";
