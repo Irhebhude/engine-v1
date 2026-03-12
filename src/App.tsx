@@ -15,6 +15,7 @@ import Feedback from "./pages/Feedback";
 import Auth from "./pages/Auth";
 import Referral from "./pages/Referral";
 import AdminDashboard from "./pages/AdminDashboard";
+import TrendingContent from "./pages/TrendingContent";
 
 const queryClient = new QueryClient();
 
@@ -26,13 +27,14 @@ const App = () => (
         <Sonner />
         <BrowserRouter>
           <Routes>
-            {/* Public routes - accessible without referral gate */}
+            {/* Public routes */}
             <Route path="/auth" element={<Auth />} />
             <Route path="/referral" element={<Referral />} />
             <Route path="/admin" element={<AdminDashboard />} />
             <Route path="/policies" element={<Policies />} />
+            <Route path="/trending/:slug" element={<TrendingContent />} />
 
-            {/* Protected routes - locked behind referral gate */}
+            {/* Protected routes */}
             <Route path="/" element={<ReferralGate><Index /></ReferralGate>} />
             <Route path="/search" element={<ReferralGate><SearchResults /></ReferralGate>} />
             <Route path="/about" element={<ReferralGate><About /></ReferralGate>} />
