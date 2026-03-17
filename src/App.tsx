@@ -16,6 +16,7 @@ import Auth from "./pages/Auth";
 import Referral from "./pages/Referral";
 import AdminDashboard from "./pages/AdminDashboard";
 import TrendingContent from "./pages/TrendingContent";
+import Waitlist from "./pages/Waitlist";
 
 const queryClient = new QueryClient();
 
