@@ -10,6 +10,7 @@ const NAV_LINKS = [
   { to: "/about", label: "About" },
   { to: "/contact", label: "Contact" },
   { to: "/feedback", label: "Feedback" },
+  { to: "/waitlist", label: "Waitlist" },
 ];
 
 const Header = () => {

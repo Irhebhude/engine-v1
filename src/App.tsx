@@ -34,6 +34,7 @@ const App = () => (
             <Route path="/admin" element={<AdminDashboard />} />
             <Route path="/policies" element={<Policies />} />
             <Route path="/trending/:slug" element={<TrendingContent />} />
+            <Route path="/waitlist" element={<Waitlist />} />
 
             {/* Protected routes */}
             <Route path="/" element={<ReferralGate><Index /></ReferralGate>} />
