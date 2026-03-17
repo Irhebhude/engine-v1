@@ -16,6 +16,7 @@ import Auth from "./pages/Auth";
 import Referral from "./pages/Referral";
 import AdminDashboard from "./pages/AdminDashboard";
 import TrendingContent from "./pages/TrendingContent";
+import Waitlist from "./pages/Waitlist";
 
 const queryClient = new QueryClient();
 
@@ -33,6 +34,7 @@ const App = () => (
             <Route path="/admin" element={<AdminDashboard />} />
             <Route path="/policies" element={<Policies />} />
             <Route path="/trending/:slug" element={<TrendingContent />} />
+            <Route path="/waitlist" element={<Waitlist />} />
 
             {/* Protected routes */}
             <Route path="/" element={<ReferralGate><Index /></ReferralGate>} />
