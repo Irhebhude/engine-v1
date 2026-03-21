@@ -110,6 +110,29 @@ const Index = () => {
             ))}
           </div>
 
+          {/* Premium & Business CTAs */}
+          <motion.div
+            initial={{ opacity: 0, y: 15 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.8 }}
+            className="flex flex-col sm:flex-row gap-3 mt-10 justify-center"
+          >
+            <Link
+              to="/premium"
+              className="flex items-center justify-center gap-2 px-6 py-3 rounded-xl bg-[hsl(45,90%,50%)]/10 border border-[hsl(45,90%,50%)]/20 text-[hsl(45,90%,55%)] font-semibold hover:bg-[hsl(45,90%,50%)]/20 transition-colors"
+            >
+              <Crown className="w-4 h-4" />
+              Go Premium — ₦1,000/mo
+            </Link>
+            <Link
+              to="/business"
+              className="flex items-center justify-center gap-2 px-6 py-3 rounded-xl bg-primary/10 border border-primary/20 text-primary font-semibold hover:bg-primary/20 transition-colors"
+            >
+              <Building2 className="w-4 h-4" />
+              Business Dashboard
+            </Link>
+          </motion.div>
+
           {/* Ad placement */}
           <AdSense adSlot="9944378861" adFormat="horizontal" className="mt-12" />
 
