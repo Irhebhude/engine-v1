@@ -17,6 +17,8 @@ import Referral from "./pages/Referral";
 import AdminDashboard from "./pages/AdminDashboard";
 import TrendingContent from "./pages/TrendingContent";
 import Waitlist from "./pages/Waitlist";
+import Premium from "./pages/Premium";
+import BusinessDashboard from "./pages/BusinessDashboard";
 
 const queryClient = new QueryClient();
 
@@ -35,6 +37,8 @@ const App = () => (
             <Route path="/policies" element={<Policies />} />
             <Route path="/trending/:slug" element={<TrendingContent />} />
             <Route path="/waitlist" element={<Waitlist />} />
+            <Route path="/premium" element={<Premium />} />
+            <Route path="/business" element={<BusinessDashboard />} />
 
             {/* Protected routes */}
             <Route path="/" element={<ReferralGate><Index /></ReferralGate>} />
