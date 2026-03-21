@@ -2,15 +2,21 @@ import { useState } from "react";
 import { motion } from "framer-motion";
 import { Globe, ExternalLink, FileText, Loader2 } from "lucide-react";
 import { summarizeUrl } from "@/lib/search-api";
+import BusinessBadge from "@/components/BusinessBadge";
+import ActionButtons from "@/components/ActionButtons";
 
 export interface WebResult {
   url: string;
   title: string;
   description: string;
   markdown?: string;
+  // Business enrichment (optional)
+  isVerified?: boolean;
+  phone?: string;
+  whatsapp?: string;
+  memberDiscount?: number;
+  businessName?: string;
 }
-
-// Props defined inline below
 
 const getDomain = (url: string) => {
   try { return new URL(url).hostname.replace("www.", ""); } catch { return url; }
@@ -31,15 +37,17 @@ interface WebSearchResultsProps {
   onLoadMore?: () => void;
   isLoadingMore?: boolean;
   hasMore?: boolean;
+  isPremiumUser?: boolean;
+  liteMode?: boolean;
+  query?: string;
 }
 
-const WebSearchResults = ({ results, isLoading, onLoadMore, isLoadingMore, hasMore = true }: WebSearchResultsProps) => {
+const WebSearchResults = ({ results, isLoading, onLoadMore, isLoadingMore, hasMore = true, isPremiumUser, liteMode, query }: WebSearchResultsProps) => {
   const [summarizing, setSummarizing] = useState<string | null>(null);
   const [summaries, setSummaries] = useState<Record<string, string>>({});
 
   const handleSummarize = async (url: string) => {
     if (summaries[url]) {
-      // Toggle off
       setSummaries((prev) => { const n = { ...prev }; delete n[url]; return n; });
       return;
     }
@@ -69,6 +77,28 @@ const WebSearchResults = ({ results, isLoading, onLoadMore, isLoadingMore, hasMo
   }
 
   if (results.length === 0) return null;
+
+  // Lite mode: text-only minimal layout
+  if (liteMode) {
+    return (
+      <div className="mt-4 space-y-2">
+        <p className="text-xs text-muted-foreground uppercase tracking-wider mb-2">Web Results</p>
+        {results.map((result, i) => (
+          <div key={i} className="border-b border-border/20 pb-2">
+            <a href={result.url} target="_blank" rel="noopener noreferrer" className="text-sm text-primary hover:underline font-medium">
+              {result.title || getDomain(result.url)}
+            </a>
+            <p className="text-xs text-muted-foreground">{getDomain(result.url)}</p>
+            {result.description && <p className="text-xs text-foreground/70 mt-0.5">{result.description}</p>}
+            {result.isVerified && <BusinessBadge isVerified memberDiscount={result.memberDiscount} isPremiumUser={isPremiumUser} />}
+            {(result.phone || result.whatsapp) && (
+              <ActionButtons phone={result.phone} whatsapp={result.whatsapp} businessName={result.businessName} query={query} />
+            )}
+          </div>
+        ))}
+      </div>
+    );
+  }
 
   return (
     <div className="mt-8 space-y-1">
@@ -102,6 +132,18 @@ const WebSearchResults = ({ results, isLoading, onLoadMore, isLoadingMore, hasMo
               <p className="text-sm text-muted-foreground mt-1 line-clamp-2 leading-relaxed">{result.description}</p>
             )}
           </a>
+
+          {/* Business badges */}
+          {result.isVerified && (
+            <div className="mt-2">
+              <BusinessBadge isVerified memberDiscount={result.memberDiscount} isPremiumUser={isPremiumUser} />
+            </div>
+          )}
+
+          {/* Action buttons for businesses */}
+          {(result.phone || result.whatsapp) && (
+            <ActionButtons phone={result.phone} whatsapp={result.whatsapp} businessName={result.businessName} query={query} />
+          )}
 
           {/* AI Summarize button */}
           <button

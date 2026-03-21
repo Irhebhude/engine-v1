@@ -139,3 +139,28 @@
     linear-gradient(90deg, hsl(var(--border) / 0.3) 1px, transparent 1px);
   background-size: 60px 60px;
 }
+
+/* Lite Mode — Low-Data text-only layout */
+.lite-mode img:not([data-keep]),
+.lite-mode video,
+.lite-mode iframe,
+.lite-mode .glow-box,
+.lite-mode .glow-text,
+.lite-mode .glass {
+  box-shadow: none !important;
+  text-shadow: none !important;
+  backdrop-filter: none !important;
+}
+
+.lite-mode .glass {
+  background: hsl(var(--card)) !important;
+}
+
+.lite-mode img:not([data-keep]):not([class*="favicon"]):not([src*="favicon"]) {
+  display: none !important;
+}
+
+.lite-mode * {
+  animation: none !important;
+  transition: none !important;
+}

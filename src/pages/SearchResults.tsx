@@ -18,10 +18,12 @@ import BlueprintGenerator from "@/components/BlueprintGenerator";
 import BuildGuideViewer from "@/components/BuildGuideViewer";
 import LocationSearch from "@/components/LocationSearch";
 import AdSense from "@/components/AdSense";
+import PulseAnalytics from "@/components/PulseAnalytics";
 
 import SEOHead from "@/components/SEOHead";
 import { streamSearch, webSearch, imageSearch, videoSearch, newsSearch } from "@/lib/search-api";
 import type { SearchMode, WebResult, ImageResult as ImageResultType, VideoResult as VideoResultType, NewsResult as NewsResultType } from "@/lib/search-api";
+import type { SourceRef } from "@/components/SourceCitations";
 import { addSearchToHistory, getRecentQueries } from "@/lib/search-context";
 import { useToast } from "@/hooks/use-toast";
 
@@ -34,12 +36,24 @@ const TAB_CONFIG: { id: SearchTab; label: string; icon: React.ElementType }[] = 
   { id: "news", label: "News", icon: Newspaper },
 ];
 
+/** Extract source refs from web results for the citation panel */
+const buildSources = (results: WebResult[]): SourceRef[] => {
+  return results.slice(0, 8).map((r) => {
+    let domain = "";
+    try { domain = new URL(r.url).hostname.replace("www.", ""); } catch { domain = r.url; }
+    return { url: r.url, title: r.title, domain };
+  });
+};
+
 const SearchResults = () => {
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
   const { toast } = useToast();
+  const { profile } = useAuth();
   const query = searchParams.get("q") || "";
   const initialTab = (searchParams.get("tab") as SearchTab) || "web";
+  const liteMode = profile?.lite_mode ?? false;
+  const isPremium = profile?.is_premium ?? false;
 
   const [answer, setAnswer] = useState("");
   const [isStreaming, setIsStreaming] = useState(false);
@@ -62,6 +76,7 @@ const SearchResults = () => {
   const [showBuildGuide, setShowBuildGuide] = useState(false);
   const [showLocation, setShowLocation] = useState(false);
   const [activeTab, setActiveTab] = useState<SearchTab>(initialTab);
+  const [sources, setSources] = useState<SourceRef[]>([]);
 
   const performSearch = useCallback(
     async (q: string, searchMode: SearchMode = mode, tab: SearchTab = activeTab) => {
@@ -69,17 +84,16 @@ const SearchResults = () => {
       setIsStreaming(true);
       setError(null);
       setSearchTime(null);
+      setSources([]);
       const start = performance.now();
       let accumulated = "";
 
       addSearchToHistory(q, searchMode);
       const recentContext = getRecentQueries(5);
 
-      // Track search count for referral verification + log activity
       supabase.rpc("increment_search_count" as any).then(() => {});
       supabase.rpc("log_search_activity" as any, { search_query: q, search_mode: searchMode }).then(() => {});
 
-      // Always run AI stream
       const aiPromise = (async () => {
         try {
           await streamSearch({
@@ -102,13 +116,17 @@ const SearchResults = () => {
         }
       })();
 
-      // Run tab-specific search
       if (tab === "web") {
         setWebResults([]);
         setIsWebLoading(true);
         setWebPage(1);
         setHasMoreWeb(true);
-        const webPromise = webSearch(q).then((r) => { setWebResults(r); setIsWebLoading(false); if (r.length < 10) setHasMoreWeb(false); }).catch(() => setIsWebLoading(false));
+        const webPromise = webSearch(q).then((r) => {
+          setWebResults(r);
+          setSources(buildSources(r));
+          setIsWebLoading(false);
+          if (r.length < 10) setHasMoreWeb(false);
+        }).catch(() => setIsWebLoading(false));
         await Promise.allSettled([webPromise, aiPromise]);
       } else if (tab === "images") {
         setImageResults([]);
@@ -189,7 +207,7 @@ const SearchResults = () => {
 
   return (
     <>
-    <div className="min-h-screen bg-background">
+    <div className={`min-h-screen bg-background ${liteMode ? "lite-mode" : ""}`}>
       <SEOHead title={`${query} — SEARCH-POI Results`} description={`AI-powered search results for "${query}". Get instant answers, web results, images, videos & news.`} path={`/search?q=${encodeURIComponent(query)}`} />
       <Header />
 
@@ -204,26 +222,28 @@ const SearchResults = () => {
           <SearchBar onSearch={handleNewSearch} isLoading={isStreaming} compact initialQuery={query} />
 
           {/* Search tabs */}
-          <div className="flex items-center gap-1 mt-3 -mb-4 pb-0">
-            {TAB_CONFIG.map((tab) => {
-              const Icon = tab.icon;
-              const isActive = activeTab === tab.id;
-              return (
-                <button
-                  key={tab.id}
-                  onClick={() => handleTabChange(tab.id)}
-                  className={`flex items-center gap-1.5 px-4 py-2 text-sm font-medium rounded-t-lg transition-colors border-b-2 ${
-                    isActive
-                      ? "border-primary text-primary bg-primary/5"
-                      : "border-transparent text-muted-foreground hover:text-foreground hover:bg-accent/10"
-                  }`}
-                >
-                  <Icon className="w-3.5 h-3.5" />
-                  {tab.label}
-                </button>
-              );
-            })}
-          </div>
+          {!liteMode && (
+            <div className="flex items-center gap-1 mt-3 -mb-4 pb-0">
+              {TAB_CONFIG.map((tab) => {
+                const Icon = tab.icon;
+                const isActive = activeTab === tab.id;
+                return (
+                  <button
+                    key={tab.id}
+                    onClick={() => handleTabChange(tab.id)}
+                    className={`flex items-center gap-1.5 px-4 py-2 text-sm font-medium rounded-t-lg transition-colors border-b-2 ${
+                      isActive
+                        ? "border-primary text-primary bg-primary/5"
+                        : "border-transparent text-muted-foreground hover:text-foreground hover:bg-accent/10"
+                    }`}
+                  >
+                    <Icon className="w-3.5 h-3.5" />
+                    {tab.label}
+                  </button>
+                );
+              })}
+            </div>
+          )}
         </div>
       </div>
 
@@ -244,10 +264,16 @@ const SearchResults = () => {
           </motion.div>
         )}
 
-        <AIAnswer answer={answer} isStreaming={isStreaming} query={query} />
+        <AIAnswer answer={answer} isStreaming={isStreaming} query={query} sources={sources} liteMode={liteMode} />
 
-        {/* Top ad */}
-        <AdSense adSlot="9944378861" adFormat="horizontal" className="mb-6" />
+        {/* Premium Pulse Analytics sidebar */}
+        {isPremium && !liteMode && (
+          <div className="mt-6">
+            <PulseAnalytics />
+          </div>
+        )}
+
+        {!liteMode && <AdSense adSlot="9944378861" adFormat="horizontal" className="mb-6" />}
 
         {activeTab === "web" && (
           <WebSearchResults
@@ -256,14 +282,17 @@ const SearchResults = () => {
             onLoadMore={handleLoadMoreWeb}
             isLoadingMore={isLoadingMore}
             hasMore={hasMoreWeb}
+            isPremiumUser={isPremium}
+            liteMode={liteMode}
+            query={query}
           />
         )}
-        {activeTab === "images" && <ImageSearchResults results={imageResults} isLoading={isImageLoading} />}
-        {activeTab === "videos" && <VideoSearchResults results={videoResults} isLoading={isVideoLoading} />}
+        {activeTab === "images" && !liteMode && <ImageSearchResults results={imageResults} isLoading={isImageLoading} />}
+        {activeTab === "videos" && !liteMode && <VideoSearchResults results={videoResults} isLoading={isVideoLoading} />}
         {activeTab === "news" && <NewsSearchResults results={newsResults} isLoading={isNewsLoading} />}
 
-        {/* Blueprint Generator quick-access button */}
-        {query && !isStreaming && (
+        {/* Blueprint buttons */}
+        {query && !isStreaming && !liteMode && (
           <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="mt-6 flex flex-wrap gap-3">
             <button
               onClick={() => setShowBlueprint(true)}
@@ -282,8 +311,7 @@ const SearchResults = () => {
           </motion.div>
         )}
 
-        {/* Bottom ad */}
-        <AdSense adSlot="9944378861" adFormat="auto" className="mt-8" />
+        {!liteMode && <AdSense adSlot="9944378861" adFormat="auto" className="mt-8" />}
 
         <div className="text-center mt-12 text-xs text-muted-foreground">
           SEARCH-POI • AI-First Intelligence • POI Foundation

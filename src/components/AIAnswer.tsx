@@ -2,14 +2,17 @@ import { useState } from "react";
 import { motion } from "framer-motion";
 import { Brain, Loader2, Copy, Check } from "lucide-react";
 import ShareButtons from "@/components/ShareButtons";
+import SourceCitations, { type SourceRef } from "@/components/SourceCitations";
 
 interface AIAnswerProps {
   answer: string;
   isStreaming: boolean;
   query: string;
+  sources?: SourceRef[];
+  liteMode?: boolean;
 }
 
-const AIAnswer = ({ answer, isStreaming, query }: AIAnswerProps) => {
+const AIAnswer = ({ answer, isStreaming, query, sources = [], liteMode }: AIAnswerProps) => {
   const [copied, setCopied] = useState(false);
 
   if (!answer && !isStreaming) return null;
@@ -20,7 +23,6 @@ const AIAnswer = ({ answer, isStreaming, query }: AIAnswerProps) => {
       setCopied(true);
       setTimeout(() => setCopied(false), 2000);
     } catch {
-      // fallback
       const ta = document.createElement("textarea");
       ta.value = answer;
       document.body.appendChild(ta);
@@ -31,6 +33,20 @@ const AIAnswer = ({ answer, isStreaming, query }: AIAnswerProps) => {
       setTimeout(() => setCopied(false), 2000);
     }
   };
+
+  if (liteMode) {
+    return (
+      <div className="border border-border/30 rounded-lg p-4 mb-4">
+        <div className="flex items-center gap-2 mb-2">
+          <Brain className="w-4 h-4 text-primary" />
+          <span className="text-xs font-semibold text-muted-foreground">AI ANSWER</span>
+          {isStreaming && <Loader2 className="w-3 h-3 animate-spin text-primary" />}
+        </div>
+        <div className="text-sm text-foreground whitespace-pre-wrap">{answer}</div>
+        {!isStreaming && sources.length > 0 && <SourceCitations sources={sources} />}
+      </div>
+    );
+  }
 
   return (
     <motion.div
@@ -60,7 +76,7 @@ const AIAnswer = ({ answer, isStreaming, query }: AIAnswerProps) => {
                 className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-xs text-muted-foreground hover:text-foreground hover:bg-accent/20 transition-colors"
                 title="Copy AI response"
               >
-                {copied ? <Check className="w-3.5 h-3.5 text-green-500" /> : <Copy className="w-3.5 h-3.5" />}
+                {copied ? <Check className="w-3.5 h-3.5 text-[hsl(142,70%,50%)]" /> : <Copy className="w-3.5 h-3.5" />}
                 {copied ? "Copied!" : "Copy"}
               </button>
             </div>
@@ -76,6 +92,8 @@ const AIAnswer = ({ answer, isStreaming, query }: AIAnswerProps) => {
           )}
         </div>
       </div>
+
+      {!isStreaming && sources.length > 0 && <SourceCitations sources={sources} />}
     </motion.div>
   );
 };
