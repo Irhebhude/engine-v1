@@ -14,6 +14,86 @@ export type Database = {
   }
   public: {
     Tables: {
+      businesses: {
+        Row: {
+          address: string | null
+          category: string
+          city: string | null
+          country: string
+          created_at: string
+          description: string | null
+          email: string | null
+          id: string
+          inventory_csv_url: string | null
+          is_verified: boolean
+          logo_url: string | null
+          member_discount_percent: number | null
+          name: string
+          owner_id: string
+          phone: string | null
+          state: string | null
+          trust_score: number
+          updated_at: string
+          verified_at: string | null
+          website: string | null
+          whatsapp: string | null
+        }
+        Insert: {
+          address?: string | null
+          category?: string
+          city?: string | null
+          country?: string
+          created_at?: string
+          description?: string | null
+          email?: string | null
+          id?: string
+          inventory_csv_url?: string | null
+          is_verified?: boolean
+          logo_url?: string | null
+          member_discount_percent?: number | null
+          name: string
+          owner_id: string
+          phone?: string | null
+          state?: string | null
+          trust_score?: number
+          updated_at?: string
+          verified_at?: string | null
+          website?: string | null
+          whatsapp?: string | null
+        }
+        Update: {
+          address?: string | null
+          category?: string
+          city?: string | null
+          country?: string
+          created_at?: string
+          description?: string | null
+          email?: string | null
+          id?: string
+          inventory_csv_url?: string | null
+          is_verified?: boolean
+          logo_url?: string | null
+          member_discount_percent?: number | null
+          name?: string
+          owner_id?: string
+          phone?: string | null
+          state?: string | null
+          trust_score?: number
+          updated_at?: string
+          verified_at?: string | null
+          website?: string | null
+          whatsapp?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "businesses_owner_id_fkey"
+            columns: ["owner_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       contact_messages: {
         Row: {
           created_at: string
@@ -74,6 +154,38 @@ export type Database = {
         }
         Relationships: []
       }
+      poi_points_log: {
+        Row: {
+          created_at: string
+          id: string
+          points: number
+          reason: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          points: number
+          reason: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          points?: number
+          reason?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "poi_points_log_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       profiles: {
         Row: {
           avatar_url: string | null
@@ -81,6 +193,10 @@ export type Database = {
           display_name: string | null
           email_verified: boolean
           id: string
+          is_premium: boolean
+          lite_mode: boolean
+          poi_points: number
+          premium_since: string | null
           referral_code: string
           referred_by: string | null
           search_count: number
@@ -94,6 +210,10 @@ export type Database = {
           display_name?: string | null
           email_verified?: boolean
           id: string
+          is_premium?: boolean
+          lite_mode?: boolean
+          poi_points?: number
+          premium_since?: string | null
           referral_code?: string
           referred_by?: string | null
           search_count?: number
@@ -107,6 +227,10 @@ export type Database = {
           display_name?: string | null
           email_verified?: boolean
           id?: string
+          is_premium?: boolean
+          lite_mode?: boolean
+          poi_points?: number
+          premium_since?: string | null
           referral_code?: string
           referred_by?: string | null
           search_count?: number
@@ -320,6 +444,10 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      award_poi_points: {
+        Args: { amount: number; point_reason: string; target_user_id: string }
+        Returns: undefined
+      }
       get_admin_user_stats: {
         Args: never
         Returns: {
