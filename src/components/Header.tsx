@@ -1,7 +1,9 @@
 import { useState } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
-import { Zap, Clock, Menu, X, Gift, LogOut, User, Shield } from "lucide-react";
+import { Zap, Clock, Menu, X, Gift, LogOut, User, Shield, Star } from "lucide-react";
 import SearchHistory from "@/components/SearchHistory";
+import LiteModeToggle from "@/components/LiteModeToggle";
+import POIPointsBadge from "@/components/POIPointsBadge";
 import { useAuth } from "@/contexts/AuthContext";
 
 const ADMIN_EMAIL = "prosperozoya50@gmail.com";
@@ -16,7 +18,7 @@ const NAV_LINKS = [
 const Header = () => {
   const location = useLocation();
   const navigate = useNavigate();
-  const { user, profile, signOut } = useAuth();
+  const { user, profile, signOut, toggleLiteMode } = useAuth();
   const [showHistory, setShowHistory] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
 
@@ -33,12 +35,11 @@ const Header = () => {
         </Link>
 
         {/* Desktop nav */}
-        <nav className="hidden sm:flex items-center gap-4 text-sm relative">
+        <nav className="hidden sm:flex items-center gap-3 text-sm relative">
           {NAV_LINKS.map((l) => (
             <Link key={l.to} to={l.to} className="text-muted-foreground hover:text-foreground transition-colors">{l.label}</Link>
           ))}
 
-          {/* Referral button - always visible */}
           <Link
             to="/referral"
             className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-primary/10 text-primary hover:bg-primary/20 transition-colors font-medium"
@@ -47,7 +48,6 @@ const Header = () => {
             Refer & Earn
           </Link>
 
-          {/* Admin dashboard - only for admin */}
           {user?.email === ADMIN_EMAIL && (
             <Link
               to="/admin"
@@ -56,6 +56,19 @@ const Header = () => {
               <Shield className="w-3.5 h-3.5" />
               Admin
             </Link>
+          )}
+
+          {/* Lite Mode Toggle */}
+          {user && (
+            <LiteModeToggle
+              enabled={profile?.lite_mode ?? false}
+              onToggle={() => toggleLiteMode()}
+            />
+          )}
+
+          {/* POI Points */}
+          {profile && profile.poi_points > 0 && (
+            <POIPointsBadge points={profile.poi_points} />
           )}
 
           <button
@@ -67,13 +80,15 @@ const Header = () => {
             <span>History</span>
           </button>
 
-          {/* Auth buttons */}
           {user ? (
             <div className="flex items-center gap-2">
               <Link to="/referral" className="flex items-center gap-1.5 text-muted-foreground hover:text-foreground transition-colors" title="My Profile">
                 <User className="w-4 h-4" />
                 <span className="max-w-[80px] truncate">{profile?.display_name || "Account"}</span>
               </Link>
+              {profile?.is_premium && (
+                <span className="px-1.5 py-0.5 rounded-full bg-[hsl(45,90%,50%)]/15 text-[hsl(45,90%,55%)] text-[9px] font-bold uppercase">PRO</span>
+              )}
               <button
                 onClick={signOut}
                 className="text-muted-foreground hover:text-foreground transition-colors"
@@ -129,6 +144,12 @@ const Header = () => {
               <Shield className="w-4 h-4" /> Admin Dashboard
             </Link>
           )}
+          {user && (
+            <div className="flex items-center gap-2">
+              <LiteModeToggle enabled={profile?.lite_mode ?? false} onToggle={() => toggleLiteMode()} />
+              {profile && profile.poi_points > 0 && <POIPointsBadge points={profile.poi_points} />}
+            </div>
+          )}
           <button
             onClick={() => { setMobileOpen(false); setShowHistory(!showHistory); }}
             className="flex items-center gap-1.5 text-muted-foreground hover:text-foreground transition-colors"
@@ -140,6 +161,9 @@ const Header = () => {
               <div className="flex items-center gap-1.5 text-muted-foreground">
                 <User className="w-4 h-4" />
                 <span>{profile?.display_name || user.email}</span>
+                {profile?.is_premium && (
+                  <span className="px-1.5 py-0.5 rounded-full bg-[hsl(45,90%,50%)]/15 text-[hsl(45,90%,55%)] text-[9px] font-bold uppercase">PRO</span>
+                )}
               </div>
               <button onClick={() => { setMobileOpen(false); signOut(); }} className="flex items-center gap-1.5 text-muted-foreground hover:text-foreground">
                 <LogOut className="w-4 h-4" /> Sign Out
