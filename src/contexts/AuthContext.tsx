@@ -12,6 +12,9 @@ interface Profile {
   email_verified: boolean;
   search_count: number;
   created_at: string;
+  is_premium: boolean;
+  poi_points: number;
+  lite_mode: boolean;
 }
 
 interface AuthContextType {
@@ -23,6 +26,7 @@ interface AuthContextType {
   signIn: (email: string, password: string) => Promise<{ error: string | null }>;
   signOut: () => Promise<void>;
   refreshProfile: () => Promise<void>;
+  toggleLiteMode: () => Promise<void>;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -45,21 +49,26 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       .select("*")
       .eq("id", userId)
       .single();
-    if (data) setProfile(data as Profile);
+    if (data) setProfile(data as unknown as Profile);
   };
 
   const refreshProfile = async () => {
     if (user) await fetchProfile(user.id);
   };
 
+  const toggleLiteMode = async () => {
+    if (!user || !profile) return;
+    const newVal = !profile.lite_mode;
+    await supabase.from("profiles").update({ lite_mode: newVal } as any).eq("id", user.id);
+    setProfile((p) => p ? { ...p, lite_mode: newVal } : p);
+  };
+
   useEffect(() => {
-    // Set up auth listener BEFORE checking session
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       async (_event, session) => {
         setSession(session);
         setUser(session?.user ?? null);
         if (session?.user) {
-          // Use setTimeout to avoid Supabase deadlock
           setTimeout(() => fetchProfile(session.user.id), 0);
         } else {
           setProfile(null);
@@ -89,9 +98,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     });
     if (error) return { error: error.message };
 
-    // Process referral code immediately since email is auto-confirmed
     if (referralCode && data.user) {
-      // Small delay to let the profile trigger complete
       setTimeout(async () => {
         await supabase.rpc("process_referral", { referral_code_input: referralCode });
       }, 1000);
@@ -104,7 +111,6 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     const { error } = await supabase.auth.signInWithPassword({ email, password });
     if (error) return { error: error.message };
 
-    // Process pending referral
     const pendingCode = localStorage.getItem("pending_referral_code");
     if (pendingCode) {
       await supabase.rpc("process_referral", { referral_code_input: pendingCode });
@@ -122,7 +128,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   };
 
   return (
-    <AuthContext.Provider value={{ user, session, profile, loading, signUp, signIn, signOut, refreshProfile }}>
+    <AuthContext.Provider value={{ user, session, profile, loading, signUp, signIn, signOut, refreshProfile, toggleLiteMode }}>
       {children}
     </AuthContext.Provider>
   );
