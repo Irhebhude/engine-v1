@@ -72,6 +72,8 @@ const AIAnswer = ({ answer, isStreaming, query, sources = [], liteMode }: AIAnsw
             </span>
           ) : answer ? (
             <div className="flex items-center gap-2">
+              <SmartShareButton query={query} answer={answer} sources={sources.map(s => ({ url: s.url, title: s.title, domain: s.domain }))} />
+              <SaveToVaultButton query={query} answer={answer} sources={sources} />
               <ShareButtons text={answer} query={query} />
               <button
                 onClick={handleCopy}

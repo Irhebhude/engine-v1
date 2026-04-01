@@ -42,6 +42,9 @@ const App = () => (
             <Route path="/waitlist" element={<Waitlist />} />
             <Route path="/premium" element={<Premium />} />
             <Route path="/business" element={<BusinessDashboard />} />
+            <Route path="/shared/:slug" element={<SharedSearch />} />
+            <Route path="/vaults/:slug" element={<KnowledgeVault />} />
+            <Route path="/points" element={<ReferralGate><POIPointsDashboard /></ReferralGate>} />
 
             {/* Protected routes */}
             <Route path="/" element={<ReferralGate><Index /></ReferralGate>} />

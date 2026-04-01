@@ -43,6 +43,7 @@ const SearchBar = ({ onSearch, isLoading, compact, initialQuery = "" }: SearchBa
           } ${isFocused ? "glow-border" : ""}`}
         >
           <Search className="w-5 h-5 text-primary shrink-0" />
+          <VoiceSearchButton onTranscript={(text) => { setQuery(text); onSearch(text); }} />
           <input
             ref={inputRef}
             type="text"
