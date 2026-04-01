@@ -1,6 +1,7 @@
 import { useState, useRef, useEffect } from "react";
 import { Search, Sparkles } from "lucide-react";
 import SearchAutocomplete from "@/components/SearchAutocomplete";
+import VoiceSearchButton from "@/components/VoiceSearchButton";
 
 interface SearchBarProps {
   onSearch: (query: string) => void;
