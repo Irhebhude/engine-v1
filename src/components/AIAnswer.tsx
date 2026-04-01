@@ -2,6 +2,8 @@ import { useState } from "react";
 import { motion } from "framer-motion";
 import { Brain, Loader2, Copy, Check } from "lucide-react";
 import ShareButtons from "@/components/ShareButtons";
+import SmartShareButton from "@/components/SmartShareButton";
+import SaveToVaultButton from "@/components/SaveToVaultButton";
 import SourceCitations, { type SourceRef } from "@/components/SourceCitations";
 
 interface AIAnswerProps {
