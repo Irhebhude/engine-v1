@@ -19,6 +19,7 @@ import BuildGuideViewer from "@/components/BuildGuideViewer";
 import LocationSearch from "@/components/LocationSearch";
 import AdSense from "@/components/AdSense";
 import PulseAnalytics from "@/components/PulseAnalytics";
+import CommodityPulse from "@/components/CommodityPulse";
 
 import SEOHead from "@/components/SEOHead";
 import { streamSearch, webSearch, imageSearch, videoSearch, newsSearch } from "@/lib/search-api";
