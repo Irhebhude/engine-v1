@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
-import { Zap, Clock, Menu, X, Gift, LogOut, User, Shield, Star } from "lucide-react";
+import { Zap, Clock, Menu, X, Gift, LogOut, User, Shield, Star, Trophy } from "lucide-react";
 import SearchHistory from "@/components/SearchHistory";
 import LiteModeToggle from "@/components/LiteModeToggle";
 import POIPointsBadge from "@/components/POIPointsBadge";
