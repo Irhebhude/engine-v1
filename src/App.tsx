@@ -19,6 +19,9 @@ import TrendingContent from "./pages/TrendingContent";
 import Waitlist from "./pages/Waitlist";
 import Premium from "./pages/Premium";
 import BusinessDashboard from "./pages/BusinessDashboard";
+import SharedSearch from "./pages/SharedSearch";
+import KnowledgeVault from "./pages/KnowledgeVault";
+import POIPointsDashboard from "./pages/POIPointsDashboard";
 
 const queryClient = new QueryClient();
 
