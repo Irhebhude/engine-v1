@@ -154,6 +154,85 @@ export type Database = {
         }
         Relationships: []
       }
+      knowledge_vault_items: {
+        Row: {
+          answer: string | null
+          created_at: string
+          id: string
+          query: string
+          sources: Json | null
+          vault_id: string
+        }
+        Insert: {
+          answer?: string | null
+          created_at?: string
+          id?: string
+          query: string
+          sources?: Json | null
+          vault_id: string
+        }
+        Update: {
+          answer?: string | null
+          created_at?: string
+          id?: string
+          query?: string
+          sources?: Json | null
+          vault_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "knowledge_vault_items_vault_id_fkey"
+            columns: ["vault_id"]
+            isOneToOne: false
+            referencedRelation: "knowledge_vaults"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      knowledge_vaults: {
+        Row: {
+          created_at: string
+          description: string | null
+          id: string
+          is_public: boolean
+          name: string
+          slug: string
+          updated_at: string
+          user_id: string
+          view_count: number
+        }
+        Insert: {
+          created_at?: string
+          description?: string | null
+          id?: string
+          is_public?: boolean
+          name: string
+          slug: string
+          updated_at?: string
+          user_id: string
+          view_count?: number
+        }
+        Update: {
+          created_at?: string
+          description?: string | null
+          id?: string
+          is_public?: boolean
+          name?: string
+          slug?: string
+          updated_at?: string
+          user_id?: string
+          view_count?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "knowledge_vaults_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       poi_points_log: {
         Row: {
           created_at: string
@@ -185,6 +264,78 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      poi_task_completions: {
+        Row: {
+          created_at: string
+          id: string
+          proof_data: Json | null
+          status: string
+          task_id: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          proof_data?: Json | null
+          status?: string
+          task_id: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          proof_data?: Json | null
+          status?: string
+          task_id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "poi_task_completions_task_id_fkey"
+            columns: ["task_id"]
+            isOneToOne: false
+            referencedRelation: "poi_tasks"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "poi_task_completions_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      poi_tasks: {
+        Row: {
+          created_at: string
+          description: string | null
+          id: string
+          is_active: boolean
+          points_reward: number
+          task_type: string
+          title: string
+        }
+        Insert: {
+          created_at?: string
+          description?: string | null
+          id?: string
+          is_active?: boolean
+          points_reward?: number
+          task_type?: string
+          title: string
+        }
+        Update: {
+          created_at?: string
+          description?: string | null
+          id?: string
+          is_active?: boolean
+          points_reward?: number
+          task_type?: string
+          title?: string
+        }
+        Relationships: []
       }
       profiles: {
         Row: {
@@ -349,6 +500,50 @@ export type Database = {
         }
         Relationships: []
       }
+      shared_searches: {
+        Row: {
+          answer: string
+          created_at: string
+          id: string
+          query: string
+          search_mode: string
+          slug: string
+          sources: Json | null
+          user_id: string | null
+          view_count: number
+        }
+        Insert: {
+          answer: string
+          created_at?: string
+          id?: string
+          query: string
+          search_mode?: string
+          slug: string
+          sources?: Json | null
+          user_id?: string | null
+          view_count?: number
+        }
+        Update: {
+          answer?: string
+          created_at?: string
+          id?: string
+          query?: string
+          search_mode?: string
+          slug?: string
+          sources?: Json | null
+          user_id?: string | null
+          view_count?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "shared_searches_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       trending_content: {
         Row: {
           category: string
@@ -482,6 +677,7 @@ export type Database = {
         }[]
       }
       increment_search_count: { Args: never; Returns: undefined }
+      increment_shared_view: { Args: { search_id: string }; Returns: undefined }
       log_search_activity: {
         Args: { search_mode?: string; search_query: string }
         Returns: undefined
