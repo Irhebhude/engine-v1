@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
-import { Zap, Clock, Menu, X, Gift, LogOut, User, Shield, Star } from "lucide-react";
+import { Zap, Clock, Menu, X, Gift, LogOut, User, Shield, Star, Trophy } from "lucide-react";
 import SearchHistory from "@/components/SearchHistory";
 import LiteModeToggle from "@/components/LiteModeToggle";
 import POIPointsBadge from "@/components/POIPointsBadge";
@@ -67,8 +67,11 @@ const Header = () => {
           )}
 
           {/* POI Points */}
-          {profile && profile.poi_points > 0 && (
-            <POIPointsBadge points={profile.poi_points} />
+          {profile && (
+            <Link to="/points" className="flex items-center gap-1 text-xs text-[hsl(45,90%,55%)] hover:text-[hsl(45,90%,65%)] transition-colors font-medium">
+              <Trophy className="w-3.5 h-3.5" />
+              {profile.poi_points} pts
+            </Link>
           )}
 
           <button

@@ -2,6 +2,8 @@ import { useState } from "react";
 import { motion } from "framer-motion";
 import { Brain, Loader2, Copy, Check } from "lucide-react";
 import ShareButtons from "@/components/ShareButtons";
+import SmartShareButton from "@/components/SmartShareButton";
+import SaveToVaultButton from "@/components/SaveToVaultButton";
 import SourceCitations, { type SourceRef } from "@/components/SourceCitations";
 
 interface AIAnswerProps {
@@ -70,6 +72,8 @@ const AIAnswer = ({ answer, isStreaming, query, sources = [], liteMode }: AIAnsw
             </span>
           ) : answer ? (
             <div className="flex items-center gap-2">
+              <SmartShareButton query={query} answer={answer} sources={sources.map(s => ({ url: s.url, title: s.title, domain: s.domain }))} />
+              <SaveToVaultButton query={query} answer={answer} sources={sources} />
               <ShareButtons text={answer} query={query} />
               <button
                 onClick={handleCopy}

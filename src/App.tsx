@@ -19,6 +19,9 @@ import TrendingContent from "./pages/TrendingContent";
 import Waitlist from "./pages/Waitlist";
 import Premium from "./pages/Premium";
 import BusinessDashboard from "./pages/BusinessDashboard";
+import SharedSearch from "./pages/SharedSearch";
+import KnowledgeVault from "./pages/KnowledgeVault";
+import POIPointsDashboard from "./pages/POIPointsDashboard";
 
 const queryClient = new QueryClient();
 
@@ -39,6 +42,9 @@ const App = () => (
             <Route path="/waitlist" element={<Waitlist />} />
             <Route path="/premium" element={<Premium />} />
             <Route path="/business" element={<BusinessDashboard />} />
+            <Route path="/shared/:slug" element={<SharedSearch />} />
+            <Route path="/vaults/:slug" element={<KnowledgeVault />} />
+            <Route path="/points" element={<ReferralGate><POIPointsDashboard /></ReferralGate>} />
 
             {/* Protected routes */}
             <Route path="/" element={<ReferralGate><Index /></ReferralGate>} />

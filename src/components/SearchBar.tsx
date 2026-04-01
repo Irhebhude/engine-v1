@@ -1,6 +1,7 @@
 import { useState, useRef, useEffect } from "react";
 import { Search, Sparkles } from "lucide-react";
 import SearchAutocomplete from "@/components/SearchAutocomplete";
+import VoiceSearchButton from "@/components/VoiceSearchButton";
 
 interface SearchBarProps {
   onSearch: (query: string) => void;
@@ -42,6 +43,7 @@ const SearchBar = ({ onSearch, isLoading, compact, initialQuery = "" }: SearchBa
           } ${isFocused ? "glow-border" : ""}`}
         >
           <Search className="w-5 h-5 text-primary shrink-0" />
+          <VoiceSearchButton onTranscript={(text) => { setQuery(text); onSearch(text); }} />
           <input
             ref={inputRef}
             type="text"

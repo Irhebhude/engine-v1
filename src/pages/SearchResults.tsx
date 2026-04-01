@@ -19,6 +19,7 @@ import BuildGuideViewer from "@/components/BuildGuideViewer";
 import LocationSearch from "@/components/LocationSearch";
 import AdSense from "@/components/AdSense";
 import PulseAnalytics from "@/components/PulseAnalytics";
+import CommodityPulse from "@/components/CommodityPulse";
 
 import SEOHead from "@/components/SEOHead";
 import { streamSearch, webSearch, imageSearch, videoSearch, newsSearch } from "@/lib/search-api";
@@ -266,10 +267,11 @@ const SearchResults = () => {
 
         <AIAnswer answer={answer} isStreaming={isStreaming} query={query} sources={sources} liteMode={liteMode} />
 
-        {/* Premium Pulse Analytics sidebar */}
-        {isPremium && !liteMode && (
-          <div className="mt-6">
-            <PulseAnalytics />
+        {/* Commodity Pulse + Premium Analytics */}
+        {!liteMode && (
+          <div className="mt-6 grid grid-cols-1 md:grid-cols-2 gap-4">
+            <CommodityPulse />
+            {isPremium && <PulseAnalytics />}
           </div>
         )}
 
