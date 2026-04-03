@@ -12,64 +12,8 @@ interface ReferralGateProps {
 }
 
 const ReferralGate = ({ children }: ReferralGateProps) => {
-  const { user, profile, loading } = useAuth();
-  const [verifiedCount, setVerifiedCount] = useState<number | null>(null);
-  const [checking, setChecking] = useState(true);
-
-  useEffect(() => {
-    if (loading) return;
-    if (!user) { setChecking(false); return; }
-    if (user.email === ADMIN_EMAIL) { setChecking(false); return; }
-
-    const fetchCount = async () => {
-      const { data } = await supabase
-        .from("referrals")
-        .select("status")
-        .eq("referrer_id", user.id);
-      // Only count non-flagged verified/rewarded referrals
-      const verified = (data || []).filter(
-        (r: any) => (r.status === "verified" || r.status === "rewarded")
-      ).length;
-
-      // Also check via RPC for IP-based flagging
-      const { data: details } = await supabase.rpc("get_referral_details", { referrer_uid: user.id });
-      const flaggedIds = new Set(
-        (details || []).filter((d: any) => d.is_flagged).map((d: any) => d.referred_id)
-      );
-      
-      // Subtract flagged from verified count
-      const legitimateCount = (data || []).filter(
-        (r: any) => (r.status === "verified" || r.status === "rewarded") && !flaggedIds.has(r.referred_id)
-      ).length;
-      setVerifiedCount(legitimateCount);
-      setChecking(false);
-    };
-    fetchCount();
-  }, [user, loading]);
-
-  if (loading || checking) return <>{children}</>;
-
-  // Admin bypass
-  if (user?.email === ADMIN_EMAIL) return <>{children}</>;
-
-  // Not logged in
-  if (!user) {
-    return <GateUI message="Sign up and refer 10 real users to unlock SEARCH-POI." showSignUp />;
-  }
-
-  // Has 10+ verified referrals — fully unlocked
-  if (verifiedCount !== null && verifiedCount >= 10) return <>{children}</>;
-
-  // New user gets 1 free search — allow access if search_count < 1
-  if (profile && profile.search_count < 1) return <>{children}</>;
-
-  // Used their 1 free search but doesn't have 10 referrals — locked
-  return (
-    <GateUI
-      message={`You've used your 1 free search. You have ${verifiedCount ?? 0}/10 verified referrals. Refer ${10 - (verifiedCount ?? 0)} more real users to re-unlock SEARCH-POI!`}
-      showReferral
-    />
-  );
+  // All access is currently free — bypass the gate
+  return <>{children}</>;
 };
 
 const GateUI = ({
