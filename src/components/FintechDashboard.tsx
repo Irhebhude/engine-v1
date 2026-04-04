@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { TrendingUp, TrendingDown, RefreshCw, DollarSign, BarChart3, Activity } from "lucide-react";
+import { TrendingUp, TrendingDown, RefreshCw, DollarSign, BarChart3, Activity, Atom, Brain, Shield, Rocket } from "lucide-react";
 
 interface MarketData {
   symbol: string;
@@ -9,23 +9,65 @@ interface MarketData {
   category: string;
 }
 
-const ENDPOINTS = {
-  quantum: "https://quantum.cybertron.ai/api/v1/compute",
-  neuromorphic: "https://neuromorphic.cybertronsecurity.com/api/v1/neuralnet",
-  crypto: "https://cryptography.cybertronsecurity.ai/api/v1/encrypt",
-  alien: "https://zorvath.aliens.tech/api/v1/gravitywaves",
-};
+interface ApiEndpoint {
+  key: string;
+  label: string;
+  url: string;
+  icon: typeof Atom;
+  description: string;
+  dataKey: string;
+}
+
+const LIVE_ENDPOINTS: ApiEndpoint[] = [
+  {
+    key: "crypto",
+    label: "Crypto Markets",
+    url: "https://api.coingecko.com/api/v3/ping",
+    icon: Shield,
+    description: "CoinGecko Live",
+    dataKey: "gecko_says",
+  },
+  {
+    key: "space",
+    label: "Space Intel",
+    url: "https://api.nasa.gov/planetary/apod?api_key=DEMO_KEY",
+    icon: Rocket,
+    description: "NASA APOD",
+    dataKey: "title",
+  },
+  {
+    key: "exchange",
+    label: "FX Rates",
+    url: "https://api.exchangerate-api.com/v4/latest/USD",
+    icon: DollarSign,
+    description: "Exchange Rates",
+    dataKey: "provider",
+  },
+  {
+    key: "neural",
+    label: "Neural Net",
+    url: "https://huggingface.co/api/models?limit=1&sort=downloads&direction=-1",
+    icon: Brain,
+    description: "HuggingFace Models",
+    dataKey: "modelId",
+  },
+];
+
+interface ApiStatus {
+  status: "online" | "offline" | "loading";
+  latency?: number;
+  snippet?: string;
+}
 
 const FintechDashboard = () => {
   const [marketData, setMarketData] = useState<MarketData[]>([]);
   const [loading, setLoading] = useState(true);
   const [lastUpdate, setLastUpdate] = useState<Date>(new Date());
-  const [apiStatus, setApiStatus] = useState<Record<string, "online" | "offline">>({});
+  const [apiStatus, setApiStatus] = useState<Record<string, ApiStatus>>({});
 
   const fetchMarketData = async () => {
     setLoading(true);
     try {
-      // Fetch real crypto data from CoinGecko (no API key needed)
       const resp = await fetch(
         "https://api.coingecko.com/api/v3/coins/markets?vs_currency=ngn&order=market_cap_desc&per_page=8&page=1&sparkline=false"
       );
@@ -42,7 +84,6 @@ const FintechDashboard = () => {
         );
       }
     } catch {
-      // Fallback data
       setMarketData([
         { symbol: "BTC", name: "Bitcoin", price: "₦105,200,000", change: 2.4, category: "Crypto" },
         { symbol: "ETH", name: "Ethereum", price: "₦5,800,000", change: -1.2, category: "Crypto" },
@@ -55,24 +96,62 @@ const FintechDashboard = () => {
   };
 
   const checkApiStatus = async () => {
-    const status: Record<string, "online" | "offline"> = {};
-    for (const [key, url] of Object.entries(ENDPOINTS)) {
-      try {
+    const initialStatus: Record<string, ApiStatus> = {};
+    LIVE_ENDPOINTS.forEach((ep) => {
+      initialStatus[ep.key] = { status: "loading" };
+    });
+    setApiStatus(initialStatus);
+
+    const results = await Promise.allSettled(
+      LIVE_ENDPOINTS.map(async (ep) => {
+        const start = performance.now();
         const ctrl = new AbortController();
-        setTimeout(() => ctrl.abort(), 3000);
-        await fetch(url, { method: "HEAD", signal: ctrl.signal });
-        status[key] = "online";
-      } catch {
-        status[key] = "offline";
+        const timeout = setTimeout(() => ctrl.abort(), 8000);
+        try {
+          const resp = await fetch(ep.url, { signal: ctrl.signal });
+          clearTimeout(timeout);
+          const latency = Math.round(performance.now() - start);
+          let snippet = "";
+          if (resp.ok) {
+            try {
+              const json = await resp.json();
+              if (Array.isArray(json) && json.length > 0) {
+                snippet = json[0]?.modelId || json[0]?.id || "Connected";
+              } else {
+                snippet = json[ep.dataKey] || json?.title || "Connected";
+              }
+              if (typeof snippet === "string" && snippet.length > 40) {
+                snippet = snippet.slice(0, 37) + "…";
+              }
+            } catch {
+              snippet = "Connected";
+            }
+          }
+          return { key: ep.key, status: resp.ok ? "online" : "offline", latency, snippet } as { key: string } & ApiStatus;
+        } catch {
+          clearTimeout(timeout);
+          return { key: ep.key, status: "offline", latency: undefined, snippet: "" } as { key: string } & ApiStatus;
+        }
+      })
+    );
+
+    const newStatus: Record<string, ApiStatus> = {};
+    results.forEach((r) => {
+      if (r.status === "fulfilled") {
+        const { key, ...rest } = r.value;
+        newStatus[key] = rest;
       }
-    }
-    setApiStatus(status);
+    });
+    setApiStatus(newStatus);
   };
 
   useEffect(() => {
     fetchMarketData();
     checkApiStatus();
-    const interval = setInterval(fetchMarketData, 60000);
+    const interval = setInterval(() => {
+      fetchMarketData();
+      checkApiStatus();
+    }, 60000);
     return () => clearInterval(interval);
   }, []);
 
@@ -84,7 +163,7 @@ const FintechDashboard = () => {
           <h3 className="text-sm font-semibold text-foreground">Fintech Intelligence</h3>
         </div>
         <button
-          onClick={fetchMarketData}
+          onClick={() => { fetchMarketData(); checkApiStatus(); }}
           className="flex items-center gap-1 text-xs text-muted-foreground hover:text-primary transition-colors touch-manipulation"
         >
           <RefreshCw className={`w-3 h-3 ${loading ? "animate-spin" : ""}`} />
@@ -113,25 +192,48 @@ const FintechDashboard = () => {
         ))}
       </div>
 
-      {/* API Status Indicators */}
+      {/* Live API Status */}
       <div className="border-t border-border/30 pt-3">
         <p className="text-xs text-muted-foreground mb-2 flex items-center gap-1">
           <Activity className="w-3 h-3" />
-          Advanced API Endpoints
+          Live API Endpoints
         </p>
-        <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
-          {Object.entries(ENDPOINTS).map(([key]) => (
-            <div key={key} className="flex items-center gap-1.5 text-xs">
-              <span
-                className={`w-1.5 h-1.5 rounded-full ${
-                  apiStatus[key] === "online"
-                    ? "bg-green-400 shadow-[0_0_4px_hsl(120,60%,50%)]"
-                    : "bg-muted-foreground/50"
-                }`}
-              />
-              <span className="text-muted-foreground capitalize">{key}</span>
-            </div>
-          ))}
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+          {LIVE_ENDPOINTS.map((ep) => {
+            const s = apiStatus[ep.key];
+            const Icon = ep.icon;
+            return (
+              <div key={ep.key} className="flex items-center gap-2 bg-secondary/30 rounded-lg px-3 py-2">
+                <Icon className="w-4 h-4 text-primary shrink-0" />
+                <div className="flex-1 min-w-0">
+                  <div className="flex items-center gap-1.5">
+                    <span
+                      className={`w-2 h-2 rounded-full shrink-0 ${
+                        s?.status === "online"
+                          ? "bg-green-400 shadow-[0_0_6px_hsl(142,70%,50%)] animate-pulse"
+                          : s?.status === "loading"
+                          ? "bg-yellow-400 animate-pulse"
+                          : "bg-red-400 shadow-[0_0_6px_hsl(0,70%,50%)] animate-pulse"
+                      }`}
+                    />
+                    <span className="text-xs font-medium text-foreground truncate">{ep.label}</span>
+                  </div>
+                  <p className="text-[10px] text-muted-foreground truncate">
+                    {s?.status === "loading"
+                      ? "Connecting…"
+                      : s?.status === "online"
+                      ? `${s.snippet || "OK"} • ${s.latency}ms`
+                      : "Unreachable"}
+                  </p>
+                </div>
+                <span className={`text-[10px] font-semibold uppercase ${
+                  s?.status === "online" ? "text-green-400" : s?.status === "loading" ? "text-yellow-400" : "text-red-400"
+                }`}>
+                  {s?.status || "…"}
+                </span>
+              </div>
+            );
+          })}
         </div>
       </div>
     </div>
