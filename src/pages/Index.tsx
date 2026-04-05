@@ -10,6 +10,7 @@ import SEOHead from "@/components/SEOHead";
 import LiveActivityFeed from "@/components/LiveActivityFeed";
 import TrendingTopics from "@/components/TrendingTopics";
 import LocationSearch from "@/components/LocationSearch";
+import FintechDashboard from "@/components/FintechDashboard";
 import heroBg from "@/assets/hero-bg.jpg";
 
 const FEATURES = [
@@ -120,20 +121,24 @@ const Index = () => {
               Next-Gen AI Search & Fintech Intelligence
             </motion.div>
 
-            <h1 className="text-4xl sm:text-5xl md:text-7xl font-bold tracking-tight mb-3 sm:mb-4">
+            <h1 className="text-4xl sm:text-5xl md:text-7xl font-bold tracking-tight mb-2 sm:mb-3">
               <span className="text-foreground">SEARCH</span>
               <span className="gradient-text">-POI</span>
             </h1>
+            <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-primary/10 border border-primary/20 text-[10px] font-bold text-primary uppercase tracking-widest mb-4">
+              <Zap className="w-3 h-3" />
+              Powered by SEARCH-POI Engine v1
+            </div>
             <p className="text-base sm:text-lg md:text-xl text-muted-foreground max-w-2xl mx-auto mb-6 sm:mb-10 leading-relaxed px-2">
-              The world's most intelligent search engine. Ask anything — get
-              <span className="text-foreground font-medium"> direct AI answers</span>, real-time market data & fintech insights.
+              The world's first <span className="text-foreground font-medium">Intelligent Reasoning Search Engine</span>.
+              You don't search anymore — you ask, and it <span className="text-primary font-semibold">solves</span>.
             </p>
 
             <SearchBar onSearch={handleSearch} />
 
             <div className="flex flex-wrap items-center justify-center gap-3 sm:gap-4 mt-3 sm:mt-4">
               <p className="text-xs text-muted-foreground">
-                Powered by multi-model AI • Built by POI Foundation
+                SEARCH-POI Engine v1 • Multi-Step Reasoning • POI Foundation
               </p>
               <button
                 onClick={() => setShowLocationSearch(true)}
@@ -154,6 +159,16 @@ const Index = () => {
           >
             <TrendingTopics />
             <LiveActivityFeed />
+          </motion.div>
+
+          {/* Fintech Intelligence Dashboard */}
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.4 }}
+            className="mb-8 sm:mb-12"
+          >
+            <FintechDashboard />
           </motion.div>
 
           {/* Features grid */}
@@ -197,7 +212,7 @@ const Index = () => {
             className="text-center mt-16 sm:mt-20 text-xs text-muted-foreground px-2"
           >
             <p>Founded by <span className="text-foreground">Prosper Ozoya Irhebhude</span> • POI Foundation</p>
-            <p className="mt-1">AI-First Search • Fintech Intelligence • Privacy Focused • Open Intelligence</p>
+            <p className="mt-1">Powered by <span className="text-primary font-semibold">SEARCH-POI Engine v1</span> • Intelligent Reasoning • Privacy Focused</p>
             <p className="mt-2"><a href="/policies" className="text-primary hover:underline">Policies & Governance</a></p>
           </motion.div>
         </div>
