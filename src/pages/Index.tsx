@@ -10,6 +10,7 @@ import SEOHead from "@/components/SEOHead";
 import LiveActivityFeed from "@/components/LiveActivityFeed";
 import TrendingTopics from "@/components/TrendingTopics";
 import LocationSearch from "@/components/LocationSearch";
+import FintechDashboard from "@/components/FintechDashboard";
 import heroBg from "@/assets/hero-bg.jpg";
 
 const FEATURES = [
