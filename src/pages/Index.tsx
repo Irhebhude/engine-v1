@@ -161,6 +161,16 @@ const Index = () => {
             <LiveActivityFeed />
           </motion.div>
 
+          {/* Fintech Intelligence Dashboard */}
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.4 }}
+            className="mb-8 sm:mb-12"
+          >
+            <FintechDashboard />
+          </motion.div>
+
           {/* Features grid */}
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4 mt-6 sm:mt-8">
             {FEATURES.map((feature, i) => (
