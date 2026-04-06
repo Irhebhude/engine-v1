@@ -1,7 +1,7 @@
 import { useState, useEffect, useCallback } from "react";
 import { useSearchParams, useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
-import { Clock, AlertCircle, Globe, Image, Video, Newspaper, Cpu, Hammer, MapPin } from "lucide-react";
+import { Clock, AlertCircle, Globe, Image, Video, Newspaper, Cpu, Hammer, MapPin, Brain, Shield, FileText } from "lucide-react";
 import Header from "@/components/Header";
 import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
@@ -221,6 +221,33 @@ const SearchResults = () => {
             <ToolsMenu onSelectMode={handleModeChange} onAction={handleToolAction} />
           </div>
           <SearchBar onSearch={handleNewSearch} isLoading={isStreaming} compact initialQuery={query} />
+
+          {/* Quick Tool Buttons — always visible */}
+          {!liteMode && (
+            <div className="flex flex-wrap items-center gap-2 mt-3">
+              <button onClick={() => setShowBlueprint(true)} className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-primary/10 hover:bg-primary/20 text-primary text-xs font-medium transition-colors">
+                <Cpu className="w-3.5 h-3.5" /> Blueprints
+              </button>
+              <button onClick={() => setShowBuildGuide(true)} className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-primary/10 hover:bg-primary/20 text-primary text-xs font-medium transition-colors">
+                <Hammer className="w-3.5 h-3.5" /> Build Guide
+              </button>
+              <button onClick={() => handleTabChange("images")} className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-primary/10 hover:bg-primary/20 text-primary text-xs font-medium transition-colors">
+                <Image className="w-3.5 h-3.5" /> Images
+              </button>
+              <button onClick={() => handleTabChange("videos")} className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-primary/10 hover:bg-primary/20 text-primary text-xs font-medium transition-colors">
+                <Video className="w-3.5 h-3.5" /> Videos
+              </button>
+              <button onClick={() => handleTabChange("news")} className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-primary/10 hover:bg-primary/20 text-primary text-xs font-medium transition-colors">
+                <Newspaper className="w-3.5 h-3.5" /> News
+              </button>
+              <button onClick={() => setShowSummarizer(true)} className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-primary/10 hover:bg-primary/20 text-primary text-xs font-medium transition-colors">
+                <FileText className="w-3.5 h-3.5" /> Summarizer
+              </button>
+              <button onClick={() => setShowLocation(true)} className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-primary/10 hover:bg-primary/20 text-primary text-xs font-medium transition-colors">
+                <MapPin className="w-3.5 h-3.5" /> Location
+              </button>
+            </div>
+          )}
 
           {/* Search tabs */}
           {!liteMode && (
