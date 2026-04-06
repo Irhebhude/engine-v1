@@ -17,3 +17,6 @@ verify_jwt = false
 
 [functions.generate-blueprint]
 verify_jwt = false
+
+[functions.poi-api]
+verify_jwt = false

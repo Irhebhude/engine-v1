@@ -24,6 +24,7 @@ import BusinessDashboard from "./pages/BusinessDashboard";
 import SharedSearch from "./pages/SharedSearch";
 import KnowledgeVault from "./pages/KnowledgeVault";
 import POIPointsDashboard from "./pages/POIPointsDashboard";
+import DeveloperDashboard from "./pages/DeveloperDashboard";
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -56,6 +57,7 @@ const App = () => (
             <Route path="/shared/:slug" element={<SharedSearch />} />
             <Route path="/vaults/:slug" element={<KnowledgeVault />} />
             <Route path="/points" element={<ReferralGate><POIPointsDashboard /></ReferralGate>} />
+            <Route path="/developer" element={<ReferralGate><DeveloperDashboard /></ReferralGate>} />
 
             {/* Protected routes */}
             <Route path="/" element={<ReferralGate><Index /></ReferralGate>} />
