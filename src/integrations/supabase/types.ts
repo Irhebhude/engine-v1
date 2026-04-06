@@ -14,6 +14,88 @@ export type Database = {
   }
   public: {
     Tables: {
+      api_keys: {
+        Row: {
+          created_at: string
+          credits_remaining: number
+          id: string
+          is_active: boolean
+          key_hash: string
+          key_prefix: string
+          last_used_at: string | null
+          name: string
+          total_calls: number
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          credits_remaining?: number
+          id?: string
+          is_active?: boolean
+          key_hash: string
+          key_prefix: string
+          last_used_at?: string | null
+          name?: string
+          total_calls?: number
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          credits_remaining?: number
+          id?: string
+          is_active?: boolean
+          key_hash?: string
+          key_prefix?: string
+          last_used_at?: string | null
+          name?: string
+          total_calls?: number
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "api_keys_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      api_usage_log: {
+        Row: {
+          api_key_id: string
+          created_at: string
+          id: string
+          mode: string
+          query: string
+          tokens_used: number
+        }
+        Insert: {
+          api_key_id: string
+          created_at?: string
+          id?: string
+          mode?: string
+          query: string
+          tokens_used?: number
+        }
+        Update: {
+          api_key_id?: string
+          created_at?: string
+          id?: string
+          mode?: string
+          query?: string
+          tokens_used?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "api_usage_log_api_key_id_fkey"
+            columns: ["api_key_id"]
+            isOneToOne: false
+            referencedRelation: "api_keys"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       businesses: {
         Row: {
           address: string | null

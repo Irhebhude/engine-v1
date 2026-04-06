@@ -25,6 +25,7 @@ const REASONING_STEPS = [
 const AIAnswer = ({ answer, isStreaming, query, sources = [], liteMode }: AIAnswerProps) => {
   const [copied, setCopied] = useState(false);
   const [showReasoning, setShowReasoning] = useState(false);
+  const [showFullAnswer, setShowFullAnswer] = useState(false);
   const [activeStep, setActiveStep] = useState(0);
 
   // Animate reasoning steps during streaming
@@ -173,12 +174,27 @@ const AIAnswer = ({ answer, isStreaming, query, sources = [], liteMode }: AIAnsw
       {/* Answer content */}
       <div className="prose prose-invert prose-sm max-w-none">
         <div className="text-secondary-foreground leading-relaxed whitespace-pre-wrap">
-          {answer}
+          {showFullAnswer ? answer : answer.slice(0, 800)}
+          {!showFullAnswer && answer.length > 800 && "..."}
           {isStreaming && (
             <span className="inline-block w-2 h-5 bg-primary ml-0.5 animate-pulse" />
           )}
         </div>
       </div>
+
+      {/* See More button */}
+      {!isStreaming && answer.length > 800 && (
+        <button
+          onClick={() => setShowFullAnswer(!showFullAnswer)}
+          className="flex items-center gap-2 mt-3 px-4 py-2 rounded-lg bg-primary/10 hover:bg-primary/20 text-primary text-sm font-medium transition-colors"
+        >
+          {showFullAnswer ? (
+            <><ChevronUp className="w-4 h-4" /> Show Less</>
+          ) : (
+            <><ChevronDown className="w-4 h-4" /> See More — Detailed Analysis</>
+          )}
+        </button>
+      )}
 
       {!isStreaming && sources.length > 0 && <SourceCitations sources={sources} />}
 

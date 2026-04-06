@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
-import { Zap, Clock, Menu, X, Gift, LogOut, User, Shield, Star, Trophy } from "lucide-react";
+import { Zap, Clock, Menu, X, Gift, LogOut, User, Shield, Star, Trophy, Code } from "lucide-react";
 import SearchHistory from "@/components/SearchHistory";
 import LiteModeToggle from "@/components/LiteModeToggle";
 import POIPointsBadge from "@/components/POIPointsBadge";
@@ -46,6 +46,14 @@ const Header = () => {
           >
             <Gift className="w-3.5 h-3.5" />
             Refer & Earn
+          </Link>
+
+          <Link
+            to="/developer"
+            className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-accent/10 text-foreground hover:bg-accent/20 transition-colors font-medium"
+          >
+            <Code className="w-3.5 h-3.5" />
+            API
           </Link>
 
           {user?.email === ADMIN_EMAIL && (
@@ -141,6 +149,9 @@ const Header = () => {
           ))}
           <Link to="/referral" onClick={() => setMobileOpen(false)} className="flex items-center gap-1.5 text-primary font-medium">
             <Gift className="w-4 h-4" /> Refer & Earn
+          </Link>
+          <Link to="/developer" onClick={() => setMobileOpen(false)} className="flex items-center gap-1.5 text-muted-foreground hover:text-foreground font-medium">
+            <Code className="w-4 h-4" /> Developer API
           </Link>
           {user?.email === ADMIN_EMAIL && (
             <Link to="/admin" onClick={() => setMobileOpen(false)} className="flex items-center gap-1.5 text-destructive font-medium">
