@@ -5,9 +5,6 @@ import SearchHistory from "@/components/SearchHistory";
 import LiteModeToggle from "@/components/LiteModeToggle";
 import POIPointsBadge from "@/components/POIPointsBadge";
 import { useAuth } from "@/contexts/AuthContext";
-import LiteModeToggle from "@/components/LiteModeToggle";
-import POIPointsBadge from "@/components/POIPointsBadge";
-import { useAuth } from "@/contexts/AuthContext";
 
 const ADMIN_EMAIL = "prosperozoya50@gmail.com";
 
