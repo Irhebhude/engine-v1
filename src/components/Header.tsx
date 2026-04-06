@@ -150,6 +150,9 @@ const Header = () => {
           <Link to="/referral" onClick={() => setMobileOpen(false)} className="flex items-center gap-1.5 text-primary font-medium">
             <Gift className="w-4 h-4" /> Refer & Earn
           </Link>
+          <Link to="/developer" onClick={() => setMobileOpen(false)} className="flex items-center gap-1.5 text-muted-foreground hover:text-foreground font-medium">
+            <Code className="w-4 h-4" /> Developer API
+          </Link>
           {user?.email === ADMIN_EMAIL && (
             <Link to="/admin" onClick={() => setMobileOpen(false)} className="flex items-center gap-1.5 text-destructive font-medium">
               <Shield className="w-4 h-4" /> Admin Dashboard
