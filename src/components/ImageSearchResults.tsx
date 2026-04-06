@@ -35,6 +35,15 @@ const ImageSearchResults = ({ results, isLoading }: ImageSearchResultsProps) => 
     );
   }
 
+  if (results.length === 0 && !isLoading) {
+    return (
+      <div className="mt-6 text-center py-8">
+        <Image className="w-8 h-8 text-muted-foreground/40 mx-auto mb-2" />
+        <p className="text-sm text-muted-foreground">No images found. Try a different search term.</p>
+      </div>
+    );
+  }
+
   if (results.length === 0) return null;
 
   return (
