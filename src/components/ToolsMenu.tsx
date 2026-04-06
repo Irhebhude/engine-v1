@@ -59,7 +59,6 @@ const TOOLS: { category: string; items: Tool[] }[] = [
       { id: "location", label: "Location Search", description: "OpenStreetMap-powered place finder", icon: MapPin, action: "location" },
       { id: "web", label: "Live Web Results", description: "Real-time internet search", icon: Globe, action: "web" },
       { id: "trust", label: "Trust & Safety", description: "Source credibility analysis", icon: Shield, action: "trust" },
-      { id: "trust", label: "Trust & Safety", description: "Source credibility analysis", icon: Shield, action: "trust" },
     ],
   },
   {
