@@ -163,9 +163,14 @@ const Header = () => {
             <Code className="w-4 h-4" /> Developer API
           </Link>
           {user?.email === ADMIN_EMAIL && (
-            <Link to="/admin" onClick={() => setMobileOpen(false)} className="flex items-center gap-1.5 text-destructive font-medium">
-              <Shield className="w-4 h-4" /> Admin Dashboard
-            </Link>
+            <>
+              <Link to="/admin" onClick={() => setMobileOpen(false)} className="flex items-center gap-1.5 text-destructive font-medium">
+                <Shield className="w-4 h-4" /> Admin Dashboard
+              </Link>
+              <Link to="/admin/acquisition-control" onClick={() => setMobileOpen(false)} className="flex items-center gap-1.5 text-[hsl(45,90%,55%)] font-medium">
+                <Star className="w-4 h-4" /> Acquisition Control
+              </Link>
+            </>
           )}
           {user && (
             <div className="flex items-center gap-2">
