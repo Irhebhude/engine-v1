@@ -25,6 +25,7 @@ import SharedSearch from "./pages/SharedSearch";
 import KnowledgeVault from "./pages/KnowledgeVault";
 import POIPointsDashboard from "./pages/POIPointsDashboard";
 import DeveloperDashboard from "./pages/DeveloperDashboard";
+import AcquisitionControl from "./pages/AcquisitionControl";
 
 const queryClient = new QueryClient({
   defaultOptions: {
