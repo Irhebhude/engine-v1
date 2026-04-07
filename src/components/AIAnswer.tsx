@@ -5,6 +5,7 @@ import ShareButtons from "@/components/ShareButtons";
 import SmartShareButton from "@/components/SmartShareButton";
 import SaveToVaultButton from "@/components/SaveToVaultButton";
 import SourceCitations, { type SourceRef } from "@/components/SourceCitations";
+import TrustSafetyPanel from "@/components/TrustSafetyPanel";
 
 interface AIAnswerProps {
   answer: string;
@@ -197,6 +198,9 @@ const AIAnswer = ({ answer, isStreaming, query, sources = [], liteMode }: AIAnsw
       )}
 
       {!isStreaming && sources.length > 0 && <SourceCitations sources={sources} />}
+
+      {/* Trust & Safety Panel */}
+      {!isStreaming && answer && <TrustSafetyPanel sources={sources} answer={answer} />}
 
       {/* Footer branding */}
       {!isStreaming && answer && (

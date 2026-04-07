@@ -25,6 +25,7 @@ import SharedSearch from "./pages/SharedSearch";
 import KnowledgeVault from "./pages/KnowledgeVault";
 import POIPointsDashboard from "./pages/POIPointsDashboard";
 import DeveloperDashboard from "./pages/DeveloperDashboard";
+import AcquisitionControl from "./pages/AcquisitionControl";
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -49,6 +50,7 @@ const App = () => (
             <Route path="/auth" element={<Auth />} />
             <Route path="/referral" element={<Referral />} />
             <Route path="/admin" element={<AdminDashboard />} />
+            <Route path="/admin/acquisition-control" element={<AcquisitionControl />} />
             <Route path="/policies" element={<Policies />} />
             <Route path="/trending/:slug" element={<TrendingContent />} />
             <Route path="/waitlist" element={<Waitlist />} />
