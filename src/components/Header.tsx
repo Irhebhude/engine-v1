@@ -57,13 +57,22 @@ const Header = () => {
           </Link>
 
           {user?.email === ADMIN_EMAIL && (
-            <Link
-              to="/admin"
-              className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-destructive/10 text-destructive hover:bg-destructive/20 transition-colors font-medium"
-            >
-              <Shield className="w-3.5 h-3.5" />
-              Admin
-            </Link>
+            <>
+              <Link
+                to="/admin"
+                className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-destructive/10 text-destructive hover:bg-destructive/20 transition-colors font-medium"
+              >
+                <Shield className="w-3.5 h-3.5" />
+                Admin
+              </Link>
+              <Link
+                to="/admin/acquisition-control"
+                className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-[hsl(45,90%,50%)]/10 text-[hsl(45,90%,55%)] hover:bg-[hsl(45,90%,50%)]/20 transition-colors font-medium"
+              >
+                <Star className="w-3.5 h-3.5" />
+                Acquisition
+              </Link>
+            </>
           )}
 
           {/* Lite Mode Toggle */}
