@@ -54,6 +54,8 @@ const App = () => (
             <Route path="/admin" element={<AdminDashboard />} />
             <Route path="/admin/acquisition-control" element={<AcquisitionControl />} />
             <Route path="/policies" element={<Policies />} />
+            <Route path="/pricing" element={<Pricing />} />
+            <Route path="/insights" element={<Insights />} />
             <Route path="/trending/:slug" element={<TrendingContent />} />
             <Route path="/waitlist" element={<Waitlist />} />
             <Route path="/premium" element={<Premium />} />
