@@ -26,6 +26,8 @@ import KnowledgeVault from "./pages/KnowledgeVault";
 import POIPointsDashboard from "./pages/POIPointsDashboard";
 import DeveloperDashboard from "./pages/DeveloperDashboard";
 import AcquisitionControl from "./pages/AcquisitionControl";
+import Pricing from "./pages/Pricing";
+import Insights from "./pages/Insights";
 
 const queryClient = new QueryClient({
   defaultOptions: {
