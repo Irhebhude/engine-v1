@@ -53,6 +53,7 @@ Rules:
 - Make it sound like a once-in-a-lifetime investment opportunity
 - Vary tone: sometimes professional, sometimes bold, sometimes visionary
 - Do NOT include the footer/contact info — it will be appended automatically
+- Do NOT include any acquisition details, prices, or contact info
 - Output ONLY the post text, nothing else`,
           },
           {
@@ -71,6 +72,7 @@ Rules:
       const data = await response.json();
       const content = data.choices?.[0]?.message?.content || "SEARCH-POI ENGINE v1 — The Future of Intelligent Search";
 
+      // Return content WITH footer for preview
       return new Response(JSON.stringify({ content: content + ELITE_FOOTER }), {
         headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
@@ -78,13 +80,26 @@ Rules:
 
     // Action: post to Ayrshare
     if (action === "post") {
+      // Strip any existing footer to prevent duplication, then add exactly one
+      let cleanPost = customPost;
+      const footerMarker = "━━━━━━━━━━━━━━━━━━━━━━━━━";
+      const firstFooterIdx = cleanPost.indexOf(footerMarker);
+      if (firstFooterIdx !== -1) {
+        cleanPost = cleanPost.substring(0, firstFooterIdx).trim();
+      }
+      
+      const finalPost = cleanPost + ELITE_FOOTER;
+
+      // Only post to platforms that are actually linked
+      const platforms = ["facebook", "linkedin"];
+
       const postBody: any = {
-        post: customPost + ELITE_FOOTER,
-        platforms: ["twitter", "facebook", "instagram", "linkedin", "tiktok"],
+        post: finalPost,
+        platforms,
         autoHashtag: true,
       };
 
-      if (mediaUrl) {
+      if (mediaUrl && mediaUrl.startsWith("http")) {
         postBody.mediaUrls = [mediaUrl];
       }
 
@@ -99,13 +114,19 @@ Rules:
 
       const ayrData = await ayrRes.json();
 
-      if (!ayrRes.ok) {
-        return new Response(JSON.stringify({ error: "Ayrshare error", details: ayrData }), {
-          status: ayrRes.status, headers: { ...corsHeaders, "Content-Type": "application/json" },
-        });
-      }
+      // Check for partial success (some platforms succeed, some fail)
+      const successPosts = ayrData.postIds?.filter((p: any) => p.status === "success") || [];
+      const failedPosts = ayrData.errors?.filter((e: any) => e.status === "error") || [];
 
-      return new Response(JSON.stringify({ success: true, data: ayrData }), {
+      return new Response(JSON.stringify({ 
+        success: successPosts.length > 0, 
+        data: ayrData,
+        summary: {
+          succeeded: successPosts.length,
+          failed: failedPosts.length,
+          platforms: successPosts.map((p: any) => p.platform),
+        }
+      }), {
         headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
     }

@@ -6,6 +6,7 @@ import SmartShareButton from "@/components/SmartShareButton";
 import SaveToVaultButton from "@/components/SaveToVaultButton";
 import SourceCitations, { type SourceRef } from "@/components/SourceCitations";
 import TrustSafetyPanel from "@/components/TrustSafetyPanel";
+import EngineDifferentiation from "@/components/EngineDifferentiation";
 
 interface AIAnswerProps {
   answer: string;
@@ -198,6 +199,9 @@ const AIAnswer = ({ answer, isStreaming, query, sources = [], liteMode }: AIAnsw
       )}
 
       {!isStreaming && sources.length > 0 && <SourceCitations sources={sources} />}
+
+      {/* Engine Differentiation Panel */}
+      {!isStreaming && answer && <EngineDifferentiation query={query} confidence={confidence} />}
 
       {/* Trust & Safety Panel */}
       {!isStreaming && answer && <TrustSafetyPanel sources={sources} answer={answer} />}

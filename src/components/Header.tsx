@@ -10,9 +10,9 @@ const ADMIN_EMAIL = "prosperozoya50@gmail.com";
 
 const NAV_LINKS = [
   { to: "/about", label: "About" },
+  { to: "/pricing", label: "Pricing" },
+  { to: "/insights", label: "Insights" },
   { to: "/contact", label: "Contact" },
-  { to: "/feedback", label: "Feedback" },
-  { to: "/waitlist", label: "Waitlist" },
 ];
 
 const Header = () => {
