@@ -17,6 +17,7 @@ import UrlSummarizer from "@/components/UrlSummarizer";
 import BlueprintGenerator from "@/components/BlueprintGenerator";
 import BuildGuideViewer from "@/components/BuildGuideViewer";
 import LocationSearch from "@/components/LocationSearch";
+import POIDiscoveryEngine from "@/components/POIDiscoveryEngine";
 import AdSense from "@/components/AdSense";
 import PulseAnalytics from "@/components/PulseAnalytics";
 import CommodityPulse from "@/components/CommodityPulse";
@@ -76,6 +77,7 @@ const SearchResults = () => {
   const [showBlueprint, setShowBlueprint] = useState(false);
   const [showBuildGuide, setShowBuildGuide] = useState(false);
   const [showLocation, setShowLocation] = useState(false);
+  const [showPOIEngine, setShowPOIEngine] = useState(false);
   const [activeTab, setActiveTab] = useState<SearchTab>(initialTab);
   const [sources, setSources] = useState<SourceRef[]>([]);
 
@@ -199,12 +201,12 @@ const SearchResults = () => {
     if (action === "blueprint") setShowBlueprint(true);
     if (action === "buildguide") setShowBuildGuide(true);
     if (action === "location") setShowLocation(true);
+    if (action === "poi") setShowPOIEngine(true);
     if (action === "images") handleTabChange("images");
     if (action === "videos") handleTabChange("videos");
     if (action === "news") handleTabChange("news");
     if (action === "web") handleTabChange("web");
     if (action === "trust") {
-      // Scroll to AI answer where Trust & Safety panel lives
       window.scrollTo({ top: 0, behavior: "smooth" });
       toast({ title: "Trust & Safety", description: "Expand the Trust & Safety panel below the AI answer." });
     }
@@ -251,6 +253,9 @@ const SearchResults = () => {
               </button>
               <button onClick={() => setShowLocation(true)} className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-primary/10 hover:bg-primary/20 text-primary text-xs font-medium transition-colors">
                 <MapPin className="w-3.5 h-3.5" /> Location
+              </button>
+              <button onClick={() => setShowPOIEngine(true)} className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-primary/10 hover:bg-primary/20 text-primary text-xs font-medium transition-colors">
+                <Brain className="w-3.5 h-3.5" /> POI Engine
               </button>
             </div>
           )}
@@ -357,6 +362,7 @@ const SearchResults = () => {
       <BlueprintGenerator isOpen={showBlueprint} onClose={() => setShowBlueprint(false)} initialQuery={query} />
       <BuildGuideViewer isOpen={showBuildGuide} onClose={() => setShowBuildGuide(false)} initialQuery={query} />
       <LocationSearch isOpen={showLocation} onClose={() => setShowLocation(false)} initialQuery={query} />
+      <POIDiscoveryEngine isOpen={showPOIEngine} onClose={() => setShowPOIEngine(false)} initialQuery={query} />
     </div>
     </>
   );
