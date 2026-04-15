@@ -57,6 +57,7 @@ const TOOLS: { category: string; items: Tool[] }[] = [
       { id: "buildguide", label: "Build Guide Video", description: "AI step-by-step video build instructions", icon: Hammer, action: "buildguide" },
       { id: "summarize", label: "Website Summarizer", description: "AI-powered page understanding", icon: FileText, action: "summarize" },
       { id: "location", label: "Location Search", description: "OpenStreetMap-powered place finder", icon: MapPin, action: "location" },
+      { id: "poi", label: "POI Discovery Engine", description: "Trust-verified place intelligence", icon: Brain, action: "poi" },
       { id: "web", label: "Live Web Results", description: "Real-time internet search", icon: Globe, action: "web" },
       { id: "trust", label: "Trust & Safety", description: "Source credibility analysis", icon: Shield, action: "trust" },
     ],
