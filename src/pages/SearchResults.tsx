@@ -202,6 +202,12 @@ const SearchResults = () => {
     if (action === "images") handleTabChange("images");
     if (action === "videos") handleTabChange("videos");
     if (action === "news") handleTabChange("news");
+    if (action === "web") handleTabChange("web");
+    if (action === "trust") {
+      // Scroll to AI answer where Trust & Safety panel lives
+      window.scrollTo({ top: 0, behavior: "smooth" });
+      toast({ title: "Trust & Safety", description: "Expand the Trust & Safety panel below the AI answer." });
+    }
   };
 
   const modeLabel = mode !== "default" ? ` • ${mode.replace("_", " ").toUpperCase()} MODE` : "";

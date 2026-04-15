@@ -7,6 +7,8 @@ import SaveToVaultButton from "@/components/SaveToVaultButton";
 import SourceCitations, { type SourceRef } from "@/components/SourceCitations";
 import TrustSafetyPanel from "@/components/TrustSafetyPanel";
 import EngineDifferentiation from "@/components/EngineDifferentiation";
+import ICSReasoningPanel from "@/components/ICSReasoningPanel";
+import OptimizationPanel from "@/components/OptimizationPanel";
 
 interface AIAnswerProps {
   answer: string;
@@ -203,8 +205,14 @@ const AIAnswer = ({ answer, isStreaming, query, sources = [], liteMode }: AIAnsw
       {/* Engine Differentiation Panel */}
       {!isStreaming && answer && <EngineDifferentiation query={query} confidence={confidence} />}
 
+      {/* ICS Reasoning Chain */}
+      {!isStreaming && answer && <ICSReasoningPanel query={query} answer={answer} confidence={confidence} sources={sources} />}
+
       {/* Trust & Safety Panel */}
       {!isStreaming && answer && <TrustSafetyPanel sources={sources} answer={answer} />}
+
+      {/* Multi-Platform Optimization */}
+      {!isStreaming && answer && <OptimizationPanel query={query} answer={answer} />}
 
       {/* Footer branding */}
       {!isStreaming && answer && (

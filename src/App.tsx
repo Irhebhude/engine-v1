@@ -28,6 +28,7 @@ import DeveloperDashboard from "./pages/DeveloperDashboard";
 import AcquisitionControl from "./pages/AcquisitionControl";
 import Pricing from "./pages/Pricing";
 import Insights from "./pages/Insights";
+import QueryPage from "./pages/QueryPage";
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -62,6 +63,7 @@ const App = () => (
             <Route path="/business" element={<BusinessDashboard />} />
             <Route path="/shared/:slug" element={<SharedSearch />} />
             <Route path="/vaults/:slug" element={<KnowledgeVault />} />
+            <Route path="/q/:slug" element={<QueryPage />} />
             <Route path="/points" element={<ReferralGate><POIPointsDashboard /></ReferralGate>} />
             <Route path="/developer" element={<ReferralGate><DeveloperDashboard /></ReferralGate>} />
 
