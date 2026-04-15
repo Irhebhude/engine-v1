@@ -59,7 +59,9 @@ const Auth = () => {
         } catch (e) {
           console.warn("Could not capture IP:", e);
         }
-        setEmailSent(true);
+        toast({ title: "Account created!", description: "You can now sign in." });
+        setIsLogin(true);
+        setPassword("");
       }
     }
     setLoading(false);
