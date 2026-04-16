@@ -48,6 +48,7 @@ const App = () => (
       <AuthProvider>
         <Toaster />
         <Sonner />
+        <OfflineStatusBar />
         <BrowserRouter>
           <Routes>
             {/* Public routes */}
