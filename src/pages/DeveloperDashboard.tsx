@@ -72,12 +72,15 @@ const DeveloperDashboard = () => {
     setUsage((data as UsageEntry[]) || []);
   };
 
+  const [generating, setGenerating] = useState(false);
+
   const generateKey = async () => {
     if (!user) {
       toast({ title: "Error", description: "You must be logged in to generate API keys", variant: "destructive" });
       return;
     }
 
+    setGenerating(true);
     try {
       const rawKey = `poi_${crypto.randomUUID().replace(/-/g, "")}`;
       const prefix = rawKey.slice(0, 12) + "...";
@@ -97,16 +100,22 @@ const DeveloperDashboard = () => {
 
       if (error) {
         console.error("Key generation error:", error);
-        toast({ title: "Error", description: error.message || "Failed to create API key", variant: "destructive" });
+        if (error.message?.includes("policy")) {
+          toast({ title: "Permission Error", description: "Please sign out and sign back in, then try again.", variant: "destructive" });
+        } else {
+          toast({ title: "Error", description: error.message || "Failed to create API key", variant: "destructive" });
+        }
         return;
       }
 
       setRevealedKey(rawKey);
       toast({ title: "API Key Created", description: "Copy it now — you won't see it again!" });
-      fetchKeys();
+      await fetchKeys();
     } catch (e: any) {
       console.error("Key generation exception:", e);
       toast({ title: "Error", description: e.message || "Unexpected error generating key", variant: "destructive" });
+    } finally {
+      setGenerating(false);
     }
   };
 

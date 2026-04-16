@@ -34,12 +34,19 @@ const ActionButtons = ({ phone, whatsapp, businessName, query }: ActionButtonsPr
           Call
         </a>
       )}
-      <button
+      <a
+        href={whatsapp
+          ? `https://wa.me/${whatsapp.replace(/\D/g, "")}?text=${encodeURIComponent(`Hi${businessName ? ` ${businessName}` : ""}, I'd like to request a quote${query ? ` regarding "${query}"` : ""}. Please share pricing details.`)}`
+          : phone
+            ? `mailto:?subject=Quote Request&body=${encodeURIComponent(`I'd like to request a quote${businessName ? ` from ${businessName}` : ""}${query ? ` for "${query}"` : ""}.`)}`
+            : "#"}
+        target={whatsapp || phone ? "_blank" : undefined}
+        rel="noopener noreferrer"
         className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-accent/20 text-accent-foreground hover:bg-accent/30 transition-colors text-xs font-medium"
       >
         <ShoppingCart className="w-3.5 h-3.5" />
         Request Quote
-      </button>
+      </a>
     </div>
   );
 };
