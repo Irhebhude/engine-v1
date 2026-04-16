@@ -213,8 +213,9 @@ const DeveloperDashboard = () => {
                     placeholder="My App"
                   />
                 </div>
-                <Button onClick={generateKey} className="gap-2">
-                  <Plus className="w-4 h-4" /> Generate Key
+                <Button onClick={generateKey} disabled={generating} className="gap-2">
+                  {generating ? <Loader2 className="w-4 h-4 animate-spin" /> : <Plus className="w-4 h-4" />}
+                  {generating ? "Generating..." : "Generate Key"}
                 </Button>
               </div>
 
