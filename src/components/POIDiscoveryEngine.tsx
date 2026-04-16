@@ -48,6 +48,19 @@ const usePredictiveSearch = (query: string, delay = 150) => {
     clearTimeout(timerRef.current);
     timerRef.current = setTimeout(async () => {
       setIsLoading(true);
+      
+      if (!navigator.onLine) {
+        // Offline: use local DB for predictions
+        try {
+          const localResults = await searchPOIsOffline(query, 5);
+          setPredictions(localResults.map(r => `${r.name}, ${r.city || ''}, ${r.country || ''}`));
+        } catch {
+          setPredictions([]);
+        }
+        setIsLoading(false);
+        return;
+      }
+
       try {
         const resp = await fetch(
           `https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(query)}&format=json&limit=5&addressdetails=1`,
@@ -56,7 +69,9 @@ const usePredictiveSearch = (query: string, delay = 150) => {
         const data = await resp.json();
         setPredictions(data.map((d: any) => d.display_name));
       } catch {
-        setPredictions([]);
+        // Fallback to offline
+        const localResults = await searchPOIsOffline(query, 5);
+        setPredictions(localResults.map(r => `${r.name}, ${r.city || ''}, ${r.country || ''}`));
       }
       setIsLoading(false);
     }, delay);
