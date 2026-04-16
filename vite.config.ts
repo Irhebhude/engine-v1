@@ -5,17 +5,9 @@ import { componentTagger } from "lovable-tagger";
 import { VitePWA } from "vite-plugin-pwa";
 
 // https://vitejs.dev/config/
-export default defineConfig(({ mode }) => ({
-  server: {
-    host: "::",
-    port: 8080,
-    hmr: {
-      overlay: false,
-    },
-  },
-  plugins: [
+export default defineConfig(({ mode }) => {
+  const plugins = [
     react(),
-    mode === "development" && componentTagger(),
     VitePWA({
       registerType: "autoUpdate",
       devOptions: {
@@ -52,10 +44,25 @@ export default defineConfig(({ mode }) => ({
         ],
       },
     }),
-  ].filter(Boolean),
-  resolve: {
-    alias: {
-      "@": path.resolve(__dirname, "./src"),
+  ];
+
+  if (mode === "development") {
+    plugins.push(componentTagger());
+  }
+
+  return {
+    server: {
+      host: "::",
+      port: 8080,
+      hmr: {
+        overlay: false,
+      },
     },
-  },
-}));
+    plugins: plugins,
+    resolve: {
+      alias: {
+        "@": path.resolve(__dirname, "./src"),
+      },
+    },
+  };
+});
