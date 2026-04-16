@@ -4,10 +4,18 @@ import path from "path";
 import { componentTagger } from "lovable-tagger";
 import { VitePWA } from "vite-plugin-pwa";
 
-// https://vitejs.dev/config/
-export default defineConfig(({ mode }) => {
-  const plugins = [
+// https://vitejs.dev
+export default defineConfig({
+  server: {
+    host: "::",
+    port: 8080,
+    hmr: {
+      overlay: false,
+    },
+  },
+  plugins: [
     react(),
+    componentTagger(),
     VitePWA({
       registerType: "autoUpdate",
       devOptions: {
@@ -44,25 +52,10 @@ export default defineConfig(({ mode }) => {
         ],
       },
     }),
-  ];
-
-  if (mode === "development") {
-    plugins.push(componentTagger());
-  }
-
-  return {
-    server: {
-      host: "::",
-      port: 8080,
-      hmr: {
-        overlay: false,
-      },
+  ],
+  resolve: {
+    alias: {
+      "@": path.resolve(__dirname, "./src"),
     },
-    plugins: plugins,
-    resolve: {
-      alias: {
-        "@": path.resolve(__dirname, "./src"),
-      },
-    },
-  };
+  },
 });
