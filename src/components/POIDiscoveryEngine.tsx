@@ -3,8 +3,9 @@ import { motion, AnimatePresence } from "framer-motion";
 import {
   MapPin, Search, Shield, Brain, Zap, Clock, Star, ExternalLink,
   Navigation, ChevronDown, ChevronUp, AlertTriangle, CheckCircle2,
-  Thermometer, Cloud, Eye, TrendingUp, Loader2, X
+  Thermometer, Cloud, Eye, TrendingUp, Loader2, X, WifiOff
 } from "lucide-react";
+import { searchPOIsOffline, searchPOIsByLocation, cacheSearchResult, getCachedSearch } from "@/lib/offline-db";
 
 // ===== TYPES =====
 interface POIResult {
@@ -140,6 +141,40 @@ const POIDiscoveryEngine = ({ isOpen, onClose, initialQuery = "" }: POIDiscovery
     if (!q.trim()) return;
     setLoading(true);
     addToSearchMemory(q);
+
+    const isOnline = navigator.onLine;
+
+    if (!isOnline) {
+      // OFFLINE: query local IndexedDB
+      try {
+        const cached = await getCachedSearch(q);
+        if (cached) {
+          setResults(cached);
+          setLoading(false);
+          return;
+        }
+        const localResults = await searchPOIsOffline(q, 15);
+        const enriched: POIResult[] = localResults.map((poi) => ({
+          place_id: parseInt(poi.id.replace(/\D/g, '')) || Math.random() * 100000,
+          display_name: `${poi.name}, ${poi.city || ''}, ${poi.state || ''}, ${poi.country || ''}`,
+          lat: String(poi.lat),
+          lon: String(poi.lon),
+          type: poi.category || 'place',
+          address: { road: poi.address, city: poi.city, state: poi.state, country: poi.country },
+          trustScore: poi.trustScore || 70,
+          validationType: (poi.trustScore || 70) >= 75 ? "source-backed" as const : "logic-backed" as const,
+          contextRelevance: computeContextRelevance({ type: poi.category }, context),
+          entityGravity: 60,
+        }));
+        setResults(enriched);
+      } catch {
+        setResults([]);
+      }
+      setLoading(false);
+      return;
+    }
+
+    // ONLINE: use Nominatim API
     try {
       const resp = await fetch(
         `https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(q)}&format=json&limit=15&addressdetails=1&extratags=1`,
@@ -158,15 +193,30 @@ const POIDiscoveryEngine = ({ isOpen, onClose, initialQuery = "" }: POIDiscovery
           entityGravity,
         };
       });
-      // Sort by combined score: trust + context + gravity
       enriched.sort((a, b) => {
         const scoreA = a.trustScore * 0.4 + a.contextRelevance * 0.3 + a.entityGravity * 0.3;
         const scoreB = b.trustScore * 0.4 + b.contextRelevance * 0.3 + b.entityGravity * 0.3;
         return scoreB - scoreA;
       });
       setResults(enriched);
+      // Cache for offline use
+      cacheSearchResult(q, enriched);
     } catch {
-      setResults([]);
+      // Fallback to offline if network fails
+      const localResults = await searchPOIsOffline(q, 15);
+      const enriched: POIResult[] = localResults.map((poi) => ({
+        place_id: parseInt(poi.id.replace(/\D/g, '')) || Math.random() * 100000,
+        display_name: `${poi.name}, ${poi.city || ''}, ${poi.state || ''}, ${poi.country || ''}`,
+        lat: String(poi.lat),
+        lon: String(poi.lon),
+        type: poi.category || 'place',
+        address: { road: poi.address, city: poi.city, state: poi.state, country: poi.country },
+        trustScore: poi.trustScore || 70,
+        validationType: (poi.trustScore || 70) >= 75 ? "source-backed" as const : "logic-backed" as const,
+        contextRelevance: computeContextRelevance({ type: poi.category }, context),
+        entityGravity: 60,
+      }));
+      setResults(enriched);
     }
     setLoading(false);
   }, [context]);
