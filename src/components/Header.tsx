@@ -214,12 +214,30 @@ const Header = () => {
               {profile && profile.poi_points > 0 && <POIPointsBadge points={profile.poi_points} />}
             </div>
           )}
-          <button
-            onClick={() => { setMobileOpen(false); setShowHistory(!showHistory); }}
-            className="flex items-center gap-1.5 text-muted-foreground hover:text-foreground transition-colors"
-          >
-            <Clock className="w-4 h-4" /> History
-          </button>
+          {profile?.referral_code && (
+            <button
+              onClick={() => { copyReferralCode(); setMobileOpen(false); }}
+              className="flex items-center gap-2 px-3 py-2 rounded-lg bg-primary/5 border border-primary/20 text-primary text-sm font-medium"
+            >
+              <Gift className="w-4 h-4" />
+              Your Code: <span className="font-mono">{profile.referral_code}</span>
+              <Copy className="w-3 h-3 ml-auto opacity-70" />
+            </button>
+          )}
+          <div className="flex items-center justify-between gap-2">
+            <button
+              onClick={() => { setMobileOpen(false); setShowHistory(!showHistory); }}
+              className="flex items-center gap-1.5 text-muted-foreground hover:text-foreground transition-colors"
+            >
+              <Clock className="w-4 h-4" /> History
+            </button>
+            <button
+              onClick={() => { handleClearHistory(); setMobileOpen(false); }}
+              className="flex items-center gap-1.5 text-destructive/80 hover:text-destructive text-xs"
+            >
+              <Trash2 className="w-3.5 h-3.5" /> Clear
+            </button>
+          </div>
           {user ? (
             <>
               <div className="flex items-center gap-1.5 text-muted-foreground">
