@@ -1,7 +1,9 @@
 import { useState } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
-import { Zap, Clock, Menu, X, Gift, LogOut, User, Shield, Star, Trophy, Code } from "lucide-react";
+import { Zap, Clock, Menu, X, Gift, LogOut, User, Shield, Star, Trophy, Code, Trash2, Copy } from "lucide-react";
 import SearchHistory from "@/components/SearchHistory";
+import { clearSearchHistory } from "@/lib/search-context";
+import { useToast } from "@/hooks/use-toast";
 import LiteModeToggle from "@/components/LiteModeToggle";
 import POIPointsBadge from "@/components/POIPointsBadge";
 import { useAuth } from "@/contexts/AuthContext";
@@ -19,8 +21,21 @@ const Header = () => {
   const location = useLocation();
   const navigate = useNavigate();
   const { user, profile, signOut, toggleLiteMode } = useAuth();
+  const { toast } = useToast();
   const [showHistory, setShowHistory] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
+
+  const handleClearHistory = () => {
+    clearSearchHistory();
+    toast({ title: "History cleared", description: "All search history has been removed." });
+    setShowHistory(false);
+  };
+
+  const copyReferralCode = () => {
+    if (!profile?.referral_code) return;
+    navigator.clipboard.writeText(profile.referral_code);
+    toast({ title: "Copied!", description: `Referral code ${profile.referral_code} copied.` });
+  };
 
   return (
     <header className="fixed top-0 left-0 right-0 z-50 glass border-b border-border/30">
@@ -91,14 +106,35 @@ const Header = () => {
             </Link>
           )}
 
-          <button
-            onClick={() => setShowHistory(!showHistory)}
-            className="flex items-center gap-1.5 text-muted-foreground hover:text-foreground transition-colors"
-            title="Search History"
-          >
-            <Clock className="w-4 h-4" />
-            <span>History</span>
-          </button>
+          <div className="flex items-center gap-1">
+            <button
+              onClick={() => setShowHistory(!showHistory)}
+              className="flex items-center gap-1.5 text-muted-foreground hover:text-foreground transition-colors"
+              title="Search History"
+            >
+              <Clock className="w-4 h-4" />
+              <span>History</span>
+            </button>
+            <button
+              onClick={handleClearHistory}
+              className="p-1 text-muted-foreground hover:text-destructive transition-colors"
+              title="Clear search history"
+            >
+              <Trash2 className="w-3.5 h-3.5" />
+            </button>
+          </div>
+
+          {profile?.referral_code && (
+            <button
+              onClick={copyReferralCode}
+              className="hidden md:flex items-center gap-1 px-2 py-1 rounded-md bg-primary/5 border border-primary/20 text-[10px] font-mono text-primary hover:bg-primary/10 transition-colors"
+              title="Click to copy your referral code"
+            >
+              <Gift className="w-3 h-3" />
+              {profile.referral_code}
+              <Copy className="w-3 h-3 opacity-60" />
+            </button>
+          )}
 
           {user ? (
             <div className="flex items-center gap-2">
@@ -126,18 +162,6 @@ const Header = () => {
             </Link>
           )}
 
-          {showHistory && (
-            <div className="absolute right-0 top-full mt-2 w-80">
-              <SearchHistory
-                isOpen={showHistory}
-                onClose={() => setShowHistory(false)}
-                onSelect={(q) => {
-                  setShowHistory(false);
-                  navigate(`/search?q=${encodeURIComponent(q)}`);
-                }}
-              />
-            </div>
-          )}
         </nav>
 
         {/* Mobile hamburger */}
@@ -178,12 +202,30 @@ const Header = () => {
               {profile && profile.poi_points > 0 && <POIPointsBadge points={profile.poi_points} />}
             </div>
           )}
-          <button
-            onClick={() => { setMobileOpen(false); setShowHistory(!showHistory); }}
-            className="flex items-center gap-1.5 text-muted-foreground hover:text-foreground transition-colors"
-          >
-            <Clock className="w-4 h-4" /> History
-          </button>
+          {profile?.referral_code && (
+            <button
+              onClick={() => { copyReferralCode(); setMobileOpen(false); }}
+              className="flex items-center gap-2 px-3 py-2 rounded-lg bg-primary/5 border border-primary/20 text-primary text-sm font-medium"
+            >
+              <Gift className="w-4 h-4" />
+              Your Code: <span className="font-mono">{profile.referral_code}</span>
+              <Copy className="w-3 h-3 ml-auto opacity-70" />
+            </button>
+          )}
+          <div className="flex items-center justify-between gap-2">
+            <button
+              onClick={() => { setMobileOpen(false); setShowHistory(!showHistory); }}
+              className="flex items-center gap-1.5 text-muted-foreground hover:text-foreground transition-colors"
+            >
+              <Clock className="w-4 h-4" /> History
+            </button>
+            <button
+              onClick={() => { handleClearHistory(); setMobileOpen(false); }}
+              className="flex items-center gap-1.5 text-destructive/80 hover:text-destructive text-xs"
+            >
+              <Trash2 className="w-3.5 h-3.5" /> Clear
+            </button>
+          </div>
           {user ? (
             <>
               <div className="flex items-center gap-1.5 text-muted-foreground">
@@ -202,6 +244,20 @@ const Header = () => {
               Sign In / Sign Up
             </Link>
           )}
+        </div>
+      )}
+
+      {/* Global search history popover (desktop + mobile) */}
+      {showHistory && (
+        <div className="absolute right-2 sm:right-4 top-full mt-1 w-80 max-w-[calc(100vw-1rem)] z-50">
+          <SearchHistory
+            isOpen={showHistory}
+            onClose={() => setShowHistory(false)}
+            onSelect={(q) => {
+              setShowHistory(false);
+              navigate(`/search?q=${encodeURIComponent(q)}`);
+            }}
+          />
         </div>
       )}
     </header>
