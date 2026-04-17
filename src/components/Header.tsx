@@ -106,14 +106,35 @@ const Header = () => {
             </Link>
           )}
 
-          <button
-            onClick={() => setShowHistory(!showHistory)}
-            className="flex items-center gap-1.5 text-muted-foreground hover:text-foreground transition-colors"
-            title="Search History"
-          >
-            <Clock className="w-4 h-4" />
-            <span>History</span>
-          </button>
+          <div className="flex items-center gap-1">
+            <button
+              onClick={() => setShowHistory(!showHistory)}
+              className="flex items-center gap-1.5 text-muted-foreground hover:text-foreground transition-colors"
+              title="Search History"
+            >
+              <Clock className="w-4 h-4" />
+              <span>History</span>
+            </button>
+            <button
+              onClick={handleClearHistory}
+              className="p-1 text-muted-foreground hover:text-destructive transition-colors"
+              title="Clear search history"
+            >
+              <Trash2 className="w-3.5 h-3.5" />
+            </button>
+          </div>
+
+          {profile?.referral_code && (
+            <button
+              onClick={copyReferralCode}
+              className="hidden md:flex items-center gap-1 px-2 py-1 rounded-md bg-primary/5 border border-primary/20 text-[10px] font-mono text-primary hover:bg-primary/10 transition-colors"
+              title="Click to copy your referral code"
+            >
+              <Gift className="w-3 h-3" />
+              {profile.referral_code}
+              <Copy className="w-3 h-3 opacity-60" />
+            </button>
+          )}
 
           {user ? (
             <div className="flex items-center gap-2">
