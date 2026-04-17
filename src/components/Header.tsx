@@ -162,18 +162,6 @@ const Header = () => {
             </Link>
           )}
 
-          {showHistory && (
-            <div className="absolute right-0 top-full mt-2 w-80">
-              <SearchHistory
-                isOpen={showHistory}
-                onClose={() => setShowHistory(false)}
-                onSelect={(q) => {
-                  setShowHistory(false);
-                  navigate(`/search?q=${encodeURIComponent(q)}`);
-                }}
-              />
-            </div>
-          )}
         </nav>
 
         {/* Mobile hamburger */}
