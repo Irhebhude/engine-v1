@@ -1,7 +1,9 @@
 import { useState } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
-import { Zap, Clock, Menu, X, Gift, LogOut, User, Shield, Star, Trophy, Code } from "lucide-react";
+import { Zap, Clock, Menu, X, Gift, LogOut, User, Shield, Star, Trophy, Code, Trash2, Copy } from "lucide-react";
 import SearchHistory from "@/components/SearchHistory";
+import { clearSearchHistory } from "@/lib/search-context";
+import { useToast } from "@/hooks/use-toast";
 import LiteModeToggle from "@/components/LiteModeToggle";
 import POIPointsBadge from "@/components/POIPointsBadge";
 import { useAuth } from "@/contexts/AuthContext";
@@ -19,8 +21,21 @@ const Header = () => {
   const location = useLocation();
   const navigate = useNavigate();
   const { user, profile, signOut, toggleLiteMode } = useAuth();
+  const { toast } = useToast();
   const [showHistory, setShowHistory] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
+
+  const handleClearHistory = () => {
+    clearSearchHistory();
+    toast({ title: "History cleared", description: "All search history has been removed." });
+    setShowHistory(false);
+  };
+
+  const copyReferralCode = () => {
+    if (!profile?.referral_code) return;
+    navigator.clipboard.writeText(profile.referral_code);
+    toast({ title: "Copied!", description: `Referral code ${profile.referral_code} copied.` });
+  };
 
   return (
     <header className="fixed top-0 left-0 right-0 z-50 glass border-b border-border/30">
