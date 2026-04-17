@@ -246,6 +246,20 @@ const Header = () => {
           )}
         </div>
       )}
+
+      {/* Global search history popover (desktop + mobile) */}
+      {showHistory && (
+        <div className="absolute right-2 sm:right-4 top-full mt-1 w-80 max-w-[calc(100vw-1rem)] z-50">
+          <SearchHistory
+            isOpen={showHistory}
+            onClose={() => setShowHistory(false)}
+            onSelect={(q) => {
+              setShowHistory(false);
+              navigate(`/search?q=${encodeURIComponent(q)}`);
+            }}
+          />
+        </div>
+      )}
     </header>
   );
 };
