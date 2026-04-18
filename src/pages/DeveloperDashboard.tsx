@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
-import { Key, Copy, Check, Trash2, Plus, Code, BarChart3, Zap, Play, Loader2 } from "lucide-react";
+import { Key, Copy, Check, Trash2, Plus, Code, BarChart3, Zap, Play, Loader2, Terminal } from "lucide-react";
 import Header from "@/components/Header";
 import SEOHead from "@/components/SEOHead";
 import { useAuth } from "@/contexts/AuthContext";
@@ -157,6 +157,17 @@ const DeveloperDashboard = () => {
   const copyKey = (text: string, id: string) => {
     navigator.clipboard.writeText(text);
     setCopiedId(id);
+    setTimeout(() => setCopiedId(null), 2000);
+  };
+
+  const copyAsCurl = (apiKey: string, id: string) => {
+    const curl = `curl -X POST "${BASE_URL}" \\
+  -H "Content-Type: application/json" \\
+  -H "x-api-key: ${apiKey}" \\
+  -d '{"query": "Top startups in Africa", "mode": "default"}'`;
+    navigator.clipboard.writeText(curl);
+    setCopiedId(`curl-${id}`);
+    toast({ title: "cURL copied", description: "Paste into your terminal to test." });
     setTimeout(() => setCopiedId(null), 2000);
   };
 
