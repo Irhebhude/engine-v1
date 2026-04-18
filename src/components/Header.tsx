@@ -166,11 +166,11 @@ const Header = () => {
 
         {/* Mobile hamburger */}
         <button
-          className="sm:hidden p-2 text-muted-foreground hover:text-foreground transition-colors"
+          className="sm:hidden flex items-center justify-center min-w-[48px] min-h-[48px] p-2 rounded-lg bg-primary/10 border border-primary/30 text-primary hover:bg-primary/20 active:bg-primary/30 transition-colors"
           onClick={() => setMobileOpen(!mobileOpen)}
           aria-label="Toggle menu"
         >
-          {mobileOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
+          {mobileOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
         </button>
       </div>
 

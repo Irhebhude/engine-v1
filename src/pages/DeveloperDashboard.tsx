@@ -91,6 +91,31 @@ const DeveloperDashboard = () => {
       const hashArray = Array.from(new Uint8Array(hashBuffer));
       const keyHash = hashArray.map(b => b.toString(16).padStart(2, "0")).join("");
 
+      // Ensure profile exists (FK requirement) before inserting api key
+      const { data: existingProfile } = await supabase
+        .from("profiles")
+        .select("id")
+        .eq("id", user.id)
+        .maybeSingle();
+
+      if (!existingProfile) {
+        // Refresh session — server-side trigger should have created it
+        await supabase.auth.refreshSession();
+        const { data: retry } = await supabase
+          .from("profiles")
+          .select("id")
+          .eq("id", user.id)
+          .maybeSingle();
+        if (!retry) {
+          toast({
+            title: "Profile not ready",
+            description: "Please sign out and sign back in once, then try again.",
+            variant: "destructive",
+          });
+          return;
+        }
+      }
+
       const { error } = await supabase.from("api_keys").insert({
         user_id: user.id,
         key_hash: keyHash,
