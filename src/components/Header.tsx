@@ -38,17 +38,9 @@ const Header = () => {
   };
 
   return (
+    <>
     <header className="fixed top-0 left-0 right-0 z-50 glass border-b border-border/30">
       <div className="container mx-auto flex items-center justify-between h-14 px-4 gap-2">
-        {/* Mobile hamburger — left side */}
-        <button
-          className="sm:hidden flex items-center justify-center min-w-[44px] min-h-[44px] p-2 rounded-lg bg-primary/10 border border-primary/30 text-primary hover:bg-primary/20 active:bg-primary/30 transition-colors shrink-0"
-          onClick={() => setMobileOpen(!mobileOpen)}
-          aria-label="Toggle menu"
-        >
-          {mobileOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
-        </button>
-
         <Link to="/" className="flex items-center gap-2 group flex-1 sm:flex-initial">
           <div className="w-9 h-9 rounded-xl overflow-hidden ring-1 ring-primary/30 group-hover:ring-primary/60 transition-all bg-background shrink-0">
             <img src="/search-poi-logo.jpg" alt="SEARCH-POI logo" className="w-full h-full object-cover" />
@@ -262,6 +254,16 @@ const Header = () => {
         </div>
       )}
     </header>
+
+    {/* Floating menu button — bottom-left corner (mobile only) */}
+    <button
+      onClick={() => setMobileOpen(!mobileOpen)}
+      aria-label="Toggle menu"
+      className="sm:hidden fixed bottom-5 left-5 z-[60] w-14 h-14 rounded-full bg-primary text-primary-foreground flex items-center justify-center shadow-[0_10px_30px_-5px_hsl(var(--primary)/0.6),0_0_0_1px_hsl(var(--primary)/0.3)] hover:scale-105 active:scale-95 transition-transform"
+    >
+      {mobileOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
+    </button>
+    </>
   );
 };
 
