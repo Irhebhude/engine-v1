@@ -254,6 +254,16 @@ const Header = () => {
         </div>
       )}
     </header>
+
+    {/* Floating menu button — bottom-left corner (mobile only) */}
+    <button
+      onClick={() => setMobileOpen(!mobileOpen)}
+      aria-label="Toggle menu"
+      className="sm:hidden fixed bottom-5 left-5 z-[60] w-14 h-14 rounded-full bg-primary text-primary-foreground flex items-center justify-center shadow-[0_10px_30px_-5px_hsl(var(--primary)/0.6),0_0_0_1px_hsl(var(--primary)/0.3)] hover:scale-105 active:scale-95 transition-transform"
+    >
+      {mobileOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
+    </button>
+    </>
   );
 };
 
