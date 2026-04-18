@@ -43,6 +43,8 @@ const DeveloperDashboard = () => {
   const [testing, setTesting] = useState(false);
   const [activeTab, setActiveTab] = useState<"keys" | "docs" | "test" | "usage">("keys");
 
+  const BASE_URL = `https://${import.meta.env.VITE_SUPABASE_PROJECT_ID}.supabase.co/functions/v1/poi-api`;
+
   useEffect(() => {
     if (!user) { navigate("/auth"); return; }
     fetchKeys();
@@ -202,7 +204,6 @@ const DeveloperDashboard = () => {
     }
   };
 
-  const BASE_URL = `https://${import.meta.env.VITE_SUPABASE_PROJECT_ID}.supabase.co/functions/v1/poi-api`;
 
   return (
     <div className="min-h-screen bg-background">
@@ -260,8 +261,12 @@ const DeveloperDashboard = () => {
                   <p className="text-xs text-primary font-medium mb-2">⚠️ Copy this key now — you won't see it again!</p>
                   <div className="flex items-center gap-2">
                     <code className="flex-1 text-sm bg-secondary/30 p-2 rounded font-mono text-foreground break-all">{revealedKey}</code>
-                    <button onClick={() => copyKey(revealedKey, "new")} className="p-2 hover:bg-accent/20 rounded-lg transition-colors">
+                    <button onClick={() => copyKey(revealedKey, "new")} title="Copy key" className="p-2 hover:bg-accent/20 rounded-lg transition-colors">
                       {copiedId === "new" ? <Check className="w-4 h-4 text-[hsl(142,70%,50%)]" /> : <Copy className="w-4 h-4 text-muted-foreground" />}
+                    </button>
+                    <button onClick={() => copyAsCurl(revealedKey, "new")} title="Copy as cURL" className="p-2 hover:bg-accent/20 rounded-lg transition-colors flex items-center gap-1 text-xs text-muted-foreground">
+                      {copiedId === "curl-new" ? <Check className="w-4 h-4 text-[hsl(142,70%,50%)]" /> : <Terminal className="w-4 h-4" />}
+                      <span className="hidden sm:inline">cURL</span>
                     </button>
                   </div>
                 </motion.div>
@@ -277,17 +282,25 @@ const DeveloperDashboard = () => {
               ) : (
                 <div className="space-y-2">
                   {keys.map((k) => (
-                    <div key={k.id} className="glass rounded-xl p-4 flex items-center gap-4">
+                    <div key={k.id} className="glass rounded-xl p-4 flex items-center gap-3 sm:gap-4">
                       <Key className="w-4 h-4 text-primary shrink-0" />
                       <div className="flex-1 min-w-0">
-                        <p className="text-sm font-medium text-foreground">{k.name}</p>
-                        <p className="text-xs text-muted-foreground font-mono">{k.key_prefix}</p>
+                        <p className="text-sm font-medium text-foreground truncate">{k.name}</p>
+                        <p className="text-xs text-muted-foreground font-mono truncate">{k.key_prefix}</p>
                       </div>
-                      <div className="text-right text-xs text-muted-foreground shrink-0">
+                      <div className="text-right text-xs text-muted-foreground shrink-0 hidden sm:block">
                         <p>{k.credits_remaining} credits</p>
                         <p>{k.total_calls} calls</p>
                       </div>
-                      <button onClick={() => deleteKey(k.id)} className="p-2 text-destructive/60 hover:text-destructive transition-colors">
+                      <button
+                        onClick={() => copyAsCurl(k.key_prefix.replace("...", "{your_full_key}"), k.id)}
+                        title="Copy as cURL (replace {your_full_key} with your saved key)"
+                        className="p-2 rounded-lg hover:bg-accent/20 transition-colors flex items-center gap-1 text-xs text-muted-foreground hover:text-primary"
+                      >
+                        {copiedId === `curl-${k.id}` ? <Check className="w-4 h-4 text-[hsl(142,70%,50%)]" /> : <Terminal className="w-4 h-4" />}
+                        <span className="hidden md:inline">cURL</span>
+                      </button>
+                      <button onClick={() => deleteKey(k.id)} title="Delete key" className="p-2 text-destructive/60 hover:text-destructive transition-colors">
                         <Trash2 className="w-4 h-4" />
                       </button>
                     </div>
