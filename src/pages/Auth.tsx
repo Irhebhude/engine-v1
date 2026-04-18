@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { motion } from "framer-motion";
-import { Zap, Mail, Lock, User, Eye, EyeOff, Gift } from "lucide-react";
+import { Mail, Lock, User, Eye, EyeOff, Gift } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 import SEOHead from "@/components/SEOHead";
 import { useToast } from "@/hooks/use-toast";
@@ -95,10 +95,10 @@ const Auth = () => {
         {/* Logo */}
         <div className="text-center mb-8">
           <div className="inline-flex items-center gap-2 mb-4">
-            <div className="p-2 rounded-lg bg-primary/10">
-              <Zap className="w-6 h-6 text-primary" />
+            <div className="w-12 h-12 rounded-xl overflow-hidden ring-1 ring-primary/30 bg-background">
+              <img src="/search-poi-logo.jpg" alt="SEARCH-POI logo" className="w-full h-full object-cover" />
             </div>
-            <span className="text-2xl font-bold text-foreground">
+            <span className="text-2xl font-bold text-foreground tracking-tight">
               SEARCH<span className="text-primary">-POI</span>
             </span>
           </div>

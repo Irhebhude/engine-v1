@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
-import { Zap, Clock, Menu, X, Gift, LogOut, User, Shield, Star, Trophy, Code, Trash2, Copy } from "lucide-react";
+import { Clock, Menu, X, Gift, LogOut, User, Shield, Star, Trophy, Code, Trash2, Copy } from "lucide-react";
 import SearchHistory from "@/components/SearchHistory";
 import { clearSearchHistory } from "@/lib/search-context";
 import { useToast } from "@/hooks/use-toast";
@@ -41,10 +41,10 @@ const Header = () => {
     <header className="fixed top-0 left-0 right-0 z-50 glass border-b border-border/30">
       <div className="container mx-auto flex items-center justify-between h-14 px-4">
         <Link to="/" className="flex items-center gap-2 group">
-          <div className="p-1.5 rounded-lg bg-primary/10 group-hover:bg-primary/20 transition-colors">
-            <Zap className="w-5 h-5 text-primary" />
+          <div className="w-9 h-9 rounded-xl overflow-hidden ring-1 ring-primary/30 group-hover:ring-primary/60 transition-all bg-background">
+            <img src="/search-poi-logo.jpg" alt="SEARCH-POI logo" className="w-full h-full object-cover" />
           </div>
-          <span className="font-bold text-lg text-foreground">
+          <span className="font-bold text-lg text-foreground tracking-tight">
             SEARCH<span className="text-primary">-POI</span>
           </span>
         </Link>
