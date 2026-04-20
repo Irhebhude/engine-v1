@@ -1,1 +1,4 @@
 project_id = "gnmliljrkkkomnbraqkp"
+
+[functions.poi-crawler]
+verify_jwt = false
