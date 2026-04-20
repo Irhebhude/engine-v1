@@ -203,6 +203,120 @@ export type Database = {
         }
         Relationships: []
       }
+      crawl_domains: {
+        Row: {
+          crawl_delay_ms: number
+          created_at: string
+          domain: string
+          is_blocked: boolean
+          is_priority: boolean
+          last_robots_check: string | null
+          respect_robots: boolean
+          robots_disallow: string[] | null
+        }
+        Insert: {
+          crawl_delay_ms?: number
+          created_at?: string
+          domain: string
+          is_blocked?: boolean
+          is_priority?: boolean
+          last_robots_check?: string | null
+          respect_robots?: boolean
+          robots_disallow?: string[] | null
+        }
+        Update: {
+          crawl_delay_ms?: number
+          created_at?: string
+          domain?: string
+          is_blocked?: boolean
+          is_priority?: boolean
+          last_robots_check?: string | null
+          respect_robots?: boolean
+          robots_disallow?: string[] | null
+        }
+        Relationships: []
+      }
+      crawl_queue: {
+        Row: {
+          attempts: number
+          created_at: string
+          domain: string
+          id: string
+          last_error: string | null
+          priority: number
+          scheduled_at: string
+          status: string
+          url: string
+        }
+        Insert: {
+          attempts?: number
+          created_at?: string
+          domain: string
+          id?: string
+          last_error?: string | null
+          priority?: number
+          scheduled_at?: string
+          status?: string
+          url: string
+        }
+        Update: {
+          attempts?: number
+          created_at?: string
+          domain?: string
+          id?: string
+          last_error?: string | null
+          priority?: number
+          scheduled_at?: string
+          status?: string
+          url?: string
+        }
+        Relationships: []
+      }
+      crawled_pages: {
+        Row: {
+          content_md: string | null
+          country: string | null
+          created_at: string
+          description: string | null
+          domain: string
+          id: string
+          language: string | null
+          last_crawled_at: string
+          title: string | null
+          trust_score: number
+          tsv: unknown
+          url: string
+        }
+        Insert: {
+          content_md?: string | null
+          country?: string | null
+          created_at?: string
+          description?: string | null
+          domain: string
+          id?: string
+          language?: string | null
+          last_crawled_at?: string
+          title?: string | null
+          trust_score?: number
+          tsv?: unknown
+          url: string
+        }
+        Update: {
+          content_md?: string | null
+          country?: string | null
+          created_at?: string
+          description?: string | null
+          domain?: string
+          id?: string
+          language?: string | null
+          last_crawled_at?: string
+          title?: string | null
+          trust_score?: number
+          tsv?: unknown
+          url?: string
+        }
+        Relationships: []
+      }
       feedback: {
         Row: {
           ai_response: string | null
@@ -767,6 +881,19 @@ export type Database = {
       process_referral: {
         Args: { referral_code_input: string }
         Returns: boolean
+      }
+      search_poi_index: {
+        Args: { query_text: string; result_limit?: number }
+        Returns: {
+          description: string
+          domain: string
+          is_priority: boolean
+          last_crawled_at: string
+          rank: number
+          title: string
+          trust_score: number
+          url: string
+        }[]
       }
       update_signup_ip: { Args: { ip_address: string }; Returns: undefined }
       verify_referral: { Args: never; Returns: undefined }
