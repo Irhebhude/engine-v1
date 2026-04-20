@@ -4,6 +4,8 @@ import { motion } from "framer-motion";
 import { Brain, Zap, Globe, Shield, Cpu, Layers, MapPin, Crown, Building2, TrendingUp, BarChart3, LineChart, ArrowRight } from "lucide-react";
 import SearchBar from "@/components/SearchBar";
 import Header from "@/components/Header";
+import Footer from "@/components/Footer";
+import IndependenceBadge from "@/components/IndependenceBadge";
 import AdSense from "@/components/AdSense";
 import SEOHead from "@/components/SEOHead";
 import LiveActivityFeed from "@/components/LiveActivityFeed";
@@ -73,6 +75,7 @@ const Index = () => {
           transition={{ duration: 0.5 }}
           className="flex flex-col items-center gap-4 mb-8 sm:mb-10"
         >
+          <IndependenceBadge />
           <div className="w-16 h-16 sm:w-20 sm:h-20 rounded-3xl overflow-hidden ring-1 ring-primary/30 shadow-[0_20px_60px_-20px_hsl(var(--primary)/0.45)]">
             <img src="/search-poi-logo.jpg" alt="SEARCH-POI" className="w-full h-full object-cover" />
           </div>
@@ -207,14 +210,9 @@ const Index = () => {
         </motion.div>
 
         <AdSense adSlot="9944378861" adFormat="horizontal" className="mt-12" />
-
-        <footer className="text-center mt-16 text-xs text-muted-foreground">
-          <p>Founded by <span className="text-foreground">Prosper Ozoya Irhebhude</span> · POI Foundation</p>
-          <p className="mt-1">Powered by <span className="text-primary font-semibold">SEARCH-POI Engine v1</span></p>
-          <p className="mt-2"><Link to="/policies" className="text-primary hover:underline">Policies & Governance</Link></p>
-        </footer>
       </section>
 
+      <Footer />
       <LocationSearch isOpen={showLocationSearch} onClose={() => setShowLocationSearch(false)} />
     </div>
   );

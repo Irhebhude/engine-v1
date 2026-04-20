@@ -45,9 +45,14 @@ const Header = () => {
           <div className="w-9 h-9 rounded-xl overflow-hidden ring-1 ring-primary/30 group-hover:ring-primary/60 transition-all bg-background shrink-0">
             <img src="/search-poi-logo.jpg" alt="SEARCH-POI logo" className="w-full h-full object-cover" />
           </div>
-          <span className="font-bold text-lg text-foreground tracking-tight">
-            SEARCH<span className="text-primary">-POI</span>
-          </span>
+          <div className="flex flex-col leading-none">
+            <span className="font-bold text-lg text-foreground tracking-tight">
+              SEARCH<span className="text-primary">-POI</span>
+            </span>
+            <span className="hidden sm:inline text-[9px] text-muted-foreground font-medium tracking-wider uppercase mt-0.5">
+              by POI Foundation
+            </span>
+          </div>
         </Link>
 
         {/* Desktop nav */}

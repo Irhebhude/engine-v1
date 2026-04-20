@@ -244,6 +244,10 @@ const Auth = () => {
             <span className="text-primary font-medium">{isLogin ? "Sign Up" : "Sign In"}</span>
           </button>
         </div>
+
+        <p className="mt-5 text-center text-[10px] text-muted-foreground tracking-wider uppercase">
+          An independent product of <span className="text-primary font-semibold">POI Foundation</span>
+        </p>
       </motion.div>
     </div>
   );
