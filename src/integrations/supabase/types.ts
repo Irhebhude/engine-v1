@@ -10,7 +10,7 @@ export type Database = {
   // Allows to automatically instantiate createClient with right options
   // instead of createClient<Database, { PostgrestVersion: 'XX' }>(URL, KEY)
   __InternalSupabase: {
-    PostgrestVersion: "14.1"
+    PostgrestVersion: "14.5"
   }
   public: {
     Tables: {
@@ -200,6 +200,120 @@ export type Database = {
           id?: string
           message?: string
           subject?: string
+        }
+        Relationships: []
+      }
+      crawl_domains: {
+        Row: {
+          crawl_delay_ms: number
+          created_at: string
+          domain: string
+          is_blocked: boolean
+          is_priority: boolean
+          last_robots_check: string | null
+          respect_robots: boolean
+          robots_disallow: string[] | null
+        }
+        Insert: {
+          crawl_delay_ms?: number
+          created_at?: string
+          domain: string
+          is_blocked?: boolean
+          is_priority?: boolean
+          last_robots_check?: string | null
+          respect_robots?: boolean
+          robots_disallow?: string[] | null
+        }
+        Update: {
+          crawl_delay_ms?: number
+          created_at?: string
+          domain?: string
+          is_blocked?: boolean
+          is_priority?: boolean
+          last_robots_check?: string | null
+          respect_robots?: boolean
+          robots_disallow?: string[] | null
+        }
+        Relationships: []
+      }
+      crawl_queue: {
+        Row: {
+          attempts: number
+          created_at: string
+          domain: string
+          id: string
+          last_error: string | null
+          priority: number
+          scheduled_at: string
+          status: string
+          url: string
+        }
+        Insert: {
+          attempts?: number
+          created_at?: string
+          domain: string
+          id?: string
+          last_error?: string | null
+          priority?: number
+          scheduled_at?: string
+          status?: string
+          url: string
+        }
+        Update: {
+          attempts?: number
+          created_at?: string
+          domain?: string
+          id?: string
+          last_error?: string | null
+          priority?: number
+          scheduled_at?: string
+          status?: string
+          url?: string
+        }
+        Relationships: []
+      }
+      crawled_pages: {
+        Row: {
+          content_md: string | null
+          country: string | null
+          created_at: string
+          description: string | null
+          domain: string
+          id: string
+          language: string | null
+          last_crawled_at: string
+          title: string | null
+          trust_score: number
+          tsv: unknown
+          url: string
+        }
+        Insert: {
+          content_md?: string | null
+          country?: string | null
+          created_at?: string
+          description?: string | null
+          domain: string
+          id?: string
+          language?: string | null
+          last_crawled_at?: string
+          title?: string | null
+          trust_score?: number
+          tsv?: unknown
+          url: string
+        }
+        Update: {
+          content_md?: string | null
+          country?: string | null
+          created_at?: string
+          description?: string | null
+          domain?: string
+          id?: string
+          language?: string | null
+          last_crawled_at?: string
+          title?: string | null
+          trust_score?: number
+          tsv?: unknown
+          url?: string
         }
         Relationships: []
       }
@@ -768,6 +882,19 @@ export type Database = {
         Args: { referral_code_input: string }
         Returns: boolean
       }
+      search_poi_index: {
+        Args: { query_text: string; result_limit?: number }
+        Returns: {
+          description: string
+          domain: string
+          is_priority: boolean
+          last_crawled_at: string
+          rank: number
+          title: string
+          trust_score: number
+          url: string
+        }[]
+      }
       update_signup_ip: { Args: { ip_address: string }; Returns: undefined }
       verify_referral: { Args: never; Returns: undefined }
     }
@@ -788,12 +915,12 @@ export type Tables<
   DefaultSchemaTableNameOrOptions extends
     | keyof (DefaultSchema["Tables"] & DefaultSchema["Views"])
     | { schema: keyof DatabaseWithoutInternals },
-  TableName extends DefaultSchemaTableNameOrOptions extends {
+  TableName extends (DefaultSchemaTableNameOrOptions extends {
     schema: keyof DatabaseWithoutInternals
   }
     ? keyof (DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"] &
         DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Views"])
-    : never = never,
+    : never) = never,
 > = DefaultSchemaTableNameOrOptions extends {
   schema: keyof DatabaseWithoutInternals
 }
@@ -817,11 +944,11 @@ export type TablesInsert<
   DefaultSchemaTableNameOrOptions extends
     | keyof DefaultSchema["Tables"]
     | { schema: keyof DatabaseWithoutInternals },
-  TableName extends DefaultSchemaTableNameOrOptions extends {
+  TableName extends (DefaultSchemaTableNameOrOptions extends {
     schema: keyof DatabaseWithoutInternals
   }
     ? keyof DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"]
-    : never = never,
+    : never) = never,
 > = DefaultSchemaTableNameOrOptions extends {
   schema: keyof DatabaseWithoutInternals
 }
@@ -842,11 +969,11 @@ export type TablesUpdate<
   DefaultSchemaTableNameOrOptions extends
     | keyof DefaultSchema["Tables"]
     | { schema: keyof DatabaseWithoutInternals },
-  TableName extends DefaultSchemaTableNameOrOptions extends {
+  TableName extends (DefaultSchemaTableNameOrOptions extends {
     schema: keyof DatabaseWithoutInternals
   }
     ? keyof DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"]
-    : never = never,
+    : never) = never,
 > = DefaultSchemaTableNameOrOptions extends {
   schema: keyof DatabaseWithoutInternals
 }
@@ -867,11 +994,11 @@ export type Enums<
   DefaultSchemaEnumNameOrOptions extends
     | keyof DefaultSchema["Enums"]
     | { schema: keyof DatabaseWithoutInternals },
-  EnumName extends DefaultSchemaEnumNameOrOptions extends {
+  EnumName extends (DefaultSchemaEnumNameOrOptions extends {
     schema: keyof DatabaseWithoutInternals
   }
     ? keyof DatabaseWithoutInternals[DefaultSchemaEnumNameOrOptions["schema"]]["Enums"]
-    : never = never,
+    : never) = never,
 > = DefaultSchemaEnumNameOrOptions extends {
   schema: keyof DatabaseWithoutInternals
 }
@@ -884,11 +1011,11 @@ export type CompositeTypes<
   PublicCompositeTypeNameOrOptions extends
     | keyof DefaultSchema["CompositeTypes"]
     | { schema: keyof DatabaseWithoutInternals },
-  CompositeTypeName extends PublicCompositeTypeNameOrOptions extends {
+  CompositeTypeName extends (PublicCompositeTypeNameOrOptions extends {
     schema: keyof DatabaseWithoutInternals
   }
     ? keyof DatabaseWithoutInternals[PublicCompositeTypeNameOrOptions["schema"]]["CompositeTypes"]
-    : never = never,
+    : never) = never,
 > = PublicCompositeTypeNameOrOptions extends {
   schema: keyof DatabaseWithoutInternals
 }
