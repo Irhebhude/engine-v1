@@ -1,5 +1,30 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { aiWithFailover } from "../_shared/ai-failover.ts";
+import { getLiveFacts, factsToPrompt } from "../_shared/live-facts.ts";
+
+const TRUTH_RULES = `
+ANTI-HALLUCINATION CONTRACT (highest priority, overrides style rules):
+- Never invent facts, numbers, names, dates, laws, prices or citations. If you are not sure, say "I don't have verified data on this" and say what would confirm it.
+- Separate clearly: VERIFIED (from the live data block or well-established knowledge), ESTIMATED (a calculation you show step by step), and UNCERTAIN.
+- For anything time-sensitive (prices, rates, news, officeholders, scores), use ONLY the LIVE DATA block below. If it is missing there, say the live figure is unavailable rather than guessing.
+- Never fabricate a URL. Only reference sources you were given.
+- Show the arithmetic for any number you derive.
+- Keep a "📊 Confidence: High/Medium/Low" line and briefly say why.
+`;
+
+let factsCache: { at: number; text: string } | null = null;
+const FACTS_TTL = 5 * 60 * 1000;
+
+async function liveFactsBlock(): Promise<string> {
+  if (factsCache && Date.now() - factsCache.at < FACTS_TTL) return factsCache.text;
+  try {
+    const text = factsToPrompt(await getLiveFacts());
+    factsCache = { at: Date.now(), text };
+    return text;
+  } catch {
+    return `TODAY (UTC): ${new Date().toISOString()}\nLive data feed unavailable — say so instead of guessing current prices or rates.`;
+  }
+}
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
