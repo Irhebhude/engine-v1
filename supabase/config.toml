@@ -1,4 +1,25 @@
-project_id = "gnmliljrkkkomnbraqkp"
+project_id = "cthhyjobjxdyknzcieyq"
 
-[functions.poi-crawler]
+[functions.summarize-url]
+verify_jwt = false
+
+[functions.image-search]
+verify_jwt = false
+
+[functions.video-search]
+verify_jwt = false
+
+[functions.news-search]
+verify_jwt = false
+
+[functions.feedback-ai]
+verify_jwt = false
+
+[functions.generate-blueprint]
+verify_jwt = false
+
+[functions.poi-api]
+verify_jwt = false
+
+[functions.ayrshare-post]
 verify_jwt = false

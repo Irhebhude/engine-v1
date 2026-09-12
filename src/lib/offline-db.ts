@@ -1,153 +1,128 @@
-import Dexie, { type Table } from 'dexie';
+import { openDB, type IDBPDatabase } from "idb";
+import { POI_SEED, type POI } from "@/data/poi-seed";
 
-export interface POIRecord {
-  id: string;
-  name: string;
-  category: string;
-  lat: number;
-  lon: number;
-  address?: string;
-  city?: string;
-  state?: string;
-  country?: string;
-  phone?: string;
-  website?: string;
-  description?: string;
-  tags?: string[];
-  trustScore?: number;
-  lastUpdated?: string;
-}
+const DB_NAME = "searchpoi-offline";
+const DB_VERSION = 1;
+const POI_STORE = "pois";
+const ANSWER_STORE = "answers";
+const META_STORE = "meta";
 
-export interface CachedSearch {
-  id?: number;
-  query: string;
-  results: string; // JSON stringified
-  timestamp: number;
-}
+let dbPromise: Promise<IDBPDatabase> | null = null;
 
-export interface OfflineMeta {
-  key: string;
-  value: string;
-}
-
-class OfflineDatabase extends Dexie {
-  pois!: Table<POIRecord, string>;
-  cachedSearches!: Table<CachedSearch, number>;
-  meta!: Table<OfflineMeta, string>;
-
-  constructor() {
-    super('SearchPOIOffline');
-    this.version(1).stores({
-      pois: 'id, name, category, city, state, country, *tags',
-      cachedSearches: '++id, query, timestamp',
-      meta: 'key',
+function getDB() {
+  if (!dbPromise) {
+    dbPromise = openDB(DB_NAME, DB_VERSION, {
+      upgrade(db) {
+        if (!db.objectStoreNames.contains(POI_STORE)) {
+          db.createObjectStore(POI_STORE, { keyPath: "id" });
+        }
+        if (!db.objectStoreNames.contains(ANSWER_STORE)) {
+          db.createObjectStore(ANSWER_STORE);
+        }
+        if (!db.objectStoreNames.contains(META_STORE)) {
+          db.createObjectStore(META_STORE);
+        }
+      },
     });
   }
+  return dbPromise;
 }
 
-export const db = new OfflineDatabase();
-
-/** Seed POI data from a JSON array */
-export async function seedPOIData(data: POIRecord[]): Promise<number> {
-  await db.pois.bulkPut(data);
-  await db.meta.put({ key: 'lastSeedTime', value: new Date().toISOString() });
-  await db.meta.put({ key: 'poiCount', value: String(data.length) });
-  return data.length;
-}
-
-/** Check if DB has been seeded */
-export async function isSeeded(): Promise<boolean> {
-  const count = await db.pois.count();
-  return count > 0;
-}
-
-/** Get seed metadata */
-export async function getSeedInfo(): Promise<{ seeded: boolean; count: number; lastSeedTime: string | null }> {
-  const count = await db.pois.count();
-  const meta = await db.meta.get('lastSeedTime');
-  return {
-    seeded: count > 0,
-    count,
-    lastSeedTime: meta?.value ?? null,
-  };
-}
-
-/** Search POIs locally using text matching */
-export async function searchPOIsOffline(query: string, limit = 20): Promise<POIRecord[]> {
-  if (!query.trim()) return [];
-  const q = query.toLowerCase();
-  const allPois = await db.pois.toArray();
-  
-  const scored = allPois
-    .map((poi) => {
-      let score = 0;
-      const name = poi.name?.toLowerCase() ?? '';
-      const cat = poi.category?.toLowerCase() ?? '';
-      const city = poi.city?.toLowerCase() ?? '';
-      const desc = poi.description?.toLowerCase() ?? '';
-      const tags = poi.tags?.join(' ').toLowerCase() ?? '';
-
-      if (name.includes(q)) score += 10;
-      if (name.startsWith(q)) score += 5;
-      if (cat.includes(q)) score += 6;
-      if (city.includes(q)) score += 4;
-      if (desc.includes(q)) score += 2;
-      if (tags.includes(q)) score += 3;
-
-      return { poi, score };
-    })
-    .filter((s) => s.score > 0)
-    .sort((a, b) => b.score - a.score)
-    .slice(0, limit);
-
-  return scored.map((s) => s.poi);
-}
-
-/** Search POIs by proximity to a GPS coordinate */
-export async function searchPOIsByLocation(lat: number, lon: number, radiusKm = 10, limit = 20): Promise<POIRecord[]> {
-  const allPois = await db.pois.toArray();
-  
-  const withDist = allPois
-    .map((poi) => {
-      const dist = haversine(lat, lon, poi.lat, poi.lon);
-      return { poi, dist };
-    })
-    .filter((p) => p.dist <= radiusKm)
-    .sort((a, b) => a.dist - b.dist)
-    .slice(0, limit);
-
-  return withDist.map((p) => p.poi);
-}
-
-/** Cache a search result for offline replay */
-export async function cacheSearchResult(query: string, results: any): Promise<void> {
-  await db.cachedSearches.put({
-    query: query.toLowerCase(),
-    results: JSON.stringify(results),
-    timestamp: Date.now(),
-  });
-}
-
-/** Retrieve cached search result */
-export async function getCachedSearch(query: string): Promise<any | null> {
-  const cached = await db.cachedSearches
-    .where('query')
-    .equals(query.toLowerCase())
-    .last();
-  if (!cached) return null;
-  try {
-    return JSON.parse(cached.results);
-  } catch {
-    return null;
+export async function seedIfEmpty(): Promise<number> {
+  const db = await getDB();
+  const count = await db.count(POI_STORE);
+  if (count === 0) {
+    const tx = db.transaction(POI_STORE, "readwrite");
+    await Promise.all(POI_SEED.map((p) => tx.store.put(p)));
+    await tx.done;
+    await db.put(META_STORE, Date.now(), "lastSync");
+    return POI_SEED.length;
   }
+  return count;
 }
 
-function haversine(lat1: number, lon1: number, lat2: number, lon2: number): number {
-  const R = 6371;
-  const dLat = ((lat2 - lat1) * Math.PI) / 180;
-  const dLon = ((lon2 - lon1) * Math.PI) / 180;
-  const a =
-    Math.sin(dLat / 2) ** 2 +
-    Math.cos((lat1 * Math.PI) / 180) * Math.cos((lat2 * Math.PI) / 180) * Math.sin(dLon / 2) ** 2;
-  return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+export async function poiCount(): Promise<number> {
+  const db = await getDB();
+  return db.count(POI_STORE);
+}
+
+export async function lastSync(): Promise<number | null> {
+  const db = await getDB();
+  return (await db.get(META_STORE, "lastSync")) ?? null;
+}
+
+/** Re-seed / refresh the local POI cache from the bundled dataset plus any live source. */
+export async function syncPOIs(remoteUrl?: string): Promise<number> {
+  const db = await getDB();
+  let incoming: POI[] = POI_SEED;
+  if (remoteUrl && navigator.onLine) {
+    try {
+      const res = await fetch(remoteUrl);
+      if (res.ok) {
+        const json = await res.json();
+        const list: POI[] = Array.isArray(json) ? json : json.pois || [];
+        if (list.length) incoming = [...POI_SEED, ...list];
+      }
+    } catch {
+      /* keep bundled seed */
+    }
+  }
+  const tx = db.transaction(POI_STORE, "readwrite");
+  await Promise.all(incoming.map((p) => tx.store.put(p)));
+  await tx.done;
+  await db.put(META_STORE, Date.now(), "lastSync");
+  return db.count(POI_STORE);
+}
+
+function score(p: POI, terms: string[]): number {
+  const hay = `${p.name} ${p.category} ${p.city} ${p.state} ${p.address} ${p.tags.join(" ")}`.toLowerCase();
+  let s = 0;
+  for (const t of terms) {
+    if (!t) continue;
+    if (p.name.toLowerCase().includes(t)) s += 5;
+    if (p.tags.some((tag) => tag.includes(t))) s += 3;
+    if (hay.includes(t)) s += 1;
+  }
+  return s;
+}
+
+export async function searchPOIs(query: string, limit = 20): Promise<POI[]> {
+  const db = await getDB();
+  const all: POI[] = await db.getAll(POI_STORE);
+  const terms = query.toLowerCase().split(/\s+/).filter(Boolean);
+  if (!terms.length) return all.slice(0, limit);
+  return all
+    .map((p) => ({ p, s: score(p, terms) }))
+    .filter((x) => x.s > 0)
+    .sort((a, b) => b.s - a.s)
+    .slice(0, limit)
+    .map((x) => x.p);
+}
+
+/** Cache an AI answer so the same question works offline later. */
+export async function cacheAnswer(query: string, answer: string) {
+  if (!answer.trim()) return;
+  const db = await getDB();
+  await db.put(ANSWER_STORE, { answer, at: Date.now() }, query.trim().toLowerCase());
+}
+
+export async function getCachedAnswer(query: string): Promise<string | null> {
+  const db = await getDB();
+  const rec = await db.get(ANSWER_STORE, query.trim().toLowerCase());
+  return rec?.answer ?? null;
+}
+
+/** Build a readable offline answer from the local POI index. */
+export function formatOfflineAnswer(query: string, pois: POI[]): string {
+  if (!pois.length) {
+    return `**Offline mode** — no internet connection detected.\n\nI could not find anything matching "${query}" in the on-device index. Connect to the internet for full AI answers, or try a place, market, hospital, university or government agency name.`;
+  }
+  const lines = pois
+    .slice(0, 8)
+    .map(
+      (p, i) =>
+        `${i + 1}. **${p.name}** — ${p.category}, ${p.city}, ${p.state}\n   ${p.address}${p.phone ? `\n   📞 ${p.phone}` : ""}`,
+    )
+    .join("\n");
+  return `**Offline mode** — answered from the on-device SEARCH-POI index.\n\nHere is what matches "${query}":\n\n${lines}\n\n⚡ Key Takeaways\n- ${pois.length} local match${pois.length === 1 ? "" : "es"} found without any internet connection.\n- Phone numbers work over the normal mobile network.\n- Reconnect for live AI reasoning, web results and current prices.`;
 }

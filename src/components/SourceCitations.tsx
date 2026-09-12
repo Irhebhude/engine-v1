@@ -1,4 +1,4 @@
-import { useState, forwardRef } from "react";
+import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { ChevronDown, ExternalLink, Shield } from "lucide-react";
 
@@ -12,13 +12,13 @@ interface SourceCitationsProps {
   sources: SourceRef[];
 }
 
-const SourceCitations = forwardRef<HTMLDivElement, SourceCitationsProps>(({ sources }, ref) => {
+const SourceCitations = ({ sources }: SourceCitationsProps) => {
   const [open, setOpen] = useState(false);
 
   if (sources.length === 0) return null;
 
   return (
-    <div ref={ref} className="mt-4 border-t border-border/30 pt-3">
+    <div className="mt-4 border-t border-border/30 pt-3">
       <button
         onClick={() => setOpen(!open)}
         className="flex items-center gap-2 text-xs font-medium text-primary/80 hover:text-primary transition-colors w-full"
@@ -60,8 +60,6 @@ const SourceCitations = forwardRef<HTMLDivElement, SourceCitationsProps>(({ sour
       </AnimatePresence>
     </div>
   );
-});
-
-SourceCitations.displayName = "SourceCitations";
+};
 
 export default SourceCitations;

@@ -1,9 +1,7 @@
 import { useState } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
-import { Clock, Menu, X, Gift, LogOut, User, Shield, Star, Trophy, Code, Trash2, Copy } from "lucide-react";
+import { Zap, Clock, Menu, X, Gift, LogOut, User, Shield, Star, Trophy, Code } from "lucide-react";
 import SearchHistory from "@/components/SearchHistory";
-import { clearSearchHistory } from "@/lib/search-context";
-import { useToast } from "@/hooks/use-toast";
 import LiteModeToggle from "@/components/LiteModeToggle";
 import POIPointsBadge from "@/components/POIPointsBadge";
 import { useAuth } from "@/contexts/AuthContext";
@@ -21,38 +19,19 @@ const Header = () => {
   const location = useLocation();
   const navigate = useNavigate();
   const { user, profile, signOut, toggleLiteMode } = useAuth();
-  const { toast } = useToast();
   const [showHistory, setShowHistory] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
 
-  const handleClearHistory = () => {
-    clearSearchHistory();
-    toast({ title: "History cleared", description: "All search history has been removed." });
-    setShowHistory(false);
-  };
-
-  const copyReferralCode = () => {
-    if (!profile?.referral_code) return;
-    navigator.clipboard.writeText(profile.referral_code);
-    toast({ title: "Copied!", description: `Referral code ${profile.referral_code} copied.` });
-  };
-
   return (
-    <>
     <header className="fixed top-0 left-0 right-0 z-50 glass border-b border-border/30">
-      <div className="container mx-auto flex items-center justify-between h-14 px-4 gap-2">
-        <Link to="/" className="flex items-center gap-2 group flex-1 sm:flex-initial">
-          <div className="w-9 h-9 rounded-xl overflow-hidden ring-1 ring-primary/30 group-hover:ring-primary/60 transition-all bg-background shrink-0">
-            <img src="/search-poi-logo.jpg" alt="SEARCH-POI logo" className="w-full h-full object-cover" />
+      <div className="container mx-auto flex items-center justify-between h-14 px-4">
+        <Link to="/" className="flex items-center gap-2 group">
+          <div className="p-1.5 rounded-lg bg-primary/10 group-hover:bg-primary/20 transition-colors">
+            <Zap className="w-5 h-5 text-primary" />
           </div>
-          <div className="flex flex-col leading-none">
-            <span className="font-bold text-lg text-foreground tracking-tight">
-              SEARCH<span className="text-primary">-POI</span>
-            </span>
-            <span className="hidden sm:inline text-[9px] text-muted-foreground font-medium tracking-wider uppercase mt-0.5">
-              by POI Foundation
-            </span>
-          </div>
+          <span className="font-bold text-lg text-foreground">
+            SEARCH<span className="text-primary">-POI</span>
+          </span>
         </Link>
 
         {/* Desktop nav */}
@@ -112,35 +91,14 @@ const Header = () => {
             </Link>
           )}
 
-          <div className="flex items-center gap-1">
-            <button
-              onClick={() => setShowHistory(!showHistory)}
-              className="flex items-center gap-1.5 text-muted-foreground hover:text-foreground transition-colors"
-              title="Search History"
-            >
-              <Clock className="w-4 h-4" />
-              <span>History</span>
-            </button>
-            <button
-              onClick={handleClearHistory}
-              className="p-1 text-muted-foreground hover:text-destructive transition-colors"
-              title="Clear search history"
-            >
-              <Trash2 className="w-3.5 h-3.5" />
-            </button>
-          </div>
-
-          {profile?.referral_code && (
-            <button
-              onClick={copyReferralCode}
-              className="hidden md:flex items-center gap-1 px-2 py-1 rounded-md bg-primary/5 border border-primary/20 text-[10px] font-mono text-primary hover:bg-primary/10 transition-colors"
-              title="Click to copy your referral code"
-            >
-              <Gift className="w-3 h-3" />
-              {profile.referral_code}
-              <Copy className="w-3 h-3 opacity-60" />
-            </button>
-          )}
+          <button
+            onClick={() => setShowHistory(!showHistory)}
+            className="flex items-center gap-1.5 text-muted-foreground hover:text-foreground transition-colors"
+            title="Search History"
+          >
+            <Clock className="w-4 h-4" />
+            <span>History</span>
+          </button>
 
           {user ? (
             <div className="flex items-center gap-2">
@@ -168,8 +126,28 @@ const Header = () => {
             </Link>
           )}
 
+          {showHistory && (
+            <div className="absolute right-0 top-full mt-2 w-80">
+              <SearchHistory
+                isOpen={showHistory}
+                onClose={() => setShowHistory(false)}
+                onSelect={(q) => {
+                  setShowHistory(false);
+                  navigate(`/search?q=${encodeURIComponent(q)}`);
+                }}
+              />
+            </div>
+          )}
         </nav>
 
+        {/* Mobile hamburger */}
+        <button
+          className="sm:hidden p-2 text-muted-foreground hover:text-foreground transition-colors"
+          onClick={() => setMobileOpen(!mobileOpen)}
+          aria-label="Toggle menu"
+        >
+          {mobileOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
+        </button>
       </div>
 
       {/* Mobile dropdown */}
@@ -200,30 +178,12 @@ const Header = () => {
               {profile && profile.poi_points > 0 && <POIPointsBadge points={profile.poi_points} />}
             </div>
           )}
-          {profile?.referral_code && (
-            <button
-              onClick={() => { copyReferralCode(); setMobileOpen(false); }}
-              className="flex items-center gap-2 px-3 py-2 rounded-lg bg-primary/5 border border-primary/20 text-primary text-sm font-medium"
-            >
-              <Gift className="w-4 h-4" />
-              Your Code: <span className="font-mono">{profile.referral_code}</span>
-              <Copy className="w-3 h-3 ml-auto opacity-70" />
-            </button>
-          )}
-          <div className="flex items-center justify-between gap-2">
-            <button
-              onClick={() => { setMobileOpen(false); setShowHistory(!showHistory); }}
-              className="flex items-center gap-1.5 text-muted-foreground hover:text-foreground transition-colors"
-            >
-              <Clock className="w-4 h-4" /> History
-            </button>
-            <button
-              onClick={() => { handleClearHistory(); setMobileOpen(false); }}
-              className="flex items-center gap-1.5 text-destructive/80 hover:text-destructive text-xs"
-            >
-              <Trash2 className="w-3.5 h-3.5" /> Clear
-            </button>
-          </div>
+          <button
+            onClick={() => { setMobileOpen(false); setShowHistory(!showHistory); }}
+            className="flex items-center gap-1.5 text-muted-foreground hover:text-foreground transition-colors"
+          >
+            <Clock className="w-4 h-4" /> History
+          </button>
           {user ? (
             <>
               <div className="flex items-center gap-1.5 text-muted-foreground">
@@ -244,31 +204,7 @@ const Header = () => {
           )}
         </div>
       )}
-
-      {/* Global search history popover (desktop + mobile) */}
-      {showHistory && (
-        <div className="absolute right-2 sm:right-4 top-full mt-1 w-80 max-w-[calc(100vw-1rem)] z-50">
-          <SearchHistory
-            isOpen={showHistory}
-            onClose={() => setShowHistory(false)}
-            onSelect={(q) => {
-              setShowHistory(false);
-              navigate(`/search?q=${encodeURIComponent(q)}`);
-            }}
-          />
-        </div>
-      )}
     </header>
-
-    {/* Floating menu button — bottom-left corner (mobile only) */}
-    <button
-      onClick={() => setMobileOpen(!mobileOpen)}
-      aria-label="Toggle menu"
-      className="sm:hidden fixed bottom-5 left-5 z-[60] w-14 h-14 rounded-full bg-primary text-primary-foreground flex items-center justify-center shadow-[0_10px_30px_-5px_hsl(var(--primary)/0.6),0_0_0_1px_hsl(var(--primary)/0.3)] hover:scale-105 active:scale-95 transition-transform"
-    >
-      {mobileOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
-    </button>
-    </>
   );
 };
 

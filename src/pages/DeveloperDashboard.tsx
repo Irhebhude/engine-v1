@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
-import { Key, Copy, Check, Trash2, Plus, Code, BarChart3, Zap, Play, Loader2, Terminal } from "lucide-react";
+import { Key, Copy, Check, Trash2, Plus, Code, BarChart3, Zap, Eye, EyeOff, Play, Loader2 } from "lucide-react";
 import Header from "@/components/Header";
 import SEOHead from "@/components/SEOHead";
 import { useAuth } from "@/contexts/AuthContext";
@@ -43,8 +43,6 @@ const DeveloperDashboard = () => {
   const [testing, setTesting] = useState(false);
   const [activeTab, setActiveTab] = useState<"keys" | "docs" | "test" | "usage">("keys");
 
-  const BASE_URL = `https://${import.meta.env.VITE_SUPABASE_PROJECT_ID}.supabase.co/functions/v1/poi-api`;
-
   useEffect(() => {
     if (!user) { navigate("/auth"); return; }
     fetchKeys();
@@ -52,106 +50,45 @@ const DeveloperDashboard = () => {
   }, [user]);
 
   const fetchKeys = async () => {
-    const { data, error } = await supabase
-      .from("api_keys")
-      .select("id, key_prefix, name, credits_remaining, total_calls, is_active, created_at, last_used_at")
-      .order("created_at", { ascending: false });
-    if (error) {
-      console.error("Failed to fetch keys:", error);
-      toast({ title: "Error", description: "Failed to load API keys", variant: "destructive" });
-    }
-    setKeys((data as ApiKey[]) || []);
+    const { data } = await supabase.from("api_keys" as any).select("*").order("created_at", { ascending: false });
+    setKeys((data as any[]) || []);
     setLoading(false);
   };
 
   const fetchUsage = async () => {
-    const { data, error } = await supabase
-      .from("api_usage_log")
-      .select("id, query, mode, tokens_used, created_at")
-      .order("created_at", { ascending: false })
-      .limit(50);
-    if (error) console.error("Failed to fetch usage:", error);
-    setUsage((data as UsageEntry[]) || []);
+    const { data } = await supabase.from("api_usage_log" as any).select("*").order("created_at", { ascending: false }).limit(50);
+    setUsage((data as any[]) || []);
   };
 
-  const [generating, setGenerating] = useState(false);
-
   const generateKey = async () => {
-    if (!user) {
-      toast({ title: "Error", description: "You must be logged in to generate API keys", variant: "destructive" });
+    const rawKey = `poi_${crypto.randomUUID().replace(/-/g, "")}`;
+    const prefix = rawKey.slice(0, 12) + "...";
+    
+    const encoder = new TextEncoder();
+    const data = encoder.encode(rawKey);
+    const hashBuffer = await crypto.subtle.digest("SHA-256", data);
+    const hashArray = Array.from(new Uint8Array(hashBuffer));
+    const keyHash = hashArray.map(b => b.toString(16).padStart(2, "0")).join("");
+
+    const { error } = await supabase.from("api_keys" as any).insert({
+      user_id: user!.id,
+      key_hash: keyHash,
+      key_prefix: prefix,
+      name: newKeyName,
+    });
+
+    if (error) {
+      toast({ title: "Error", description: "Failed to create API key", variant: "destructive" });
       return;
     }
 
-    setGenerating(true);
-    try {
-      const rawKey = `poi_${crypto.randomUUID().replace(/-/g, "")}`;
-      const prefix = rawKey.slice(0, 12) + "...";
-
-      const encoder = new TextEncoder();
-      const data = encoder.encode(rawKey);
-      const hashBuffer = await crypto.subtle.digest("SHA-256", data);
-      const hashArray = Array.from(new Uint8Array(hashBuffer));
-      const keyHash = hashArray.map(b => b.toString(16).padStart(2, "0")).join("");
-
-      // Ensure profile exists (FK requirement) before inserting api key
-      const { data: existingProfile } = await supabase
-        .from("profiles")
-        .select("id")
-        .eq("id", user.id)
-        .maybeSingle();
-
-      if (!existingProfile) {
-        // Refresh session — server-side trigger should have created it
-        await supabase.auth.refreshSession();
-        const { data: retry } = await supabase
-          .from("profiles")
-          .select("id")
-          .eq("id", user.id)
-          .maybeSingle();
-        if (!retry) {
-          toast({
-            title: "Profile not ready",
-            description: "Please sign out and sign back in once, then try again.",
-            variant: "destructive",
-          });
-          return;
-        }
-      }
-
-      const { error } = await supabase.from("api_keys").insert({
-        user_id: user.id,
-        key_hash: keyHash,
-        key_prefix: prefix,
-        name: newKeyName || "Default",
-      });
-
-      if (error) {
-        console.error("Key generation error:", error);
-        if (error.message?.includes("policy")) {
-          toast({ title: "Permission Error", description: "Please sign out and sign back in, then try again.", variant: "destructive" });
-        } else {
-          toast({ title: "Error", description: error.message || "Failed to create API key", variant: "destructive" });
-        }
-        return;
-      }
-
-      setRevealedKey(rawKey);
-      toast({ title: "API Key Created", description: "Copy it now — you won't see it again!" });
-      await fetchKeys();
-    } catch (e: any) {
-      console.error("Key generation exception:", e);
-      toast({ title: "Error", description: e.message || "Unexpected error generating key", variant: "destructive" });
-    } finally {
-      setGenerating(false);
-    }
+    setRevealedKey(rawKey);
+    toast({ title: "API Key Created", description: "Copy it now — you won't see it again!" });
+    fetchKeys();
   };
 
   const deleteKey = async (id: string) => {
-    const { error } = await supabase.from("api_keys").delete().eq("id", id);
-    if (error) {
-      toast({ title: "Error", description: "Failed to delete key", variant: "destructive" });
-      return;
-    }
+    await supabase.from("api_keys" as any).delete().eq("id", id);
     toast({ title: "Key deleted" });
     fetchKeys();
   };
@@ -162,41 +99,16 @@ const DeveloperDashboard = () => {
     setTimeout(() => setCopiedId(null), 2000);
   };
 
-  const copyAsCurl = (apiKey: string, id: string) => {
-    const curl = `curl -X POST "${BASE_URL}" \\
-  -H "Content-Type: application/json" \\
-  -H "x-api-key: ${apiKey}" \\
-  -d '{"query": "Top startups in Africa", "mode": "default"}'`;
-    navigator.clipboard.writeText(curl);
-    setCopiedId(`curl-${id}`);
-    toast({ title: "cURL copied", description: "Paste into your terminal to test." });
-    setTimeout(() => setCopiedId(null), 2000);
-  };
-
   const runTest = async () => {
-    if (!testQuery.trim() || keys.length === 0) {
-      if (keys.length === 0) {
-        toast({ title: "No API Keys", description: "Generate an API key first before testing.", variant: "destructive" });
-      }
-      return;
-    }
+    if (!testQuery.trim() || keys.length === 0) return;
     setTesting(true);
     setTestResult(null);
     try {
-      const projectId = import.meta.env.VITE_SUPABASE_PROJECT_ID;
-      const resp = await fetch(
-        `https://${projectId}.supabase.co/functions/v1/poi-api`,
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            "x-api-key": "test-from-dashboard",
-          },
-          body: JSON.stringify({ query: testQuery, mode: "default" }),
-        }
-      );
-      const data = await resp.json();
-      setTestResult(data);
+      const resp = await supabase.functions.invoke("poi-api", {
+        body: { query: testQuery, mode: "default" },
+        headers: { "x-api-key": "test-from-dashboard" },
+      });
+      setTestResult(resp.data || resp.error);
     } catch (e: any) {
       setTestResult({ error: e.message });
     } finally {
@@ -204,6 +116,7 @@ const DeveloperDashboard = () => {
     }
   };
 
+  const BASE_URL = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/poi-api`;
 
   return (
     <div className="min-h-screen bg-background">
@@ -250,9 +163,8 @@ const DeveloperDashboard = () => {
                     placeholder="My App"
                   />
                 </div>
-                <Button onClick={generateKey} disabled={generating} className="gap-2">
-                  {generating ? <Loader2 className="w-4 h-4 animate-spin" /> : <Plus className="w-4 h-4" />}
-                  {generating ? "Generating..." : "Generate Key"}
+                <Button onClick={generateKey} className="gap-2">
+                  <Plus className="w-4 h-4" /> Generate Key
                 </Button>
               </div>
 
@@ -261,12 +173,8 @@ const DeveloperDashboard = () => {
                   <p className="text-xs text-primary font-medium mb-2">⚠️ Copy this key now — you won't see it again!</p>
                   <div className="flex items-center gap-2">
                     <code className="flex-1 text-sm bg-secondary/30 p-2 rounded font-mono text-foreground break-all">{revealedKey}</code>
-                    <button onClick={() => copyKey(revealedKey, "new")} title="Copy key" className="p-2 hover:bg-accent/20 rounded-lg transition-colors">
+                    <button onClick={() => copyKey(revealedKey, "new")} className="p-2 hover:bg-accent/20 rounded-lg transition-colors">
                       {copiedId === "new" ? <Check className="w-4 h-4 text-[hsl(142,70%,50%)]" /> : <Copy className="w-4 h-4 text-muted-foreground" />}
-                    </button>
-                    <button onClick={() => copyAsCurl(revealedKey, "new")} title="Copy as cURL" className="p-2 hover:bg-accent/20 rounded-lg transition-colors flex items-center gap-1 text-xs text-muted-foreground">
-                      {copiedId === "curl-new" ? <Check className="w-4 h-4 text-[hsl(142,70%,50%)]" /> : <Terminal className="w-4 h-4" />}
-                      <span className="hidden sm:inline">cURL</span>
                     </button>
                   </div>
                 </motion.div>
@@ -282,25 +190,17 @@ const DeveloperDashboard = () => {
               ) : (
                 <div className="space-y-2">
                   {keys.map((k) => (
-                    <div key={k.id} className="glass rounded-xl p-4 flex items-center gap-3 sm:gap-4">
+                    <div key={k.id} className="glass rounded-xl p-4 flex items-center gap-4">
                       <Key className="w-4 h-4 text-primary shrink-0" />
                       <div className="flex-1 min-w-0">
-                        <p className="text-sm font-medium text-foreground truncate">{k.name}</p>
-                        <p className="text-xs text-muted-foreground font-mono truncate">{k.key_prefix}</p>
+                        <p className="text-sm font-medium text-foreground">{k.name}</p>
+                        <p className="text-xs text-muted-foreground font-mono">{k.key_prefix}</p>
                       </div>
-                      <div className="text-right text-xs text-muted-foreground shrink-0 hidden sm:block">
+                      <div className="text-right text-xs text-muted-foreground shrink-0">
                         <p>{k.credits_remaining} credits</p>
                         <p>{k.total_calls} calls</p>
                       </div>
-                      <button
-                        onClick={() => copyAsCurl(k.key_prefix.replace("...", "{your_full_key}"), k.id)}
-                        title="Copy as cURL (replace {your_full_key} with your saved key)"
-                        className="p-2 rounded-lg hover:bg-accent/20 transition-colors flex items-center gap-1 text-xs text-muted-foreground hover:text-primary"
-                      >
-                        {copiedId === `curl-${k.id}` ? <Check className="w-4 h-4 text-[hsl(142,70%,50%)]" /> : <Terminal className="w-4 h-4" />}
-                        <span className="hidden md:inline">cURL</span>
-                      </button>
-                      <button onClick={() => deleteKey(k.id)} title="Delete key" className="p-2 text-destructive/60 hover:text-destructive transition-colors">
+                      <button onClick={() => deleteKey(k.id)} className="p-2 text-destructive/60 hover:text-destructive transition-colors">
                         <Trash2 className="w-4 h-4" />
                       </button>
                     </div>
@@ -407,11 +307,6 @@ print(response.json()["data"]["answer"])`}</pre>
           {activeTab === "test" && (
             <div className="glass rounded-xl p-6 space-y-4">
               <h3 className="text-lg font-semibold text-foreground">Test the API</h3>
-              {keys.length === 0 && (
-                <div className="p-3 rounded-lg bg-destructive/10 border border-destructive/20 text-sm text-destructive">
-                  You need to generate an API key first before testing.
-                </div>
-              )}
               <div className="flex gap-2">
                 <input
                   value={testQuery}
@@ -420,7 +315,7 @@ print(response.json()["data"]["answer"])`}</pre>
                   className="flex-1 px-4 py-2.5 rounded-lg bg-secondary/30 border border-border/30 text-sm text-foreground"
                   onKeyDown={(e) => e.key === "Enter" && runTest()}
                 />
-                <Button onClick={runTest} disabled={testing || !testQuery.trim() || keys.length === 0} className="gap-2">
+                <Button onClick={runTest} disabled={testing || !testQuery.trim()} className="gap-2">
                   {testing ? <Loader2 className="w-4 h-4 animate-spin" /> : <Play className="w-4 h-4" />}
                   Run
                 </Button>
