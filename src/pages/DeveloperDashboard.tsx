@@ -60,7 +60,29 @@ const DeveloperDashboard = () => {
     setUsage((data as any[]) || []);
   };
 
+  /** api_keys.user_id references profiles.id — make sure the row exists first. */
+  const ensureProfile = async () => {
+    if (!user) return false;
+    const { data } = await supabase.from("profiles").select("id").eq("id", user.id).maybeSingle();
+    if (data) return true;
+    const { error } = await supabase.from("profiles").insert({
+      id: user.id,
+      display_name:
+        (user.user_metadata as any)?.display_name ||
+        (user.user_metadata as any)?.full_name ||
+        user.email?.split("@")[0] ||
+        "User",
+    } as any);
+    return !error;
+  };
+
   const generateKey = async () => {
+    if (!user) { navigate("/auth"); return; }
+    const ok = await ensureProfile();
+    if (!ok) {
+      toast({ title: "Error", description: "Could not prepare your account profile. Please sign out and back in.", variant: "destructive" });
+      return;
+    }
     const rawKey = `poi_${crypto.randomUUID().replace(/-/g, "")}`;
     const prefix = rawKey.slice(0, 12) + "...";
     
