@@ -43,7 +43,10 @@ async function fetchFuelFor(country: string, product: "gasoline" | "diesel") {
     const html = await res.text();
     const text = html.replace(/<[^>]+>/g, " ").replace(/\s+/g, " ");
     const m = text.match(
-      new RegExp(`The current ${product} price in [^.]{1,60} is ([^.]{1,120})\\.`, "i"),
+      new RegExp(
+        `The current ${product} price in [A-Za-z .'-]{1,60} is (.{1,140}?)\\s+and was updated`,
+        "i",
+      ),
     );
     if (!m) return null;
     const dateM = text.match(/updated on (\d{2}-[A-Za-z]{3}-\d{4})/);
