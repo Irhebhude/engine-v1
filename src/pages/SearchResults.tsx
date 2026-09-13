@@ -26,6 +26,7 @@ import { streamSearch, webSearch, imageSearch, videoSearch, newsSearch } from "@
 import type { SearchMode, WebResult, ImageResult as ImageResultType, VideoResult as VideoResultType, NewsResult as NewsResultType } from "@/lib/search-api";
 import type { SourceRef } from "@/components/SourceCitations";
 import { addSearchToHistory, getRecentQueries } from "@/lib/search-context";
+import { seedIfEmpty, searchPOIs, formatOfflineAnswer, cacheAnswer, getCachedAnswer } from "@/lib/offline-db";
 import { useToast } from "@/hooks/use-toast";
 
 type SearchTab = "web" | "images" | "videos" | "news";

@@ -11,6 +11,8 @@ import LiveActivityFeed from "@/components/LiveActivityFeed";
 import TrendingTopics from "@/components/TrendingTopics";
 import LocationSearch from "@/components/LocationSearch";
 import FintechDashboard from "@/components/FintechDashboard";
+import OfflineStatusBar from "@/components/OfflineStatusBar";
+import LiveRates from "@/components/LiveRates";
 import heroBg from "@/assets/hero-bg.jpg";
 
 const FEATURES = [
