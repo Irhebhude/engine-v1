@@ -75,8 +75,12 @@ export async function getLiveFacts(): Promise<LiveFacts> {
   const [fxRaw, cryptoRaw, fuelRaw] = await Promise.all([
     getJson(FX_URL),
     getJson(CRYPTO_URL),
-    getJson(FUEL_URL),
+    Promise.all([
+      ...FUEL_COUNTRIES.map((c) => fetchFuelFor(c, "gasoline")),
+      fetchFuelFor("Nigeria", "diesel"),
+    ]).then((r) => r.filter(Boolean)),
   ]);
+
 
   const fx = fxRaw?.rates
     ? {
