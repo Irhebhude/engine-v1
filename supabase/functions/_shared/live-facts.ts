@@ -94,16 +94,13 @@ export async function getLiveFacts(): Promise<LiveFacts> {
   let fuel: LiveFacts["fuel"] = null;
   if (Array.isArray(fuelRaw) && fuelRaw.length) {
     fuel = {
-      note: "Retail pump prices from an open public dataset; local prices vary by station and state.",
-      source: FUEL_URL,
-      items: fuelRaw
-        .slice(0, 60)
-        .map((r: any) => ({
-          country: r.country ?? r.Country ?? "",
-          product: r.product ?? r.fuel ?? "gasoline",
-          price: String(r.price ?? r.Price ?? ""),
-        }))
-        .filter((r) => r.country && r.price),
+      note: "Retail pump prices from free public pages; local prices vary by station and state.",
+      source: FUEL_SOURCE,
+      items: (fuelRaw as any[]).map((r) => ({
+        country: r.country,
+        product: r.product,
+        price: r.asOf ? `${r.price} (as of ${r.asOf})` : r.price,
+      })),
     };
   }
 
