@@ -157,7 +157,12 @@ serve(async (req) => {
     if (!LOVABLE_API_KEY) throw new Error("LOVABLE_API_KEY is not configured");
 
     const systemPrompt = MODE_PROMPTS[mode] || MODE_PROMPTS.default;
-    const messages: any[] = [{ role: "system", content: systemPrompt }];
+    const facts = await liveFactsBlock();
+    const messages: any[] = [
+      { role: "system", content: systemPrompt },
+      { role: "system", content: TRUTH_RULES },
+      { role: "system", content: `LIVE DATA BLOCK\n${facts}` },
+    ];
 
     if (context.length > 0) {
       const contextStr = context.slice(-5).join(", ");

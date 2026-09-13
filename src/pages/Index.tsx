@@ -11,6 +11,8 @@ import LiveActivityFeed from "@/components/LiveActivityFeed";
 import TrendingTopics from "@/components/TrendingTopics";
 import LocationSearch from "@/components/LocationSearch";
 import FintechDashboard from "@/components/FintechDashboard";
+import OfflineStatusBar from "@/components/OfflineStatusBar";
+import LiveRates from "@/components/LiveRates";
 import heroBg from "@/assets/hero-bg.jpg";
 
 const FEATURES = [
@@ -169,6 +171,17 @@ const Index = () => {
             className="mb-8 sm:mb-12"
           >
             <FintechDashboard />
+          </motion.div>
+
+          {/* Live rates + offline readiness */}
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.45 }}
+            className="mb-8 sm:mb-12 space-y-3"
+          >
+            <OfflineStatusBar />
+            <LiveRates />
           </motion.div>
 
           {/* Features grid */}

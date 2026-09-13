@@ -32,7 +32,10 @@ const Referral = () => {
   const [referralDetails, setReferralDetails] = useState<ReferralDetail[]>([]);
   const [loading, setLoading] = useState(true);
 
-  const publishedUrl = "https://search-poi.lovable.app";
+  const publishedUrl =
+    typeof window !== "undefined" && !window.location.hostname.includes("lovableproject")
+      ? window.location.origin
+      : "https://engine-v1.lovable.app";
   const referralLink = profile?.referral_code
     ? `${publishedUrl}/auth?ref=${profile.referral_code}`
     : "";

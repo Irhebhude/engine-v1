@@ -26,6 +26,7 @@ import { streamSearch, webSearch, imageSearch, videoSearch, newsSearch } from "@
 import type { SearchMode, WebResult, ImageResult as ImageResultType, VideoResult as VideoResultType, NewsResult as NewsResultType } from "@/lib/search-api";
 import type { SourceRef } from "@/components/SourceCitations";
 import { addSearchToHistory, getRecentQueries } from "@/lib/search-context";
+import { seedIfEmpty, searchPOIs, formatOfflineAnswer, cacheAnswer, getCachedAnswer } from "@/lib/offline-db";
 import { useToast } from "@/hooks/use-toast";
 
 type SearchTab = "web" | "images" | "videos" | "news";
@@ -95,7 +96,24 @@ const SearchResults = () => {
       supabase.rpc("increment_search_count" as any).then(() => {});
       supabase.rpc("log_search_activity" as any, { search_query: q, search_mode: searchMode }).then(() => {});
 
+      const offlineAnswer = async () => {
+        const cached = await getCachedAnswer(q);
+        if (cached) {
+          setAnswer(cached);
+        } else {
+          await seedIfEmpty();
+          const pois = await searchPOIs(q);
+          setAnswer(formatOfflineAnswer(q, pois));
+        }
+        setIsStreaming(false);
+        setSearchTime(Math.round(performance.now() - start));
+      };
+
       const aiPromise = (async () => {
+        if (!navigator.onLine) {
+          await offlineAnswer();
+          return;
+        }
         try {
           await streamSearch({
             query: q,
@@ -108,12 +126,18 @@ const SearchResults = () => {
             onDone: () => {
               setIsStreaming(false);
               setSearchTime(Math.round(performance.now() - start));
+              cacheAnswer(q, accumulated);
             },
           });
         } catch (e: any) {
-          setIsStreaming(false);
-          setError(e.message);
-          toast({ title: "Search Error", description: e.message, variant: "destructive" });
+          try {
+            await offlineAnswer();
+            toast({ title: "Offline answer", description: "Live search unavailable — answered from the on-device index." });
+          } catch {
+            setIsStreaming(false);
+            setError(e.message);
+            toast({ title: "Search Error", description: e.message, variant: "destructive" });
+          }
         }
       })();
 

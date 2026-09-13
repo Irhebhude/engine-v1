@@ -23,9 +23,43 @@ export interface LiveFacts {
 const FX_URL = "https://open.er-api.com/v6/latest/USD";
 const CRYPTO_URL =
   "https://api.coingecko.com/api/v3/simple/price?ids=bitcoin,ethereum,tether,solana&vs_currencies=usd,ngn";
-// Global fuel price dataset, free and key-free (GlobalPetrolPrices mirror on GitHub datasets)
-const FUEL_URL =
-  "https://raw.githubusercontent.com/datasets/fuel-prices/main/data/fuel-prices.json";
+// Retail pump prices, free public pages (no key)
+const FUEL_COUNTRIES = [
+  "Nigeria", "Ghana", "Kenya", "South-Africa", "Egypt", "United-States",
+  "United-Kingdom", "India", "China", "Canada",
+];
+const FUEL_SOURCE = "globalpetrolprices.com (free public pages)";
+
+async function fetchFuelFor(country: string, product: "gasoline" | "diesel") {
+  try {
+    const ctrl = new AbortController();
+    const t = setTimeout(() => ctrl.abort(), 8000);
+    const res = await fetch(
+      `https://www.globalpetrolprices.com/${country}/${product}_prices/`,
+      { headers: { "User-Agent": "Mozilla/5.0 (SEARCH-POI Engine)" }, signal: ctrl.signal },
+    );
+    clearTimeout(t);
+    if (!res.ok) return null;
+    const html = await res.text();
+    const text = html.replace(/<[^>]+>/g, " ").replace(/\s+/g, " ");
+    const m = text.match(
+      new RegExp(
+        `The current ${product} price in [A-Za-z .'-]{1,60} is (.{1,140}?)\\s+and was updated`,
+        "i",
+      ),
+    );
+    if (!m) return null;
+    const dateM = text.match(/updated on (\d{2}-[A-Za-z]{3}-\d{4})/);
+    return {
+      country: country.replace(/-/g, " "),
+      product,
+      price: m[1].trim(),
+      asOf: dateM?.[1] ?? null,
+    };
+  } catch {
+    return null;
+  }
+}
 
 async function getJson(url: string, ms = 6000): Promise<any | null> {
   try {
@@ -44,8 +78,12 @@ export async function getLiveFacts(): Promise<LiveFacts> {
   const [fxRaw, cryptoRaw, fuelRaw] = await Promise.all([
     getJson(FX_URL),
     getJson(CRYPTO_URL),
-    getJson(FUEL_URL),
+    Promise.all([
+      ...FUEL_COUNTRIES.map((c) => fetchFuelFor(c, "gasoline")),
+      fetchFuelFor("Nigeria", "diesel"),
+    ]).then((r) => r.filter(Boolean)),
   ]);
+
 
   const fx = fxRaw?.rates
     ? {
@@ -59,16 +97,13 @@ export async function getLiveFacts(): Promise<LiveFacts> {
   let fuel: LiveFacts["fuel"] = null;
   if (Array.isArray(fuelRaw) && fuelRaw.length) {
     fuel = {
-      note: "Retail pump prices from an open public dataset; local prices vary by station and state.",
-      source: FUEL_URL,
-      items: fuelRaw
-        .slice(0, 60)
-        .map((r: any) => ({
-          country: r.country ?? r.Country ?? "",
-          product: r.product ?? r.fuel ?? "gasoline",
-          price: String(r.price ?? r.Price ?? ""),
-        }))
-        .filter((r) => r.country && r.price),
+      note: "Retail pump prices from free public pages; local prices vary by station and state.",
+      source: FUEL_SOURCE,
+      items: (fuelRaw as any[]).map((r) => ({
+        country: r.country,
+        product: r.product,
+        price: r.asOf ? `${r.price} (as of ${r.asOf})` : r.price,
+      })),
     };
   }
 
