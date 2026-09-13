@@ -21,6 +21,20 @@ const Auth = () => {
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
   const [emailSent, setEmailSent] = useState(false);
+  const handleGoogle = async () => {
+    setLoading(true);
+    const { supabase } = await import("@/integrations/supabase/client");
+    if (refCode) localStorage.setItem("pending_referral_code", refCode);
+    const { error } = await supabase.auth.signInWithOAuth({
+      provider: "google",
+      options: { redirectTo: `${window.location.origin}/` },
+    });
+    if (error) {
+      toast({ title: "Google sign-in failed", description: error.message, variant: "destructive" });
+      setLoading(false);
+    }
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
