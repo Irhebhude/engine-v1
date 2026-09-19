@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import { motion } from "framer-motion";
-import { Brain, Zap, Globe, Shield, Cpu, Layers, MapPin, Crown, Building2, TrendingUp, BarChart3, LineChart, ArrowRight, Radio, Database, Code } from "lucide-react";
+import { Brain, Zap, Globe, Shield, Cpu, Layers, MapPin, Crown, Building2, TrendingUp, BarChart3, LineChart, Radio, Database, Code } from "lucide-react";
 import SearchBar from "@/components/SearchBar";
 import FeatureCard from "@/components/FeatureCard";
 import Header from "@/components/Header";

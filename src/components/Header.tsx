@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Link, useLocation, useNavigate } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { Clock, Menu, X, Gift, LogOut, User, Shield, Star, Trophy, Code, Home, Search, Brain, Image, Video, GraduationCap, TrendingUp } from "lucide-react";
 import SearchHistory from "@/components/SearchHistory";
 import LiteModeToggle from "@/components/LiteModeToggle";
@@ -17,7 +17,6 @@ const NAV_LINKS = [
 ];
 
 const Header = () => {
-  const location = useLocation();
   const navigate = useNavigate();
   const { user, profile, signOut, toggleLiteMode } = useAuth();
   const [showHistory, setShowHistory] = useState(false);
