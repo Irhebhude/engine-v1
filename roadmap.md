@@ -10,6 +10,7 @@
 - [x] Fix API key generator (ensure profile row exists)
 - [x] Clear button on search history + referral code visible
 - [x] Live data: FX rates (all currencies) + fuel prices, key-free endpoints
+- [x] Systemic Utility Workspace mobile redesign
 - [ ] Publish
 
 ## Notes

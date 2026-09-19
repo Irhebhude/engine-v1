@@ -1,8 +1,34 @@
-@import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap&text=ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-.,!?@#$%&*()+=/:;"');
-
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+@font-face {
+  font-family: "DM Sans";
+  src: url("./assets/fonts/dm-sans-regular.ttf") format("truetype");
+  font-weight: 400 600;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "DM Sans";
+  src: url("./assets/fonts/dm-sans-bold.ttf") format("truetype");
+  font-weight: 700;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "Space Grotesk";
+  src: url("./assets/fonts/space-grotesk-medium.ttf") format("truetype");
+  font-weight: 400 600;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "Space Grotesk";
+  src: url("./assets/fonts/space-grotesk-bold.ttf") format("truetype");
+  font-weight: 700;
+  font-display: swap;
+}
 
 @layer base {
   :root {
@@ -49,6 +75,8 @@
     --glow-primary: 185 80% 55%;
     --glow-secondary: 260 70% 60%;
     --surface-glass: 220 20% 8%;
+    --signal-blue: 217 77% 64%;
+    --signal-violet: 258 67% 60%;
   }
 
   .dark {
@@ -80,7 +108,14 @@
   }
   body {
     @apply bg-background text-foreground font-sans;
-    font-family: 'Space Grotesk', sans-serif;
+    font-family: "DM Sans", sans-serif;
+  }
+  h1, h2, h3, h4, h5, h6 {
+    font-family: "Space Grotesk", sans-serif;
+  }
+  html, body, #root {
+    min-width: 320px;
+    overflow-x: hidden;
   }
 }
 
@@ -96,6 +131,13 @@
   }
   .glow-border {
     box-shadow: inset 0 0 0 1px hsl(var(--primary) / 0.2), 0 0 15px hsl(var(--primary) / 0.1);
+  }
+  .workspace-panel {
+    @apply bg-card/70 backdrop-blur-xl border border-border/70 rounded-2xl;
+  }
+  .workspace-label {
+    @apply text-[10px] font-bold uppercase text-muted-foreground;
+    letter-spacing: 0.12em;
   }
 }
 
@@ -126,10 +168,19 @@
 
 /* Gradient text */
 .gradient-text {
-  background: linear-gradient(135deg, hsl(var(--primary)), hsl(var(--glow-secondary)));
+  background: linear-gradient(135deg, hsl(var(--primary)), hsl(var(--signal-blue)), hsl(var(--signal-violet)));
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    scroll-behavior: auto !important;
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
 }
 
 /* Particle grid bg */

@@ -76,14 +76,14 @@ const LiveActivityFeed = () => {
         </div>
       </div>
 
-      <div className="divide-y divide-border/20 max-h-[300px] overflow-y-auto">
+        <div className="divide-y divide-border/20 max-h-[220px] overflow-y-auto">
         <AnimatePresence initial={false}>
           {activities.length === 0 ? (
             <div className="p-6 text-center text-sm text-muted-foreground">
               No recent searches yet — be the first!
             </div>
           ) : (
-            activities.map((item) => (
+            activities.slice(0, 4).map((item) => (
               <motion.div
                 key={item.id}
                 initial={{ opacity: 0, x: -20 }}

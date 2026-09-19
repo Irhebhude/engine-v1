@@ -98,7 +98,7 @@ const SearchAutocomplete = ({ query, isOpen, onSelect, onClose }: SearchAutocomp
         initial={{ opacity: 0, y: -8 }}
         animate={{ opacity: 1, y: 0 }}
         exit={{ opacity: 0, y: -8 }}
-        className="absolute top-full mt-2 w-full glass rounded-xl overflow-hidden z-50 shadow-lg"
+        className="absolute top-full mt-2 w-full max-h-[min(46vh,360px)] overflow-y-auto glass rounded-xl z-50 shadow-lg"
       >
         {/* Trending */}
         {filteredTrending.length > 0 && (
@@ -114,7 +114,7 @@ const SearchAutocomplete = ({ query, isOpen, onSelect, onClose }: SearchAutocomp
                 className="flex items-center gap-3 w-full px-5 py-2.5 text-left hover:bg-accent/30 transition-colors text-secondary-foreground"
               >
                 <TrendingUp className="w-3.5 h-3.5 text-primary" />
-                <span className="flex-1 text-sm">{item.query}</span>
+                <span className="flex-1 min-w-0 text-sm truncate">{item.query}</span>
                 <span className="text-xs text-muted-foreground">{item.search_count} searches</span>
                 <ArrowRight className="w-3.5 h-3.5 text-muted-foreground" />
               </button>
@@ -136,7 +136,7 @@ const SearchAutocomplete = ({ query, isOpen, onSelect, onClose }: SearchAutocomp
                 className="flex items-center gap-3 w-full px-5 py-2.5 text-left hover:bg-accent/30 transition-colors text-secondary-foreground"
               >
                 <Clock className="w-3.5 h-3.5 text-muted-foreground" />
-                <span className="flex-1 text-sm">{item}</span>
+                <span className="flex-1 min-w-0 text-sm truncate">{item}</span>
                 <ArrowRight className="w-3.5 h-3.5 text-muted-foreground" />
               </button>
             ))}

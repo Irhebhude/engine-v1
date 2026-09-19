@@ -45,14 +45,14 @@ const TrendingTopics = () => {
         <h3 className="text-sm font-semibold text-foreground">Trending Searches</h3>
       </div>
       <div className="divide-y divide-border/20">
-        {trending.map((item, i) => (
+        {trending.slice(0, 4).map((item, i) => (
           <motion.button
             key={item.query}
             initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: i * 0.05 }}
             onClick={() => navigate(`/search?q=${encodeURIComponent(item.query)}`)}
-            className="flex items-center gap-3 w-full px-4 py-3 text-left hover:bg-secondary/20 transition-colors group"
+            className="flex items-center gap-3 w-full min-h-12 px-4 py-2.5 text-left hover:bg-secondary/20 transition-colors group"
           >
             <span className="w-6 h-6 rounded-full bg-primary/10 flex items-center justify-center text-xs font-bold text-primary shrink-0">
               {i + 1}

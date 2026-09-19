@@ -1,7 +1,8 @@
 import { useState, useRef, useEffect } from "react";
-import { Search, Sparkles } from "lucide-react";
+import { Search, ArrowRight } from "lucide-react";
 import SearchAutocomplete from "@/components/SearchAutocomplete";
 import VoiceSearchButton from "@/components/VoiceSearchButton";
+import { Button } from "@/components/ui/button";
 
 interface SearchBarProps {
   onSearch: (query: string) => void;
@@ -35,14 +36,14 @@ const SearchBar = ({ onSearch, isLoading, compact, initialQuery = "" }: SearchBa
   }, [compact]);
 
   return (
-    <div className="relative w-full max-w-3xl mx-auto">
+    <div className="relative w-full max-w-3xl mx-auto min-w-0">
       <form onSubmit={handleSubmit}>
         <div
-          className={`search-glow relative flex items-center gap-3 glass rounded-2xl transition-all duration-300 ${
-            compact ? "px-4 py-3" : "px-6 py-4"
+          className={`search-glow relative flex items-center gap-2 glass rounded-2xl border-border/80 transition-all duration-300 min-w-0 ${
+            compact ? "px-3 py-2" : "p-1.5 sm:p-2"
           } ${isFocused ? "glow-border" : ""}`}
         >
-          <Search className="w-5 h-5 text-primary shrink-0" />
+          <Search className="w-5 h-5 text-primary shrink-0 ml-2" />
           <VoiceSearchButton onTranscript={(text) => { setQuery(text); onSearch(text); }} />
           <input
             ref={inputRef}
@@ -60,22 +61,23 @@ const SearchBar = ({ onSearch, isLoading, compact, initialQuery = "" }: SearchBa
               setIsFocused(false);
               setTimeout(() => setShowSuggestions(false), 200);
             }}
-            placeholder="Ask anything... SEARCH-POI understands you"
-            className={`flex-1 bg-transparent outline-none text-foreground placeholder:text-muted-foreground font-sans ${
+            placeholder="Ask SEARCH-POI anything"
+            className={`min-w-0 flex-1 bg-transparent outline-none text-foreground placeholder:text-muted-foreground font-sans ${
               compact ? "text-base" : "text-lg"
             }`}
           />
           {isLoading ? (
-            <div className="w-5 h-5 border-2 border-primary border-t-transparent rounded-full animate-spin" />
+            <div className="mr-3 w-5 h-5 border-2 border-primary border-t-transparent rounded-full animate-spin" />
           ) : (
-            <button
+            <Button
               type="submit"
               disabled={!query.trim()}
-              className="flex items-center gap-1.5 px-4 py-2 rounded-xl bg-primary text-primary-foreground font-medium text-sm hover:opacity-90 transition-opacity disabled:opacity-30"
+              size="icon"
+              className="h-12 w-12 shrink-0 rounded-xl"
+              aria-label="Search"
             >
-              <Sparkles className="w-4 h-4" />
-              Search
-            </button>
+              <ArrowRight className="w-5 h-5" />
+            </Button>
           )}
         </div>
       </form>

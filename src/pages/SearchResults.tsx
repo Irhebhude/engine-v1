@@ -54,6 +54,7 @@ const SearchResults = () => {
   const { profile } = useAuth();
   const query = searchParams.get("q") || "";
   const initialTab = (searchParams.get("tab") as SearchTab) || "web";
+  const initialMode = (searchParams.get("mode") as SearchMode) || "default";
   const liteMode = profile?.lite_mode ?? false;
   const isPremium = profile?.is_premium ?? false;
 
@@ -72,7 +73,7 @@ const SearchResults = () => {
   const [isVideoLoading, setIsVideoLoading] = useState(false);
   const [newsResults, setNewsResults] = useState<NewsResultType[]>([]);
   const [isNewsLoading, setIsNewsLoading] = useState(false);
-  const [mode, setMode] = useState<SearchMode>("default");
+  const [mode, setMode] = useState<SearchMode>(initialMode);
   const [showSummarizer, setShowSummarizer] = useState(false);
   const [showBlueprint, setShowBlueprint] = useState(false);
   const [showBuildGuide, setShowBuildGuide] = useState(false);
