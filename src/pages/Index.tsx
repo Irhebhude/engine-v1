@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import { motion } from "framer-motion";
-import { Brain, Zap, Globe, Shield, Cpu, Layers, MapPin, Crown, Building2, TrendingUp, BarChart3, LineChart } from "lucide-react";
+import { Brain, Zap, Globe, Shield, Cpu, Layers, MapPin, Crown, Building2, TrendingUp, BarChart3, LineChart, ArrowRight, Radio, Database, Code } from "lucide-react";
 import SearchBar from "@/components/SearchBar";
 import FeatureCard from "@/components/FeatureCard";
 import Header from "@/components/Header";
@@ -14,6 +14,7 @@ import FintechDashboard from "@/components/FintechDashboard";
 import OfflineStatusBar from "@/components/OfflineStatusBar";
 import LiveRates from "@/components/LiveRates";
 import heroBg from "@/assets/hero-bg.jpg";
+import { Button } from "@/components/ui/button";
 
 const FEATURES = [
   { icon: Brain, title: "AI-First Search", description: "Direct intelligent answers instead of 10 blue links. Understands meaning, intent, and context." },
@@ -31,7 +32,7 @@ const FINTECH_JSON_LD = {
   "@context": "https://schema.org",
   "@type": "WebApplication",
   name: "SEARCH-POI",
-  url: "https://search-poi.lovable.app/",
+  url: "https://engine-v1.lovable.app/",
   description: "AI-powered intelligence ecosystem for search, fintech analytics, market analysis, and business verification. Real-time data streaming with multi-model AI.",
   applicationCategory: "SearchApplication",
   operatingSystem: "Web",
@@ -48,7 +49,7 @@ const FINTECH_JSON_LD = {
   },
   potentialAction: {
     "@type": "SearchAction",
-    target: { "@type": "EntryPoint", urlTemplate: "https://search-poi.lovable.app/search?q={search_term_string}" },
+    target: { "@type": "EntryPoint", urlTemplate: "https://engine-v1.lovable.app/search?q={search_term_string}" },
     "query-input": "required name=search_term_string",
   },
   featureList: [
@@ -88,126 +89,121 @@ const Index = () => {
       />
       <Header />
 
-      {/* Hero background with lazy loading */}
-      <div className="absolute inset-0 z-0">
+      <div className="absolute inset-x-0 top-0 z-0 h-[720px]">
         <img
           src={heroBg}
           alt="SEARCH-POI AI-powered search engine background"
-          className="w-full h-full object-cover opacity-20"
+          className="w-full h-full object-cover opacity-10"
           loading="lazy"
           decoding="async"
         />
         <div className="absolute inset-0 bg-gradient-to-b from-background/60 via-background/80 to-background" />
       </div>
 
-      {/* Grid overlay */}
-      <div className="absolute inset-0 z-0 grid-bg opacity-30" />
+      <div className="absolute inset-x-0 top-0 z-0 h-[720px] grid-bg opacity-20" />
 
       {/* Main content */}
-      <main className="relative z-10 pt-24 sm:pt-32 pb-16 sm:pb-20 px-3 sm:px-4">
-        <div className="container mx-auto max-w-4xl">
+      <main className="relative z-10 pt-20 sm:pt-28 pb-24 px-3 sm:px-4">
+        <div className="mx-auto max-w-6xl">
           {/* Hero */}
           <motion.div
             initial={{ opacity: 0, y: 30 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6 }}
-            className="text-center mb-8 sm:mb-12"
+            className="text-center min-h-[560px] flex flex-col items-center justify-center py-10 sm:py-16"
           >
             <motion.div
               initial={{ scale: 0.8, opacity: 0 }}
               animate={{ scale: 1, opacity: 1 }}
               transition={{ delay: 0.15, duration: 0.4 }}
-              className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full glass text-xs text-primary font-medium mb-4 sm:mb-6"
+              className="inline-flex items-center gap-2 px-4 py-2 rounded-full glass text-xs text-primary font-medium mb-6"
             >
-              <Zap className="w-3 h-3" />
-              Next-Gen AI Search & Fintech Intelligence
+              <Shield className="w-3.5 h-3.5" />
+              Independent · Owned by POI Foundation
             </motion.div>
-
-            <h1 className="text-4xl sm:text-5xl md:text-7xl font-bold tracking-tight mb-2 sm:mb-3">
+            <img src="/search-poi-logo.jpg" alt="SEARCH-POI logo" className="h-20 w-20 sm:h-24 sm:w-24 rounded-2xl object-cover border border-primary/30 mb-5 shadow-[0_0_36px_hsl(var(--primary)/0.18)]" />
+            <h1 className="font-display text-5xl sm:text-6xl md:text-7xl font-bold tracking-normal mb-3">
               <span className="text-foreground">SEARCH</span>
               <span className="gradient-text">-POI</span>
             </h1>
-            <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-primary/10 border border-primary/20 text-[10px] font-bold text-primary uppercase tracking-widest mb-4">
-              <Zap className="w-3 h-3" />
-              Powered by SEARCH-POI Engine v1
-            </div>
-            <p className="text-base sm:text-lg md:text-xl text-muted-foreground max-w-2xl mx-auto mb-6 sm:mb-10 leading-relaxed px-2">
-              The world's first <span className="text-foreground font-medium">Intelligent Reasoning Search Engine</span>.
-              You don't search anymore — you ask, and it <span className="text-primary font-semibold">solves</span>.
+            <p className="text-base sm:text-xl text-muted-foreground max-w-2xl mx-auto mb-7 leading-relaxed px-2">
+              Don't search. <span className="text-foreground">Ask.</span> The reasoning engine for African intelligence.
             </p>
-
-            <SearchBar onSearch={handleSearch} />
-
-            <div className="flex flex-wrap items-center justify-center gap-3 sm:gap-4 mt-3 sm:mt-4">
-              <p className="text-xs text-muted-foreground">
-                SEARCH-POI Engine v1 • Multi-Step Reasoning • POI Foundation
-              </p>
-              <button
-                onClick={() => setShowLocationSearch(true)}
-                className="flex items-center gap-1 text-xs text-primary hover:text-primary/80 transition-colors touch-manipulation"
-              >
-                <MapPin className="w-3 h-3" />
-                Location Search
-              </button>
+            <div className="w-full max-w-3xl"><SearchBar onSearch={handleSearch} /></div>
+            <div className="flex flex-wrap items-center justify-center gap-2 mt-4">
+              {["Lagos businesses", "Fuel price today", "FX rate USD/NGN", "Startup ideas 2026"].map((query) => (
+                <Button key={query} variant="outline" size="sm" className="rounded-full border-border/70 bg-card/40 text-muted-foreground" onClick={() => handleSearch(query)}>{query}</Button>
+              ))}
+              <Button onClick={() => setShowLocationSearch(true)} variant="outline" size="sm" className="rounded-full border-primary/40 text-primary"><MapPin /> Near me</Button>
             </div>
+            <p className="workspace-label mt-7">SEARCH-POI ENGINE V1 · MULTI-STEP REASONING</p>
           </motion.div>
 
-          {/* Real-time widgets */}
+          <section aria-labelledby="signal-heading" className="mb-6">
+            <div className="flex items-end justify-between mb-3 px-1">
+              <div><p className="workspace-label">Live signal desk</p><h2 id="signal-heading" className="text-xl font-semibold">What Africa is asking now</h2></div>
+              <Radio className="w-5 h-5 text-primary animate-pulse" />
+            </div>
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.3 }}
-            className="grid grid-cols-1 md:grid-cols-2 gap-3 sm:gap-4 mb-8 sm:mb-12"
+            className="grid grid-cols-1 lg:grid-cols-2 gap-3"
           >
             <TrendingTopics />
             <LiveActivityFeed />
           </motion.div>
+          </section>
 
-          {/* Fintech Intelligence Dashboard */}
-          <motion.div
+          <section aria-labelledby="intelligence-heading" className="mb-6">
+            <div className="mb-3 px-1"><p className="workspace-label">Intelligence feeds</p><h2 id="intelligence-heading" className="text-xl font-semibold">Live markets, models and space</h2></div>
+            <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.4 }}
-            className="mb-8 sm:mb-12"
+            className="mb-3"
           >
             <FintechDashboard />
-          </motion.div>
+            </motion.div>
 
           {/* Live rates + offline readiness */}
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.45 }}
-            className="mb-8 sm:mb-12 space-y-3"
+            className="grid grid-cols-1 lg:grid-cols-[0.72fr_1.28fr] gap-3"
           >
             <OfflineStatusBar />
             <LiveRates />
-          </motion.div>
+            </motion.div>
+          </section>
 
-          {/* Features grid */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4 mt-6 sm:mt-8">
+          <section aria-labelledby="capabilities-heading" className="mt-8">
+            <div className="mb-3 px-1"><p className="workspace-label">System capabilities</p><h2 id="capabilities-heading" className="text-2xl sm:text-3xl font-semibold">One workspace. <span className="gradient-text">Every answer.</span></h2></div>
+          <div className="grid grid-cols-2 lg:grid-cols-3 gap-3">
             {FEATURES.map((feature, i) => (
               <FeatureCard key={feature.title} {...feature} delay={0.08 * i} />
             ))}
           </div>
+          </section>
 
           {/* Premium & Business CTAs */}
           <motion.div
             initial={{ opacity: 0, y: 15 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.6 }}
-            className="flex flex-col sm:flex-row gap-3 mt-8 sm:mt-10 justify-center px-2"
+            className="grid grid-cols-1 sm:grid-cols-2 gap-3 mt-8"
           >
             <Link
               to="/premium"
-              className="flex items-center justify-center gap-2 px-6 py-3 rounded-xl bg-accent/20 border border-accent/30 text-accent-foreground font-semibold hover:bg-accent/30 transition-colors touch-manipulation min-h-[48px]"
+              className="flex items-center justify-center gap-2 px-6 py-4 rounded-xl bg-primary text-primary-foreground font-semibold hover:bg-primary/90 transition-colors min-h-[52px]"
             >
               <Crown className="w-4 h-4" />
               Go Premium — ₦1,000/mo
             </Link>
             <Link
               to="/business"
-              className="flex items-center justify-center gap-2 px-6 py-3 rounded-xl bg-primary/10 border border-primary/20 text-primary font-semibold hover:bg-primary/20 transition-colors touch-manipulation min-h-[48px]"
+              className="flex items-center justify-center gap-2 px-6 py-4 rounded-xl bg-secondary border border-border text-foreground font-semibold hover:bg-secondary/80 transition-colors min-h-[52px]"
             >
               <Building2 className="w-4 h-4" />
               Business Dashboard
@@ -217,17 +213,20 @@ const Index = () => {
           {/* Ad placement */}
           <AdSense adSlot="9944378861" adFormat="horizontal" className="mt-8 sm:mt-12" />
 
-          {/* Footer */}
-          <motion.div
+          <motion.footer
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             transition={{ delay: 0.8 }}
-            className="text-center mt-16 sm:mt-20 text-xs text-muted-foreground px-2"
+            className="mt-16 border-t border-border/60 pt-8 text-sm text-muted-foreground"
           >
-            <p>Founded by <span className="text-foreground">Prosper Ozoya Irhebhude</span> • POI Foundation</p>
-            <p className="mt-1">Powered by <span className="text-primary font-semibold">SEARCH-POI Engine v1</span> • Intelligent Reasoning • Privacy Focused</p>
-            <p className="mt-2"><a href="/policies" className="text-primary hover:underline">Policies & Governance</a></p>
-          </motion.div>
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-8">
+              <div className="col-span-2 sm:col-span-1"><div className="flex items-center gap-2 mb-3"><img src="/search-poi-logo.jpg" alt="" className="w-9 h-9 rounded-lg" /><strong className="text-foreground text-lg">SEARCH<span className="text-primary">-POI</span></strong></div><p>Independent intelligence for African decisions.</p></div>
+              <div><p className="workspace-label mb-3">Product</p><div className="space-y-2"><Link to="/search" className="block hover:text-primary">Search</Link><Link to="/insights" className="block hover:text-primary">Insights</Link><Link to="/pricing" className="block hover:text-primary">Pricing</Link></div></div>
+              <div><p className="workspace-label mb-3">Foundation</p><div className="space-y-2"><Link to="/about" className="block hover:text-primary">About POI</Link><Link to="/contact" className="block hover:text-primary">Contact</Link><Link to="/policies" className="block hover:text-primary">Policies</Link></div></div>
+              <div><p className="workspace-label mb-3">Build</p><div className="space-y-2"><Link to="/developer" className="flex items-center gap-1 hover:text-primary"><Code className="w-3 h-3" /> Developer API</Link><Link to="/business" className="block hover:text-primary">Business dashboard</Link><Link to="/referral" className="block hover:text-primary">Refer & earn</Link></div></div>
+            </div>
+            <div className="mt-8 pt-4 border-t border-border/50 flex flex-wrap gap-3 justify-between"><span><Database className="inline w-3.5 h-3.5 text-primary mr-1" /> Crawler-owned · African-first</span><span>© 2026 POI Foundation · Made in Nigeria</span></div>
+          </motion.footer>
         </div>
       </main>
 

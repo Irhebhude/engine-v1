@@ -1,10 +1,11 @@
 import { useState } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
-import { Zap, Clock, Menu, X, Gift, LogOut, User, Shield, Star, Trophy, Code } from "lucide-react";
+import { Clock, Menu, X, Gift, LogOut, User, Shield, Star, Trophy, Code, Home, Search, Brain, Image, Video, GraduationCap, TrendingUp } from "lucide-react";
 import SearchHistory from "@/components/SearchHistory";
 import LiteModeToggle from "@/components/LiteModeToggle";
 import POIPointsBadge from "@/components/POIPointsBadge";
 import { useAuth } from "@/contexts/AuthContext";
+import { Button } from "@/components/ui/button";
 
 const ADMIN_EMAIL = "prosperozoya50@gmail.com";
 
@@ -26,9 +27,7 @@ const Header = () => {
     <header className="fixed top-0 left-0 right-0 z-50 glass border-b border-border/30">
       <div className="container mx-auto flex items-center justify-between h-14 px-4">
         <Link to="/" className="flex items-center gap-2 group">
-          <div className="p-1.5 rounded-lg bg-primary/10 group-hover:bg-primary/20 transition-colors">
-            <Zap className="w-5 h-5 text-primary" />
-          </div>
+          <img src="/search-poi-logo.jpg" alt="SEARCH-POI" className="h-8 w-8 rounded-lg object-cover border border-primary/30" />
           <span className="font-bold text-lg text-foreground">
             SEARCH<span className="text-primary">-POI</span>
           </span>
@@ -141,27 +140,41 @@ const Header = () => {
         </nav>
 
         {/* Mobile hamburger */}
-        <button
-          className="sm:hidden p-2 text-muted-foreground hover:text-foreground transition-colors"
+        <Button
+          className="sm:hidden fixed bottom-5 left-5 z-[70] h-14 w-14 rounded-full shadow-[0_0_28px_hsl(var(--primary)/0.45)]"
           onClick={() => setMobileOpen(!mobileOpen)}
           aria-label="Toggle menu"
+          size="icon"
         >
-          {mobileOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
-        </button>
+          {mobileOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
+        </Button>
       </div>
 
       {/* Mobile dropdown */}
       {mobileOpen && (
-        <div className="sm:hidden glass border-t border-border/30 px-4 py-3 flex flex-col gap-3 text-sm">
-          {NAV_LINKS.map((l) => (
-            <Link key={l.to} to={l.to} onClick={() => setMobileOpen(false)} className="text-muted-foreground hover:text-foreground transition-colors">{l.label}</Link>
-          ))}
-          <Link to="/referral" onClick={() => setMobileOpen(false)} className="flex items-center gap-1.5 text-primary font-medium">
-            <Gift className="w-4 h-4" /> Refer & Earn
-          </Link>
-          <Link to="/developer" onClick={() => setMobileOpen(false)} className="flex items-center gap-1.5 text-muted-foreground hover:text-foreground font-medium">
-            <Code className="w-4 h-4" /> Developer API
-          </Link>
+        <div className="sm:hidden fixed inset-0 z-[60] bg-background/80 backdrop-blur-md" onClick={() => setMobileOpen(false)}>
+          <div className="absolute left-4 right-4 bottom-20 max-h-[72vh] overflow-y-auto workspace-panel p-4" onClick={(event) => event.stopPropagation()}>
+            <p className="workspace-label mb-3">Navigate</p>
+            <div className="grid grid-cols-2 gap-2 mb-4">
+              <Link to="/" onClick={() => setMobileOpen(false)} className="flex min-h-12 items-center gap-2 rounded-lg bg-primary/10 px-3 text-primary font-medium"><Home className="w-4 h-4" /> Home</Link>
+              {NAV_LINKS.map((l) => (
+                <Link key={l.to} to={l.to} onClick={() => setMobileOpen(false)} className="flex min-h-12 items-center rounded-lg bg-secondary/50 px-3 text-muted-foreground">{l.label}</Link>
+              ))}
+              <Link to="/referral" onClick={() => setMobileOpen(false)} className="flex min-h-12 items-center gap-2 rounded-lg bg-secondary/50 px-3 text-primary font-medium"><Gift className="w-4 h-4" /> Refer</Link>
+              <Link to="/developer" onClick={() => setMobileOpen(false)} className="flex min-h-12 items-center gap-2 rounded-lg bg-secondary/50 px-3 text-muted-foreground"><Code className="w-4 h-4" /> API</Link>
+            </div>
+            <p className="workspace-label mb-3">Search modes</p>
+            <div className="grid grid-cols-2 gap-2 mb-4">
+              {[
+                [Search, "AI Search", "default"], [Brain, "Deep Research", "deep_research"],
+                [Code, "Code", "code"], [GraduationCap, "Academic", "academic"],
+                [TrendingUp, "Business", "business"], [Image, "Images", "images"], [Video, "Videos", "videos"],
+              ].map(([Icon, label, mode]) => (
+                <Link key={String(mode)} to={`/search?mode=${mode}`} onClick={() => setMobileOpen(false)} className="flex min-h-12 items-center gap-2 rounded-lg border border-border/60 px-3 text-muted-foreground">
+                  <Icon className="w-4 h-4 text-primary" /> {String(label)}
+                </Link>
+              ))}
+            </div>
           {user?.email === ADMIN_EMAIL && (
             <>
               <Link to="/admin" onClick={() => setMobileOpen(false)} className="flex items-center gap-1.5 text-destructive font-medium">
@@ -178,12 +191,13 @@ const Header = () => {
               {profile && profile.poi_points > 0 && <POIPointsBadge points={profile.poi_points} />}
             </div>
           )}
-          <button
+          <Button
             onClick={() => { setMobileOpen(false); setShowHistory(!showHistory); }}
-            className="flex items-center gap-1.5 text-muted-foreground hover:text-foreground transition-colors"
+            variant="ghost"
+            className="w-full justify-start min-h-12 text-muted-foreground"
           >
             <Clock className="w-4 h-4" /> History
-          </button>
+          </Button>
           {user ? (
             <>
               <div className="flex items-center gap-1.5 text-muted-foreground">
@@ -193,15 +207,16 @@ const Header = () => {
                   <span className="px-1.5 py-0.5 rounded-full bg-[hsl(45,90%,50%)]/15 text-[hsl(45,90%,55%)] text-[9px] font-bold uppercase">PRO</span>
                 )}
               </div>
-              <button onClick={() => { setMobileOpen(false); signOut(); }} className="flex items-center gap-1.5 text-muted-foreground hover:text-foreground">
+              <Button variant="ghost" onClick={() => { setMobileOpen(false); signOut(); }} className="w-full justify-start min-h-12 text-muted-foreground">
                 <LogOut className="w-4 h-4" /> Sign Out
-              </button>
+              </Button>
             </>
           ) : (
             <Link to="/auth" onClick={() => setMobileOpen(false)} className="text-primary font-medium">
               Sign In / Sign Up
             </Link>
           )}
+          </div>
         </div>
       )}
     </header>
