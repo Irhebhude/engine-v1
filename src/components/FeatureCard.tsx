@@ -13,13 +13,13 @@ const FeatureCard = ({ icon: Icon, title, description, delay = 0 }: FeatureCardP
     initial={{ opacity: 0, y: 20 }}
     animate={{ opacity: 1, y: 0 }}
     transition={{ delay, duration: 0.5 }}
-    className="glass rounded-2xl p-6 hover:glow-border transition-all duration-300 group cursor-default"
+    className="glass rounded-xl p-4 hover:glow-border transition-all duration-300 group cursor-default min-w-0"
   >
-    <div className="p-3 rounded-xl bg-primary/10 w-fit mb-4 group-hover:bg-primary/20 transition-colors">
-      <Icon className="w-6 h-6 text-primary" />
+    <div className="p-2 rounded-lg bg-primary/10 w-fit mb-3 group-hover:bg-primary/20 transition-colors">
+      <Icon className="w-5 h-5 text-primary" />
     </div>
-    <h3 className="font-semibold text-foreground mb-2">{title}</h3>
-    <p className="text-sm text-muted-foreground leading-relaxed">{description}</p>
+    <h3 className="text-sm font-semibold text-foreground mb-1">{title}</h3>
+    <p className="text-xs text-muted-foreground leading-relaxed line-clamp-2">{description}</p>
   </motion.div>
 );
 

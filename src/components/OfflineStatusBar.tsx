@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { Wifi, WifiOff, RefreshCw, Database } from "lucide-react";
 import { seedIfEmpty, poiCount, lastSync, syncPOIs } from "@/lib/offline-db";
+import { Button } from "@/components/ui/button";
 
 const REMOTE_DATASET =
   "https://raw.githubusercontent.com/poi-foundation/poi-open-data/main/nigeria-pois.json";
@@ -41,33 +42,35 @@ const OfflineStatusBar = () => {
 
   return (
     <div
-      className={`flex flex-wrap items-center gap-2 px-3 py-2 rounded-xl border text-xs ${
+      className={`flex items-center gap-2 px-3 py-2 rounded-xl border text-xs min-w-0 ${
         online
           ? "bg-primary/5 border-primary/20 text-primary"
           : "bg-[hsl(38,92%,50%)]/10 border-[hsl(38,92%,50%)]/30 text-[hsl(38,92%,60%)]"
       }`}
     >
       {online ? <Wifi className="w-3.5 h-3.5" /> : <WifiOff className="w-3.5 h-3.5" />}
-      <span className="font-medium">
-        {online ? "Mode: Offline Ready" : "Mode: Offline — Using local database"}
+      <span className="font-medium truncate">
+        {online ? "Offline ready" : "Offline · local index"}
       </span>
-      <span className="flex items-center gap-1 text-muted-foreground">
+      <span className="hidden xs:flex items-center gap-1 text-muted-foreground whitespace-nowrap">
         <Database className="w-3 h-3" />
-        {count} POIs cached
+        {count} POIs
       </span>
       {synced && (
         <span className="text-muted-foreground hidden sm:inline">
           · synced {new Date(synced).toLocaleString()}
         </span>
       )}
-      <button
+      <Button
         onClick={handleSync}
         disabled={syncing || !online}
-        className="ml-auto flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-secondary/60 border border-border/30 text-foreground hover:bg-accent/20 transition-colors disabled:opacity-50 min-h-[32px]"
+        variant="ghost"
+        size="sm"
+        className="ml-auto h-9 shrink-0 px-2 text-foreground"
       >
         <RefreshCw className={`w-3 h-3 ${syncing ? "animate-spin" : ""}`} />
-        {syncing ? "Syncing…" : "Sync Now"}
-      </button>
+        <span className="hidden sm:inline">{syncing ? "Syncing…" : "Sync now"}</span>
+      </Button>
     </div>
   );
 };
