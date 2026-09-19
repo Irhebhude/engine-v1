@@ -121,7 +121,7 @@ const Index = () => {
               <Shield className="w-3.5 h-3.5" />
               Independent · Owned by POI Foundation
             </motion.div>
-            <img src="/search-poi-logo.jpg" alt="SEARCH-POI logo" className="h-20 w-20 sm:h-24 sm:w-24 rounded-2xl object-cover border border-primary/30 mb-5 shadow-[0_0_36px_hsl(var(--primary)/0.18)]" />
+            <img src="/pwa-icon.png" alt="SEARCH-POI logo" className="h-20 w-20 sm:h-24 sm:w-24 rounded-2xl object-cover border border-primary/30 mb-5 shadow-[0_0_36px_hsl(var(--primary)/0.18)]" />
             <h1 className="font-display text-5xl sm:text-6xl md:text-7xl font-bold tracking-normal mb-3">
               <span className="text-foreground">SEARCH</span>
               <span className="gradient-text">-POI</span>
@@ -220,7 +220,7 @@ const Index = () => {
             className="mt-16 border-t border-border/60 pt-8 text-sm text-muted-foreground"
           >
             <div className="grid grid-cols-2 sm:grid-cols-4 gap-8">
-              <div className="col-span-2 sm:col-span-1"><div className="flex items-center gap-2 mb-3"><img src="/search-poi-logo.jpg" alt="" className="w-9 h-9 rounded-lg" /><strong className="text-foreground text-lg">SEARCH<span className="text-primary">-POI</span></strong></div><p>Independent intelligence for African decisions.</p></div>
+              <div className="col-span-2 sm:col-span-1"><div className="flex items-center gap-2 mb-3"><img src="/pwa-icon.png" alt="" className="w-9 h-9 rounded-lg" /><strong className="text-foreground text-lg">SEARCH<span className="text-primary">-POI</span></strong></div><p>Independent intelligence for African decisions.</p></div>
               <div><p className="workspace-label mb-3">Product</p><div className="space-y-2"><Link to="/search" className="block hover:text-primary">Search</Link><Link to="/insights" className="block hover:text-primary">Insights</Link><Link to="/pricing" className="block hover:text-primary">Pricing</Link></div></div>
               <div><p className="workspace-label mb-3">Foundation</p><div className="space-y-2"><Link to="/about" className="block hover:text-primary">About POI</Link><Link to="/contact" className="block hover:text-primary">Contact</Link><Link to="/policies" className="block hover:text-primary">Policies</Link></div></div>
               <div><p className="workspace-label mb-3">Build</p><div className="space-y-2"><Link to="/developer" className="flex items-center gap-1 hover:text-primary"><Code className="w-3 h-3" /> Developer API</Link><Link to="/business" className="block hover:text-primary">Business dashboard</Link><Link to="/referral" className="block hover:text-primary">Refer & earn</Link></div></div>

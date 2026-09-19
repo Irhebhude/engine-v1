@@ -26,7 +26,7 @@ const Header = () => {
     <header className="fixed top-0 left-0 right-0 z-50 glass border-b border-border/30">
       <div className="container mx-auto flex items-center justify-between h-14 px-4">
         <Link to="/" className="flex items-center gap-2 group">
-          <img src="/search-poi-logo.jpg" alt="SEARCH-POI" className="h-8 w-8 rounded-lg object-cover border border-primary/30" />
+          <img src="/pwa-icon.png" alt="SEARCH-POI" className="h-8 w-8 rounded-lg object-cover border border-primary/30" />
           <span className="font-bold text-lg text-foreground">
             SEARCH<span className="text-primary">-POI</span>
           </span>
@@ -140,7 +140,7 @@ const Header = () => {
 
         {/* Mobile hamburger */}
         <Button
-          className="sm:hidden fixed bottom-5 left-5 z-[70] h-14 w-14 rounded-full shadow-[0_0_28px_hsl(var(--primary)/0.45)]"
+          className="sm:hidden !fixed !top-auto !bottom-5 !left-5 z-[70] h-14 w-14 rounded-full shadow-[0_0_28px_hsl(var(--primary)/0.45)]"
           onClick={() => setMobileOpen(!mobileOpen)}
           aria-label="Toggle menu"
           size="icon"
