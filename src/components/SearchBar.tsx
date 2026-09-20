@@ -39,11 +39,11 @@ const SearchBar = ({ onSearch, isLoading, compact, initialQuery = "" }: SearchBa
     <div className="relative w-full max-w-3xl mx-auto min-w-0">
       <form onSubmit={handleSubmit}>
         <div
-          className={`search-glow relative flex items-center gap-2 glass rounded-2xl border-border/80 transition-all duration-300 min-w-0 ${
-            compact ? "px-3 py-2" : "p-1.5 sm:p-2"
+          className={`search-glow relative flex min-h-[72px] items-center gap-2 bg-card/75 backdrop-blur-xl rounded-[24px] border border-border/80 transition-all duration-300 min-w-0 ${
+            compact ? "px-3 py-2" : "p-2 sm:min-h-[82px] sm:p-3"
           } ${isFocused ? "glow-border" : ""}`}
         >
-          <Search className="w-5 h-5 text-primary shrink-0 ml-2" />
+          <Search className="ml-2 h-6 w-6 shrink-0 text-primary" />
           <VoiceSearchButton onTranscript={(text) => { setQuery(text); onSearch(text); }} />
           <input
             ref={inputRef}
@@ -61,9 +61,9 @@ const SearchBar = ({ onSearch, isLoading, compact, initialQuery = "" }: SearchBa
               setIsFocused(false);
               setTimeout(() => setShowSuggestions(false), 200);
             }}
-            placeholder="Ask SEARCH-POI anything"
+            placeholder="Ask anything..."
             className={`min-w-0 flex-1 bg-transparent outline-none text-foreground placeholder:text-muted-foreground font-sans ${
-              compact ? "text-base" : "text-lg"
+              compact ? "text-base" : "text-base sm:text-xl"
             }`}
           />
           {isLoading ? (
@@ -73,10 +73,10 @@ const SearchBar = ({ onSearch, isLoading, compact, initialQuery = "" }: SearchBa
               type="submit"
               disabled={!query.trim()}
               size="icon"
-              className="h-12 w-12 shrink-0 rounded-xl"
+              className="h-14 w-14 shrink-0 rounded-2xl sm:w-28"
               aria-label="Search"
             >
-              <ArrowRight className="w-5 h-5" />
+              <ArrowRight className="h-5 w-5" />
             </Button>
           )}
         </div>

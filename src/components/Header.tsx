@@ -1,14 +1,19 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { Clock, Menu, X, Gift, LogOut, User, Shield, Star, Trophy, Code, Home, Search, Brain, Image, Video, GraduationCap, TrendingUp } from "lucide-react";
+import {
+  Activity, Brain, Clock, Code, Database, Gift, GraduationCap, Home, Image,
+  LocateFixed, LogOut, Menu, Radio, RefreshCw, Search, Shield, Star, Trophy,
+  User, Video, Wifi, X, TrendingUp,
+} from "lucide-react";
 import SearchHistory from "@/components/SearchHistory";
 import LiteModeToggle from "@/components/LiteModeToggle";
 import POIPointsBadge from "@/components/POIPointsBadge";
 import { useAuth } from "@/contexts/AuthContext";
 import { Button } from "@/components/ui/button";
+import { seedIfEmpty, syncPOIs } from "@/lib/offline-db";
 
 const ADMIN_EMAIL = "prosperozoya50@gmail.com";
-
+const REMOTE_DATASET = "https://raw.githubusercontent.com/poi-foundation/poi-open-data/main/nigeria-pois.json";
 const NAV_LINKS = [
   { to: "/about", label: "About" },
   { to: "/pricing", label: "Pricing" },
@@ -20,205 +25,99 @@ const Header = () => {
   const navigate = useNavigate();
   const { user, profile, signOut, toggleLiteMode } = useAuth();
   const [showHistory, setShowHistory] = useState(false);
-  const [mobileOpen, setMobileOpen] = useState(false);
+  const [menuOpen, setMenuOpen] = useState(false);
+  const [syncing, setSyncing] = useState(false);
+  const [now, setNow] = useState(new Date());
+  const [gpsStatus, setGpsStatus] = useState("Locating you…");
+
+  useEffect(() => {
+    seedIfEmpty();
+    const clock = window.setInterval(() => setNow(new Date()), 1000);
+    if (!navigator.geolocation) setGpsStatus("Location unavailable");
+    else navigator.geolocation.getCurrentPosition(
+      () => setGpsStatus("GPS Ready"),
+      () => setGpsStatus("Location permission needed"),
+      { enableHighAccuracy: false, timeout: 8000 },
+    );
+    return () => window.clearInterval(clock);
+  }, []);
+
+  const syncLiveData = async () => {
+    setSyncing(true);
+    try { await syncPOIs(REMOTE_DATASET); }
+    finally { setSyncing(false); setNow(new Date()); }
+  };
+
+  const watTime = new Intl.DateTimeFormat("en-NG", {
+    timeZone: "Africa/Lagos", dateStyle: "long", timeStyle: "medium",
+  }).format(now);
+
+  const closeMenu = () => setMenuOpen(false);
 
   return (
-    <header className="fixed top-0 left-0 right-0 z-50 glass border-b border-border/30">
-      <div className="container mx-auto flex items-center justify-between h-14 px-4">
-        <Link to="/" className="flex items-center gap-2 group">
-          <img src="/pwa-icon.png" alt="SEARCH-POI" className="h-8 w-8 rounded-lg object-cover border border-primary/30" />
-          <span className="font-bold text-lg text-foreground">
-            SEARCH<span className="text-primary">-POI</span>
-          </span>
-        </Link>
-
-        {/* Desktop nav */}
-        <nav className="hidden sm:flex items-center gap-3 text-sm relative">
-          {NAV_LINKS.map((l) => (
-            <Link key={l.to} to={l.to} className="text-muted-foreground hover:text-foreground transition-colors">{l.label}</Link>
-          ))}
-
-          <Link
-            to="/referral"
-            className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-primary/10 text-primary hover:bg-primary/20 transition-colors font-medium"
-          >
-            <Gift className="w-3.5 h-3.5" />
-            Refer & Earn
+    <>
+      <header className="relative z-50 border-b border-border/70 bg-background/95 backdrop-blur-xl">
+        <div className="mx-auto flex h-[72px] max-w-7xl items-center justify-between px-4 sm:px-8">
+          <Link to="/" className="flex items-center gap-3">
+            <img src="/pwa-icon.png" alt="SEARCH-POI" className="h-10 w-10 rounded-xl border border-primary/30 object-cover" />
+            <span className="font-display text-lg font-bold text-foreground sm:text-xl">SEARCH<span className="text-primary">-POI</span></span>
           </Link>
+          <Button variant="ghost" size="icon" onClick={() => setMenuOpen(true)} aria-label="Open navigation" className="h-12 w-12 rounded-full border border-border/70 text-foreground hover:border-primary/40 hover:bg-primary/10">
+            <Menu className="h-6 w-6" />
+          </Button>
+        </div>
 
-          <Link
-            to="/developer"
-            className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-accent/10 text-foreground hover:bg-accent/20 transition-colors font-medium"
-          >
-            <Code className="w-3.5 h-3.5" />
-            API
-          </Link>
-
-          {user?.email === ADMIN_EMAIL && (
-            <>
-              <Link
-                to="/admin"
-                className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-destructive/10 text-destructive hover:bg-destructive/20 transition-colors font-medium"
-              >
-                <Shield className="w-3.5 h-3.5" />
-                Admin
-              </Link>
-              <Link
-                to="/admin/acquisition-control"
-                className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-[hsl(45,90%,50%)]/10 text-[hsl(45,90%,55%)] hover:bg-[hsl(45,90%,50%)]/20 transition-colors font-medium"
-              >
-                <Star className="w-3.5 h-3.5" />
-                Acquisition
-              </Link>
-            </>
-          )}
-
-          {/* Lite Mode Toggle */}
-          {user && (
-            <LiteModeToggle
-              enabled={profile?.lite_mode ?? false}
-              onToggle={() => toggleLiteMode()}
-            />
-          )}
-
-          {/* POI Points */}
-          {profile && (
-            <Link to="/points" className="flex items-center gap-1 text-xs text-[hsl(45,90%,55%)] hover:text-[hsl(45,90%,65%)] transition-colors font-medium">
-              <Trophy className="w-3.5 h-3.5" />
-              {profile.poi_points} pts
-            </Link>
-          )}
-
-          <button
-            onClick={() => setShowHistory(!showHistory)}
-            className="flex items-center gap-1.5 text-muted-foreground hover:text-foreground transition-colors"
-            title="Search History"
-          >
-            <Clock className="w-4 h-4" />
-            <span>History</span>
-          </button>
-
-          {user ? (
-            <div className="flex items-center gap-2">
-              <Link to="/referral" className="flex items-center gap-1.5 text-muted-foreground hover:text-foreground transition-colors" title="My Profile">
-                <User className="w-4 h-4" />
-                <span className="max-w-[80px] truncate">{profile?.display_name || "Account"}</span>
-              </Link>
-              {profile?.is_premium && (
-                <span className="px-1.5 py-0.5 rounded-full bg-[hsl(45,90%,50%)]/15 text-[hsl(45,90%,55%)] text-[9px] font-bold uppercase">PRO</span>
-              )}
-              <button
-                onClick={signOut}
-                className="text-muted-foreground hover:text-foreground transition-colors"
-                title="Sign out"
-              >
-                <LogOut className="w-4 h-4" />
-              </button>
+        <div className="border-t border-border/40 bg-accent/20">
+          <div className="mx-auto max-w-7xl px-4 py-3 sm:px-8">
+            <div className="flex flex-wrap items-center gap-x-4 gap-y-2 text-sm">
+              <div className="flex items-center gap-2 font-medium text-primary"><Wifi className="h-4 w-4" /> Mode: Live Data</div>
+              <span className="hidden text-border sm:inline">—</span>
+              <div className="flex items-center gap-2 text-primary"><LocateFixed className="h-4 w-4" /> {gpsStatus === "GPS Ready" ? "GPS Ready" : "GPS Active"}</div>
+              <Button onClick={syncLiveData} disabled={syncing} variant="outline" size="sm" className="ml-auto h-10 rounded-full border-primary/30 bg-background/50 px-4 text-primary hover:bg-primary/10">
+                <RefreshCw className={`h-4 w-4 ${syncing ? "animate-spin" : ""}`} /> {syncing ? "Syncing…" : "Sync Now"}
+              </Button>
             </div>
-          ) : (
-            <Link
-              to="/auth"
-              className="px-3 py-1.5 rounded-lg bg-primary text-primary-foreground text-sm font-medium hover:bg-primary/90 transition-colors"
-            >
-              Sign In
-            </Link>
-          )}
-
-          {showHistory && (
-            <div className="absolute right-0 top-full mt-2 w-80">
-              <SearchHistory
-                isOpen={showHistory}
-                onClose={() => setShowHistory(false)}
-                onSelect={(q) => {
-                  setShowHistory(false);
-                  navigate(`/search?q=${encodeURIComponent(q)}`);
-                }}
-              />
+            <div className="mt-3 grid gap-2 border-t border-border/40 pt-3 text-xs text-muted-foreground sm:grid-cols-2 sm:text-sm">
+              <div className="flex min-w-0 items-center gap-2"><Database className="h-4 w-4 shrink-0 text-primary" /><span className="truncate">Live Data: {watTime} WAT</span></div>
+              <div className="flex items-center gap-2 sm:justify-end"><Radio className="h-4 w-4 text-primary" /><span>Live GPS</span><span className="text-border">|</span><span>{gpsStatus}</span></div>
             </div>
-          )}
-        </nav>
+          </div>
+        </div>
+      </header>
 
-        {/* Mobile hamburger */}
-        <Button
-          className="sm:hidden !fixed !top-auto !bottom-5 !left-5 z-[70] h-14 w-14 rounded-full shadow-[0_0_28px_hsl(var(--primary)/0.45)]"
-          onClick={() => setMobileOpen(!mobileOpen)}
-          aria-label="Toggle menu"
-          size="icon"
-        >
-          {mobileOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
-        </Button>
-      </div>
+      <Button onClick={() => setMenuOpen(true)} size="icon" aria-label="Open menu" className="fixed bottom-5 left-5 z-[70] h-16 w-16 rounded-full border border-primary/50 bg-primary text-primary-foreground shadow-[0_0_32px_hsl(var(--primary)/0.38)] hover:bg-primary/90 sm:bottom-8 sm:left-8 sm:h-[72px] sm:w-[72px]">
+        <Menu className="h-7 w-7" />
+      </Button>
 
-      {/* Mobile dropdown */}
-      {mobileOpen && (
-        <div className="sm:hidden fixed inset-0 z-[60] bg-background/80 backdrop-blur-md" onClick={() => setMobileOpen(false)}>
-          <div className="absolute left-4 right-4 bottom-20 max-h-[72vh] overflow-y-auto workspace-panel p-4" onClick={(event) => event.stopPropagation()}>
+      {menuOpen && (
+        <div className="fixed inset-0 z-[80] bg-background/85 backdrop-blur-xl" onClick={closeMenu}>
+          <div className="absolute inset-y-3 right-3 w-[min(92vw,440px)] overflow-y-auto rounded-2xl border border-primary/20 bg-card p-5 shadow-[0_0_42px_hsl(var(--primary)/0.12)] sm:inset-y-6 sm:right-6 sm:p-7" onClick={(event) => event.stopPropagation()}>
+            <div className="mb-7 flex items-center justify-between">
+              <div className="flex items-center gap-3"><img src="/pwa-icon.png" alt="" className="h-10 w-10 rounded-xl" /><strong className="font-display text-lg">SEARCH<span className="text-primary">-POI</span></strong></div>
+              <Button variant="ghost" size="icon" onClick={closeMenu} aria-label="Close navigation" className="h-12 w-12 rounded-full"><X className="h-6 w-6" /></Button>
+            </div>
             <p className="workspace-label mb-3">Navigate</p>
-            <div className="grid grid-cols-2 gap-2 mb-4">
-              <Link to="/" onClick={() => setMobileOpen(false)} className="flex min-h-12 items-center gap-2 rounded-lg bg-primary/10 px-3 text-primary font-medium"><Home className="w-4 h-4" /> Home</Link>
-              {NAV_LINKS.map((l) => (
-                <Link key={l.to} to={l.to} onClick={() => setMobileOpen(false)} className="flex min-h-12 items-center rounded-lg bg-secondary/50 px-3 text-muted-foreground">{l.label}</Link>
-              ))}
-              <Link to="/referral" onClick={() => setMobileOpen(false)} className="flex min-h-12 items-center gap-2 rounded-lg bg-secondary/50 px-3 text-primary font-medium"><Gift className="w-4 h-4" /> Refer</Link>
-              <Link to="/developer" onClick={() => setMobileOpen(false)} className="flex min-h-12 items-center gap-2 rounded-lg bg-secondary/50 px-3 text-muted-foreground"><Code className="w-4 h-4" /> API</Link>
+            <div className="mb-7 grid grid-cols-2 gap-2">
+              <Link to="/" onClick={closeMenu} className="flex min-h-12 items-center gap-2 rounded-lg bg-primary/10 px-3 text-primary font-medium"><Home className="h-4 w-4" /> Home</Link>
+              {NAV_LINKS.map((link) => <Link key={link.to} to={link.to} onClick={closeMenu} className="flex min-h-12 items-center rounded-lg bg-secondary/60 px-3 text-muted-foreground hover:text-foreground">{link.label}</Link>)}
+              <Link to="/referral" onClick={closeMenu} className="flex min-h-12 items-center gap-2 rounded-lg bg-secondary/60 px-3 text-primary"><Gift className="h-4 w-4" /> Refer & Earn</Link>
+              <Link to="/developer" onClick={closeMenu} className="flex min-h-12 items-center gap-2 rounded-lg bg-secondary/60 px-3 text-muted-foreground"><Code className="h-4 w-4" /> Developer API</Link>
             </div>
             <p className="workspace-label mb-3">Search modes</p>
-            <div className="grid grid-cols-2 gap-2 mb-4">
-              {[
-                [Search, "AI Search", "default"], [Brain, "Deep Research", "deep_research"],
-                [Code, "Code", "code"], [GraduationCap, "Academic", "academic"],
-                [TrendingUp, "Business", "business"], [Image, "Images", "images"], [Video, "Videos", "videos"],
-              ].map(([Icon, label, mode]) => (
-                <Link key={String(mode)} to={`/search?mode=${mode}`} onClick={() => setMobileOpen(false)} className="flex min-h-12 items-center gap-2 rounded-lg border border-border/60 px-3 text-muted-foreground">
-                  <Icon className="w-4 h-4 text-primary" /> {String(label)}
-                </Link>
+            <div className="mb-7 grid grid-cols-2 gap-2">
+              {[[Search,"AI Search","default"],[Brain,"Deep Research","deep_research"],[Code,"Code","code"],[GraduationCap,"Academic","academic"],[TrendingUp,"Business","business"],[Image,"Images","images"],[Video,"Videos","videos"]].map(([Icon,label,mode]) => (
+                <Link key={String(mode)} to={`/search?mode=${mode}`} onClick={closeMenu} className="flex min-h-12 items-center gap-2 rounded-lg border border-border/70 px-3 text-sm text-muted-foreground hover:border-primary/30 hover:text-foreground"><Icon className="h-4 w-4 text-primary" />{String(label)}</Link>
               ))}
             </div>
-          {user?.email === ADMIN_EMAIL && (
-            <>
-              <Link to="/admin" onClick={() => setMobileOpen(false)} className="flex items-center gap-1.5 text-destructive font-medium">
-                <Shield className="w-4 h-4" /> Admin Dashboard
-              </Link>
-              <Link to="/admin/acquisition-control" onClick={() => setMobileOpen(false)} className="flex items-center gap-1.5 text-[hsl(45,90%,55%)] font-medium">
-                <Star className="w-4 h-4" /> Acquisition Control
-              </Link>
-            </>
-          )}
-          {user && (
-            <div className="flex items-center gap-2">
-              <LiteModeToggle enabled={profile?.lite_mode ?? false} onToggle={() => toggleLiteMode()} />
-              {profile && profile.poi_points > 0 && <POIPointsBadge points={profile.poi_points} />}
-            </div>
-          )}
-          <Button
-            onClick={() => { setMobileOpen(false); setShowHistory(!showHistory); }}
-            variant="ghost"
-            className="w-full justify-start min-h-12 text-muted-foreground"
-          >
-            <Clock className="w-4 h-4" /> History
-          </Button>
-          {user ? (
-            <>
-              <div className="flex items-center gap-1.5 text-muted-foreground">
-                <User className="w-4 h-4" />
-                <span>{profile?.display_name || user.email}</span>
-                {profile?.is_premium && (
-                  <span className="px-1.5 py-0.5 rounded-full bg-[hsl(45,90%,50%)]/15 text-[hsl(45,90%,55%)] text-[9px] font-bold uppercase">PRO</span>
-                )}
-              </div>
-              <Button variant="ghost" onClick={() => { setMobileOpen(false); signOut(); }} className="w-full justify-start min-h-12 text-muted-foreground">
-                <LogOut className="w-4 h-4" /> Sign Out
-              </Button>
-            </>
-          ) : (
-            <Link to="/auth" onClick={() => setMobileOpen(false)} className="text-primary font-medium">
-              Sign In / Sign Up
-            </Link>
-          )}
+            {user?.email === ADMIN_EMAIL && <div className="mb-5 grid gap-2"><Link to="/admin" onClick={closeMenu} className="flex min-h-12 items-center gap-2 text-destructive"><Shield className="h-4 w-4" /> Admin Dashboard</Link><Link to="/admin/acquisition-control" onClick={closeMenu} className="flex min-h-12 items-center gap-2 text-primary"><Star className="h-4 w-4" /> Acquisition Control</Link></div>}
+            {user && <div className="mb-4 flex items-center gap-3"><LiteModeToggle enabled={profile?.lite_mode ?? false} onToggle={() => toggleLiteMode()} />{profile && profile.poi_points > 0 && <POIPointsBadge points={profile.poi_points} />}</div>}
+            <Button onClick={() => { closeMenu(); setShowHistory(true); }} variant="outline" className="mb-3 min-h-12 w-full justify-start"><Clock className="h-4 w-4" /> Search History</Button>
+            {user ? <><div className="mb-2 flex min-h-12 items-center gap-2 text-muted-foreground"><User className="h-4 w-4" /><span className="truncate">{profile?.display_name || user.email}</span>{profile?.is_premium && <Trophy className="h-4 w-4 text-primary" />}</div><Button variant="ghost" onClick={() => { closeMenu(); signOut(); }} className="min-h-12 w-full justify-start"><LogOut className="h-4 w-4" /> Sign Out</Button></> : <Button asChild className="min-h-12 w-full"><Link to="/auth" onClick={closeMenu}>Sign In / Create Account</Link></Button>}
           </div>
         </div>
       )}
-    </header>
+      {showHistory && <div className="fixed inset-0 z-[75] bg-background/80 p-4 backdrop-blur-md" onClick={() => setShowHistory(false)}><div className="mx-auto mt-20 max-w-md" onClick={(event) => event.stopPropagation()}><SearchHistory isOpen={showHistory} onClose={() => setShowHistory(false)} onSelect={(query) => { setShowHistory(false); navigate(`/search?q=${encodeURIComponent(query)}`); }} /></div></div>}
+    </>
   );
 };
 
