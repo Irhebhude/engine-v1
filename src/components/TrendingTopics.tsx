@@ -39,27 +39,27 @@ const TrendingTopics = () => {
   if (trending.length === 0) return null;
 
   return (
-    <div className="glass rounded-2xl border border-border/30 overflow-hidden">
-      <div className="p-4 border-b border-border/30 flex items-center gap-2">
-        <Flame className="w-4 h-4 text-primary" />
-        <h3 className="text-sm font-semibold text-foreground">Trending Searches</h3>
+    <div className="overflow-hidden rounded-[28px] border border-border/70 bg-card/55">
+      <div className="flex items-center gap-3 border-b border-border/50 p-5 sm:p-6">
+        <Flame className="h-6 w-6 text-primary" />
+        <h3 className="font-display text-xl font-semibold text-foreground">Trending Searches</h3>
       </div>
       <div className="divide-y divide-border/20">
-        {trending.slice(0, 4).map((item, i) => (
+        {trending.slice(0, 5).map((item, i) => (
           <motion.button
             key={item.query}
             initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: i * 0.05 }}
             onClick={() => navigate(`/search?q=${encodeURIComponent(item.query)}`)}
-            className="flex items-center gap-3 w-full min-h-12 px-4 py-2.5 text-left hover:bg-secondary/20 transition-colors group"
+            className="group flex min-h-[92px] w-full items-center gap-4 px-5 py-4 text-left transition-colors hover:bg-secondary/25 sm:px-6"
           >
-            <span className="w-6 h-6 rounded-full bg-primary/10 flex items-center justify-center text-xs font-bold text-primary shrink-0">
+            <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-primary/10 text-base font-bold text-primary">
               {i + 1}
             </span>
             <div className="flex-1 min-w-0">
-              <p className="text-sm text-foreground truncate group-hover:text-primary transition-colors">{item.query}</p>
-              <p className="text-xs text-muted-foreground flex items-center gap-1">
+              <p className="truncate text-base text-foreground transition-colors group-hover:text-primary sm:text-lg">{item.query}</p>
+              <p className="mt-1 flex items-center gap-1 text-sm text-muted-foreground">
                 <TrendingUp className="w-3 h-3" />
                 {item.search_count} searches
               </p>

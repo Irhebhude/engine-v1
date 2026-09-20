@@ -61,14 +61,14 @@ const LiveActivityFeed = () => {
   };
 
   return (
-    <div className="glass rounded-2xl border border-border/30 overflow-hidden">
-      <div className="p-4 border-b border-border/30 flex items-center justify-between">
+    <div className="overflow-hidden rounded-[28px] border border-primary/30 bg-card/55 shadow-[0_0_28px_hsl(var(--primary)/0.06)]">
+      <div className="flex items-center justify-between border-b border-border/50 p-5 sm:p-6">
         <div className="flex items-center gap-2">
           <div className="relative">
-            <Activity className="w-4 h-4 text-primary" />
+            <Activity className="h-6 w-6 text-primary" />
             <span className="absolute -top-1 -right-1 w-2 h-2 rounded-full bg-primary animate-ping" />
           </div>
-          <h3 className="text-sm font-semibold text-foreground">Live Search Activity</h3>
+          <h3 className="font-display text-xl font-semibold text-foreground">Live Search Activity</h3>
         </div>
         <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
           <Zap className="w-3 h-3 text-primary" />
@@ -76,25 +76,25 @@ const LiveActivityFeed = () => {
         </div>
       </div>
 
-        <div className="divide-y divide-border/20 max-h-[220px] overflow-y-auto">
+        <div className="divide-y divide-border/30">
         <AnimatePresence initial={false}>
           {activities.length === 0 ? (
             <div className="p-6 text-center text-sm text-muted-foreground">
               No recent searches yet — be the first!
             </div>
           ) : (
-            activities.slice(0, 4).map((item) => (
+            activities.slice(0, 5).map((item) => (
               <motion.div
                 key={item.id}
                 initial={{ opacity: 0, x: -20 }}
                 animate={{ opacity: 1, x: 0 }}
                 exit={{ opacity: 0, x: 20 }}
-                className="flex items-center gap-3 px-4 py-3 hover:bg-secondary/20 transition-colors"
+                className="flex min-h-[92px] items-center gap-4 px-5 py-4 transition-colors hover:bg-secondary/20 sm:px-6"
               >
-                <Search className={`w-3.5 h-3.5 shrink-0 ${modeColors[item.search_mode] || "text-primary"}`} />
+                <Search className={`h-5 w-5 shrink-0 ${modeColors[item.search_mode] || "text-primary"}`} />
                 <div className="flex-1 min-w-0">
-                  <p className="text-sm text-foreground truncate">{item.query}</p>
-                  <p className="text-xs text-muted-foreground">
+                  <p className="truncate text-base text-foreground sm:text-lg">{item.query}</p>
+                  <p className="mt-1 text-sm text-muted-foreground">
                     {item.search_mode !== "default" && (
                       <span className="text-primary mr-1">{item.search_mode.replace("_", " ")}</span>
                     )}

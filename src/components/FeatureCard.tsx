@@ -1,5 +1,5 @@
 import { motion } from "framer-motion";
-import { LucideIcon } from "lucide-react";
+import { ArrowRight, LucideIcon } from "lucide-react";
 
 interface FeatureCardProps {
   icon: LucideIcon;
@@ -9,18 +9,24 @@ interface FeatureCardProps {
 }
 
 const FeatureCard = ({ icon: Icon, title, description, delay = 0 }: FeatureCardProps) => (
-  <motion.div
+  <motion.article
     initial={{ opacity: 0, y: 20 }}
-    animate={{ opacity: 1, y: 0 }}
-    transition={{ delay, duration: 0.5 }}
-    className="glass rounded-xl p-4 hover:glow-border transition-all duration-300 group cursor-default min-w-0"
+    whileInView={{ opacity: 1, y: 0 }}
+    viewport={{ once: true, margin: "-80px" }}
+    transition={{ delay, duration: 0.45 }}
+    className="group flex min-h-[250px] flex-col rounded-[28px] border border-border/70 bg-card/55 p-6 transition-all duration-300 hover:border-primary/35 hover:bg-card/80 hover:shadow-[0_0_28px_hsl(var(--primary)/0.08)] sm:min-h-[280px] sm:p-8"
   >
-    <div className="p-2 rounded-lg bg-primary/10 w-fit mb-3 group-hover:bg-primary/20 transition-colors">
-      <Icon className="w-5 h-5 text-primary" />
+    <div className="flex items-start justify-between">
+      <div className="flex h-16 w-16 items-center justify-center rounded-2xl border border-primary/30 bg-primary/10 transition-colors group-hover:bg-primary/15">
+        <Icon className="h-8 w-8 text-primary" />
+      </div>
+      <ArrowRight className="h-6 w-6 text-muted-foreground transition-transform group-hover:translate-x-1 group-hover:text-primary" />
     </div>
-    <h3 className="text-sm font-semibold text-foreground mb-1">{title}</h3>
-    <p className="text-xs text-muted-foreground leading-relaxed line-clamp-2">{description}</p>
-  </motion.div>
+    <div className="mt-auto pt-12">
+      <h3 className="font-display text-2xl font-semibold text-foreground">{title}</h3>
+      <p className="mt-3 text-base leading-relaxed text-muted-foreground sm:text-lg">{description}</p>
+    </div>
+  </motion.article>
 );
 
 export default FeatureCard;
