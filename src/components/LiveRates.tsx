@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { TrendingUp, Fuel, RefreshCw } from "lucide-react";
+import { Button } from "@/components/ui/button";
 
 const LIVE_URL = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/live-data`;
 const KEY = import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY;
@@ -46,17 +47,19 @@ const LiveRates = () => {
   const fuel = data?.fuel?.items?.slice(0, 6) ?? [];
 
   return (
-    <div className="glass rounded-2xl p-5 border border-border/30">
-      <div className="flex items-center gap-2 mb-4">
-        <TrendingUp className="w-4 h-4 text-primary" />
-        <h3 className="font-semibold text-foreground">Live Rates &amp; Prices</h3>
-        <button
+    <div className="rounded-[30px] border border-border/70 bg-card/55 p-5 sm:p-8">
+      <div className="mb-7 flex items-center gap-3">
+        <TrendingUp className="h-6 w-6 text-primary" />
+        <h3 className="font-display text-xl font-semibold text-foreground sm:text-2xl">Live Rates &amp; Prices</h3>
+        <Button
           onClick={load}
-          className="ml-auto p-2 rounded-lg hover:bg-accent/20 transition-colors min-h-[40px] min-w-[40px] flex items-center justify-center"
+          variant="ghost"
+          size="icon"
+          className="ml-auto h-12 w-12 rounded-full"
           aria-label="Refresh live rates"
         >
           <RefreshCw className={`w-3.5 h-3.5 text-muted-foreground ${loading ? "animate-spin" : ""}`} />
-        </button>
+        </Button>
       </div>
 
       {!rates && !loading && (
@@ -64,11 +67,11 @@ const LiveRates = () => {
       )}
 
       {rates && (
-        <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 mb-4">
+        <div className="mb-8 grid grid-cols-2 gap-3 sm:grid-cols-4">
           {HIGHLIGHT.filter((c) => rates[c] != null).map((c) => (
-            <div key={c} className="rounded-xl bg-secondary/40 border border-border/20 p-3">
+            <div key={c} className="min-h-[104px] rounded-2xl border border-border/40 bg-secondary/40 p-4">
               <p className="text-[10px] uppercase tracking-wider text-muted-foreground">USD → {c}</p>
-              <p className="text-sm font-semibold text-foreground font-mono">
+              <p className="mt-3 break-words font-mono text-lg font-semibold text-foreground">
                 {rates[c].toLocaleString(undefined, { maximumFractionDigits: 2 })}
               </p>
             </div>
@@ -82,9 +85,9 @@ const LiveRates = () => {
             <Fuel className="w-3.5 h-3.5 text-muted-foreground" />
             <span className="text-xs font-medium text-muted-foreground uppercase tracking-wider">Fuel prices</span>
           </div>
-          <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
+          <div className="grid grid-cols-2 gap-3 sm:grid-cols-3">
             {fuel.map((f, i) => (
-              <div key={i} className="rounded-lg bg-secondary/30 border border-border/20 px-3 py-2">
+              <div key={i} className="min-h-[72px] rounded-xl border border-border/30 bg-secondary/30 px-4 py-3">
                 <p className="text-[11px] text-muted-foreground truncate">{f.country}</p>
                 <p className="text-xs font-mono text-foreground">{f.price}</p>
               </div>

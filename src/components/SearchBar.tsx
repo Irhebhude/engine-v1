@@ -1,4 +1,4 @@
-import { useState, useRef, useEffect } from "react";
+import { useState, useRef } from "react";
 import { Search, ArrowRight } from "lucide-react";
 import SearchAutocomplete from "@/components/SearchAutocomplete";
 import VoiceSearchButton from "@/components/VoiceSearchButton";
@@ -30,10 +30,6 @@ const SearchBar = ({ onSearch, isLoading, compact, initialQuery = "" }: SearchBa
     onSearch(suggestion);
     setShowSuggestions(false);
   };
-
-  useEffect(() => {
-    if (!compact) inputRef.current?.focus();
-  }, [compact]);
 
   return (
     <div className="relative w-full max-w-3xl mx-auto min-w-0">

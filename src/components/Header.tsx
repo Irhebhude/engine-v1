@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import {
-  Activity, Brain, Clock, Code, Database, Gift, GraduationCap, Home, Image,
+  Brain, Clock, Code, Database, Gift, GraduationCap, Home, Image,
   LocateFixed, LogOut, Menu, Radio, RefreshCw, Search, Shield, Star, Trophy,
   User, Video, Wifi, X, TrendingUp,
 } from "lucide-react";

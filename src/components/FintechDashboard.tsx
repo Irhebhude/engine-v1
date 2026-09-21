@@ -132,16 +132,16 @@ const FintechDashboard = () => {
   }, []);
 
   return (
-    <div className="glass rounded-2xl p-4 sm:p-6">
-      <div className="flex items-center justify-between mb-4">
+    <div className="rounded-[30px] border border-primary/25 bg-card/55 p-5 shadow-[0_0_32px_hsl(var(--primary)/0.06)] sm:p-8">
+      <div className="mb-7 flex items-center justify-between gap-3">
         <div className="flex items-center gap-2">
-          <BarChart3 className="w-5 h-5 text-primary" />
-          <h3 className="text-sm font-semibold text-foreground">Fintech Intelligence</h3>
+          <BarChart3 className="h-7 w-7 text-primary" />
+          <h3 className="font-display text-xl font-semibold text-foreground sm:text-2xl">Fintech Intelligence</h3>
           <span className="px-1.5 py-0.5 text-[9px] font-bold rounded bg-primary/20 text-primary">LIVE</span>
         </div>
         <button
           onClick={fetchAllData}
-          className="flex items-center gap-1 text-xs text-muted-foreground hover:text-primary transition-colors touch-manipulation"
+          className="flex min-h-12 items-center gap-2 rounded-full px-3 text-xs text-muted-foreground transition-colors hover:bg-primary/10 hover:text-primary touch-manipulation"
         >
           <RefreshCw className={`w-3 h-3 ${loading ? "animate-spin" : ""}`} />
           {lastUpdate.toLocaleTimeString()}
@@ -149,20 +149,20 @@ const FintechDashboard = () => {
       </div>
 
       {/* Market Data Grid */}
-      <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 sm:gap-3 mb-4">
+      <div className="mb-9 grid grid-cols-2 gap-3 md:grid-cols-4 md:gap-4">
         {marketData.slice(0, 8).map((item) => (
-          <div key={item.symbol} className="bg-secondary/50 rounded-xl p-3 hover:bg-secondary/70 transition-colors">
+          <div key={item.symbol} className="min-h-[168px] rounded-2xl border border-border/40 bg-secondary/45 p-4 transition-colors hover:border-primary/25 hover:bg-secondary/65 sm:p-5">
             <div className="flex items-center justify-between mb-1">
-              <span className="text-xs font-bold text-foreground">{item.symbol}</span>
+              <span className="text-base font-bold text-foreground">{item.symbol}</span>
               {item.change >= 0 ? (
                 <TrendingUp className="w-3 h-3 text-[hsl(142,70%,50%)]" />
               ) : (
                 <TrendingDown className="w-3 h-3 text-destructive" />
               )}
             </div>
-            <p className="text-xs text-muted-foreground truncate">{item.name}</p>
-            <p className="text-sm font-semibold text-foreground mt-1">{item.price}</p>
-            <p className={`text-xs font-medium mt-0.5 ${item.change >= 0 ? "text-[hsl(142,70%,50%)]" : "text-destructive"}`}>
+             <p className="mt-2 truncate text-sm text-muted-foreground">{item.name}</p>
+             <p className="mt-4 break-words text-lg font-semibold text-foreground sm:text-xl">{item.price}</p>
+             <p className={`mt-1 text-sm font-medium ${item.change >= 0 ? "text-[hsl(142,70%,50%)]" : "text-destructive"}`}>
               {item.change >= 0 ? "+" : ""}{item.change.toFixed(2)}%
             </p>
           </div>
@@ -170,28 +170,28 @@ const FintechDashboard = () => {
       </div>
 
       {/* NASA Space Intelligence */}
-      <div className="border-t border-border/30 pt-3 mb-3">
-        <div className="flex items-center gap-2 mb-2">
-          <Rocket className="w-4 h-4 text-primary" />
-          <span className="text-xs font-semibold text-foreground">Space Intelligence</span>
+      <div className="mb-9 border-t border-border/50 pt-8">
+        <div className="mb-5 flex items-center gap-3">
+          <Rocket className="h-6 w-6 text-primary" />
+          <span className="font-display text-xl font-semibold text-foreground">Space Intelligence</span>
         </div>
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+        <div className="grid grid-cols-1 gap-4 lg:grid-cols-[1.35fr_0.65fr]">
           {/* APOD card */}
           {nasaApod && (
-            <div className="bg-secondary/30 rounded-lg p-3">
-              <p className="text-[10px] text-muted-foreground uppercase mb-1">NASA Astronomy Picture</p>
+            <div className="rounded-2xl border border-border/40 bg-secondary/30 p-4 sm:p-5">
+              <p className="mb-3 text-xs uppercase text-muted-foreground">NASA Astronomy Picture</p>
               {nasaApod.media_type === "image" && (
-                <img src={nasaApod.url} alt={nasaApod.title} className="w-full h-24 object-cover rounded-md mb-2" />
+                <img src={nasaApod.url} alt={nasaApod.title} className="mb-4 aspect-[16/8] w-full rounded-xl object-cover" />
               )}
-              <p className="text-xs font-medium text-foreground truncate">{nasaApod.title}</p>
-              <p className="text-[10px] text-muted-foreground line-clamp-2 mt-0.5">{nasaApod.explanation?.slice(0, 100)}…</p>
-              <p className="text-[10px] text-primary mt-1">{nasaApod.date}</p>
+              <p className="text-lg font-semibold text-foreground">{nasaApod.title}</p>
+              <p className="mt-2 line-clamp-3 text-sm leading-relaxed text-muted-foreground">{nasaApod.explanation}</p>
+              <p className="mt-3 text-sm text-primary">{nasaApod.date}</p>
             </div>
           )}
           {/* Space weather card */}
-          <div className="bg-secondary/30 rounded-lg p-3">
-            <p className="text-[10px] text-muted-foreground uppercase mb-1">🌞 Space Weather Alert</p>
-            <p className="text-xs text-foreground leading-relaxed">
+          <div className="min-h-[220px] rounded-2xl border border-border/40 bg-secondary/30 p-5">
+            <p className="mb-4 text-xs uppercase text-muted-foreground">Space Weather Alert</p>
+            <p className="text-sm leading-relaxed text-foreground">
               {spaceWeather || "Checking space conditions…"}
             </p>
             <div className="flex items-center gap-1 mt-2">
@@ -203,24 +203,24 @@ const FintechDashboard = () => {
       </div>
 
       {/* HuggingFace Trending AI Models */}
-      <div className="border-t border-border/30 pt-3 mb-3">
-        <div className="flex items-center gap-2 mb-2">
-          <Brain className="w-4 h-4 text-primary" />
-          <span className="text-xs font-semibold text-foreground">Trending AI Models</span>
-          <span className="text-[10px] text-muted-foreground">via HuggingFace</span>
+      <div className="mb-9 border-t border-border/50 pt-8">
+        <div className="mb-5 flex flex-wrap items-center gap-3">
+          <Brain className="h-6 w-6 text-primary" />
+          <span className="font-display text-xl font-semibold text-foreground">Trending AI Models</span>
+          <span className="text-sm text-muted-foreground">via HuggingFace</span>
         </div>
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2">
+        <div className="grid grid-cols-1 gap-3 lg:grid-cols-2">
           {hfModels.map((model) => (
             <a
               key={model.modelId}
               href={`https://huggingface.co/${model.modelId}`}
               target="_blank"
               rel="noopener noreferrer"
-              className="flex items-start gap-2 bg-secondary/30 rounded-lg p-2.5 hover:bg-secondary/50 transition-colors group"
+              className="group flex min-h-[92px] items-start gap-3 rounded-2xl border border-border/30 bg-secondary/30 p-4 transition-colors hover:border-primary/25 hover:bg-secondary/50"
             >
-              <Brain className="w-3.5 h-3.5 text-primary mt-0.5 shrink-0" />
+              <Brain className="mt-0.5 h-5 w-5 shrink-0 text-primary" />
               <div className="min-w-0 flex-1">
-                <p className="text-xs font-medium text-foreground truncate group-hover:text-primary transition-colors">
+                <p className="truncate text-sm font-medium text-foreground transition-colors group-hover:text-primary sm:text-base">
                   {model.modelId}
                 </p>
                 <div className="flex items-center gap-2 mt-0.5">
@@ -244,12 +244,12 @@ const FintechDashboard = () => {
       </div>
 
       {/* Live API Status */}
-      <div className="border-t border-border/30 pt-3">
-        <p className="text-xs text-muted-foreground mb-2 flex items-center gap-1">
-          <Activity className="w-3 h-3" />
+      <div className="border-t border-border/50 pt-8">
+        <p className="mb-4 flex items-center gap-2 text-base text-muted-foreground">
+          <Activity className="h-5 w-5" />
           Live API Endpoints
         </p>
-        <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
+        <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
           {[
             { key: "crypto", label: "Crypto Markets", icon: Shield },
             { key: "space", label: "Space Intel", icon: Rocket },
@@ -259,8 +259,8 @@ const FintechDashboard = () => {
             const s = apiStatus[ep.key];
             const Icon = ep.icon;
             return (
-              <div key={ep.key} className="flex items-center gap-2 bg-secondary/30 rounded-lg px-3 py-2">
-                <Icon className="w-3.5 h-3.5 text-primary shrink-0" />
+              <div key={ep.key} className="flex min-h-[64px] items-center gap-3 rounded-xl border border-border/30 bg-secondary/30 px-4 py-3">
+                <Icon className="h-5 w-5 shrink-0 text-primary" />
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center gap-1">
                     <span
@@ -272,7 +272,7 @@ const FintechDashboard = () => {
                           : "bg-destructive shadow-[0_0_6px_hsl(0,70%,50%)] animate-pulse"
                       }`}
                     />
-                    <span className="text-[10px] font-medium text-foreground truncate">{ep.label}</span>
+                    <span className="truncate text-xs font-medium text-foreground sm:text-sm">{ep.label}</span>
                   </div>
                 </div>
               </div>
