@@ -29,16 +29,43 @@ const Header = () => {
   const [syncing, setSyncing] = useState(false);
   const [now, setNow] = useState(new Date());
   const [gpsStatus, setGpsStatus] = useState("Locating you…");
+  const [address, setAddress] = useState("");
+  const [coords, setCoords] = useState<{ lat: number; lon: number } | null>(null);
 
   useEffect(() => {
     seedIfEmpty();
     const clock = window.setInterval(() => setNow(new Date()), 1000);
     if (!navigator.geolocation) setGpsStatus("Location unavailable");
-    else navigator.geolocation.getCurrentPosition(
-      () => setGpsStatus("GPS Ready"),
-      () => setGpsStatus("Location permission needed"),
-      { enableHighAccuracy: false, timeout: 8000 },
-    );
+    else {
+      const watchId = navigator.geolocation.watchPosition(
+        async (pos) => {
+          setGpsStatus("GPS Ready");
+          const { latitude, longitude } = pos.coords;
+          setCoords({ lat: latitude, lon: longitude });
+          try {
+            const res = await fetch(
+              `https://nominatim.openstreetmap.org/reverse?format=jsonv2&lat=${latitude}&lon=${longitude}&zoom=18&addressdetails=1`,
+              { headers: { Accept: "application/json" } },
+            );
+            const data = await res.json();
+            const a = data?.address ?? {};
+            const parts = [
+              a.road || a.pedestrian || a.neighbourhood,
+              a.suburb || a.village || a.town || a.city_district,
+              a.city || a.county,
+              a.state,
+              a.country,
+            ].filter(Boolean);
+            setAddress(parts.length ? parts.join(", ") : data?.display_name || "");
+          } catch {
+            setAddress("");
+          }
+        },
+        () => setGpsStatus("Location permission needed"),
+        { enableHighAccuracy: true, timeout: 12000, maximumAge: 60000 },
+      );
+      return () => { window.clearInterval(clock); navigator.geolocation.clearWatch(watchId); };
+    }
     return () => window.clearInterval(clock);
   }, []);
 
