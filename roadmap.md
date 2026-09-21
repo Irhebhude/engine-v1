@@ -11,6 +11,7 @@
 - [x] Clear button on search history + referral code visible
 - [x] Live data: FX rates (all currencies) + fuel prices, key-free endpoints
 - [x] Systemic Utility Workspace mobile redesign
+- [x] Full-length live-data interface redesign (mobile + desktop)
 - [ ] Publish
 
 ## Notes
