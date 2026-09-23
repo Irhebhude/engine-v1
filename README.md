@@ -1,73 +1,30 @@
-# Welcome to your Lovable project
+# SEARCH-POI ENGINE v1 - Proprietary AI Search Architecture
 
-## Project info
+Developed by POI FOUNDATION LTD | Nigeria
 
-**URL**: https://lovable.dev/projects/REPLACE_WITH_PROJECT_ID
+A sovereign AI-powered POI search engine with Intent-Context Synthesis and intelligent KV caching to reduce foreign API costs.
 
-## How can I edit this code?
+## Architecture
 
-There are several ways of editing your application.
+- **Frontend:** Vite + TypeScript + React + Tailwind (Deployed on Cloudflare Pages)
+- **Backend:** Cloudflare Workers Functions at `/functions/api/*`
+- **Data Layer:** Cloudflare KV (CACHE, API_KEYS) + D1 Database + R2 Bucket
+- **Core Innovation:** Intent-Context Synthesis Engine for cost reduction and data sovereignty
 
-**Use Lovable**
+## API Endpoints
 
-Simply visit the [Lovable Project](https://lovable.dev/projects/REPLACE_WITH_PROJECT_ID) and start prompting.
+- `/api/search` - Live POI search with intelligent cache
+- `/api/gps` - Reverse geocoding
+- `/api/time` - Server clock sync
+- `/api/export` - JSON to CSV export
+- `/api/generate-key` - Public API key generation
 
-Changes made via Lovable will be committed automatically to this repo.
+## Deployment
 
-**Use your preferred IDE**
+Build: `npm run build`
+Output: `dist`
+Infrastructure: Cloudflare Pages + Workers (Zero license fees, scales to 10k searches/month free tier)
 
-If you want to work locally using your own IDE, you can clone this repo and push changes. Pushed changes will also be reflected in Lovable.
+## Proprietary Notice
 
-The only requirement is having Node.js & npm installed - [install with nvm](https://github.com/nvm-sh/nvm#installing-and-updating)
-
-Follow these steps:
-
-```sh
-# Step 1: Clone the repository using the project's Git URL.
-git clone <YOUR_GIT_URL>
-
-# Step 2: Navigate to the project directory.
-cd <YOUR_PROJECT_NAME>
-
-# Step 3: Install the necessary dependencies.
-npm i
-
-# Step 4: Start the development server with auto-reloading and an instant preview.
-npm run dev
-```
-
-**Edit a file directly in GitHub**
-
-- Navigate to the desired file(s).
-- Click the "Edit" button (pencil icon) at the top right of the file view.
-- Make your changes and commit the changes.
-
-**Use GitHub Codespaces**
-
-- Navigate to the main page of your repository.
-- Click on the "Code" button (green button) near the top right.
-- Select the "Codespaces" tab.
-- Click on "New codespace" to launch a new Codespace environment.
-- Edit files directly within the Codespace and commit and push your changes once you're done.
-
-## What technologies are used for this project?
-
-This project is built with:
-
-- Vite
-- TypeScript
-- React
-- shadcn-ui
-- Tailwind CSS
-
-## How can I deploy this project?
-
-Simply open [Lovable](https://lovable.dev/projects/REPLACE_WITH_PROJECT_ID) and click on Share -> Publish.
-
-## Can I connect a custom domain to my Lovable project?
-
-Yes, you can!
-
-To connect a domain, navigate to Project > Settings > Domains and click Connect Domain.
-
-Read more here: [Setting up a custom domain](https://docs.lovable.dev/features/custom-domain#custom-domain)
+This repository contains proprietary intellectual property of POI FOUNDATION LTD. All rights reserved. Exclusive acquisition available for African market.
