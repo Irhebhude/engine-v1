@@ -73,7 +73,9 @@ const Auth = () => {
         } catch (e) {
           console.warn("Could not capture IP:", e);
         }
-        setEmailSent(true);
+        const { error: loginError } = await signIn(email, password);
+        if (loginError) setEmailSent(true);
+        else { toast({ title: "Welcome to SEARCH-POI!" }); navigate("/"); }
       }
     }
     setLoading(false);

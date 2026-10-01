@@ -108,6 +108,16 @@ const Header = () => {
               <div className="flex min-w-0 items-center gap-2"><Database className="h-4 w-4 shrink-0 text-primary" /><span className="truncate">Live Data: {watTime} WAT</span></div>
               <div className="flex items-center gap-2 sm:justify-end"><Radio className="h-4 w-4 text-primary" /><span>Live GPS</span><span className="text-border">|</span><span>{gpsStatus}</span></div>
             </div>
+            {(address || coords) && (
+              <div className="mt-2 flex min-w-0 items-start gap-2 text-xs text-foreground sm:text-sm">
+                <LocateFixed className="mt-0.5 h-4 w-4 shrink-0 text-primary" />
+                <span className="min-w-0 break-words">
+                  <span className="text-muted-foreground">You are at: </span>
+                  {address || "Finding your street…"}
+                  {coords && <span className="text-muted-foreground"> ({coords.lat.toFixed(5)}, {coords.lon.toFixed(5)})</span>}
+                </span>
+              </div>
+            )}
           </div>
         </div>
       </header>
