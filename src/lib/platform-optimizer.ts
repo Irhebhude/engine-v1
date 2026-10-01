@@ -15,6 +15,7 @@ export async function cached<T>(key: string, fn: () => Promise<T>, ttlMs = 5 * 6
   if (inflight.has(key)) return inflight.get(key) as Promise<T>;
   misses++;
   const p = fn().then((v) => {
+    if (Array.isArray(v) && v.length === 0) return v; // never cache failures/empties
     const e = { v, exp: Date.now() + ttlMs };
     mem.set(key, e);
     try { sessionStorage.setItem("poi_c_" + key, JSON.stringify(e)); } catch { /* quota */ }
