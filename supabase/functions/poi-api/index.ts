@@ -128,6 +128,9 @@ Be factual, concise, and business-oriented.`;
         model_used: model,
         credits_remaining: keyRecord.credits_remaining - 1,
         powered_by: "SEARCH-POI Engine v1",
+        trademark: "SEARCH-POI™ / POI Foundation™",
+        copyright: "© POI FOUNDATION LTD — Owner: Prosper Ozoya Irhebhude. All rights reserved.",
+        ics: "ICS v2 - NEXT GENIUS - ACTIVE",
       },
     }), {
       headers: { ...corsHeaders, "Content-Type": "application/json" },
