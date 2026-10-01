@@ -20,6 +20,7 @@ import LocationSearch from "@/components/LocationSearch";
 import AdSense from "@/components/AdSense";
 import PulseAnalytics from "@/components/PulseAnalytics";
 import CommodityPulse from "@/components/CommodityPulse";
+import ICSv2Panel from "@/components/ICSv2Panel";
 
 import SEOHead from "@/components/SEOHead";
 import { streamSearch, webSearch, imageSearch, videoSearch, newsSearch } from "@/lib/search-api";
@@ -318,6 +319,7 @@ const SearchResults = () => {
         )}
 
         <AIAnswer answer={answer} isStreaming={isStreaming} query={query} sources={sources} liteMode={liteMode} />
+        {answer && <ICSv2Panel query={query} answer={answer} results={webResults} isStreaming={isStreaming} />}
 
         {/* Commodity Pulse + Premium Analytics */}
         {!liteMode && (

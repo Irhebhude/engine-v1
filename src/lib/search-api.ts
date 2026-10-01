@@ -17,6 +17,11 @@ export interface WebResult {
 }
 
 export async function webSearch(query: string, limit = 10): Promise<WebResult[]> {
+  const { cached } = await import("@/lib/platform-optimizer");
+  return cached(`web:${query.toLowerCase().trim()}:${limit}`, () => webSearchRaw(query, limit));
+}
+
+async function webSearchRaw(query: string, limit = 10): Promise<WebResult[]> {
   const resp = await fetch(WEB_SEARCH_URL, {
     method: "POST",
     headers: {
