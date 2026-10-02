@@ -1,6 +1,7 @@
 # SEARCH-POI Engine v1 — Roadmap
 
 ## In progress
+- [ ] Close leaked developer API key, repair search filters/Web results, verify, and publish
 - [x] Remove broken `base: "/search-poi/"` from vite config
 - [x] Offline PWA (guarded service worker, installable)
 - [x] Offline POI database (IndexedDB) + seed data + Sync Now
