@@ -48,7 +48,7 @@ serve(async (req) => {
       });
     }
 
-    if (!isInternalRequest && keyRecord.credits_remaining <= 0) {
+    if (!isInternalRequest && keyRecord && keyRecord.credits_remaining <= 0) {
       return new Response(JSON.stringify({ error: "No credits remaining. Please upgrade or add credits." }), {
         status: 402, headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
@@ -133,7 +133,7 @@ Be factual, concise, and business-oriented.`;
       data: structured,
       meta: {
         model_used: model,
-        credits_remaining: isInternalRequest ? null : keyRecord.credits_remaining - 1,
+        credits_remaining: isInternalRequest || !keyRecord ? null : keyRecord.credits_remaining - 1,
         powered_by: "SEARCH-POI Engine v1",
         trademark: "SEARCH-POI™ / POI Foundation™",
         copyright: "© POI FOUNDATION LTD — Owner: Prosper Ozoya Irhebhude. All rights reserved.",

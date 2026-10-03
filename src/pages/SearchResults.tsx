@@ -1,7 +1,7 @@
 import { useState, useEffect, useCallback } from "react";
 import { useSearchParams, useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
-import { Clock, AlertCircle, Globe, Image, Video, Newspaper, Cpu, Hammer, MapPin, Brain, Shield, FileText } from "lucide-react";
+import { Clock, AlertCircle, Globe, Image, Video, Newspaper, Cpu, Hammer, MapPin, FileText } from "lucide-react";
 import Header from "@/components/Header";
 import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
@@ -29,6 +29,7 @@ import type { SourceRef } from "@/components/SourceCitations";
 import { addSearchToHistory, getRecentQueries } from "@/lib/search-context";
 import { seedIfEmpty, searchPOIs, formatOfflineAnswer, cacheAnswer, getCachedAnswer } from "@/lib/offline-db";
 import { useToast } from "@/hooks/use-toast";
+import { Button } from "@/components/ui/button";
 
 type SearchTab = "web" | "images" | "videos" | "news";
 
@@ -36,7 +37,6 @@ const TAB_CONFIG: { id: SearchTab; label: string; icon: React.ElementType }[] = 
   { id: "web", label: "Web", icon: Globe },
   { id: "images", label: "Images", icon: Image },
   { id: "videos", label: "Videos", icon: Video },
-  { id: "news", label: "News", icon: Newspaper },
 ];
 
 /** Extract source refs from web results for the citation panel */
@@ -238,8 +238,8 @@ const SearchResults = () => {
       <SEOHead title={`${query} — SEARCH-POI Results`} description={`AI-powered search results for "${query}". Get instant answers, web results, images, videos & news.`} path={`/search?q=${encodeURIComponent(query)}`} />
       <Header />
 
-      <div className="pt-20 pb-4 px-4 border-b border-border/30 glass">
-        <div className="container mx-auto max-w-4xl">
+      <div className="bg-background px-4 pb-6 pt-20 border-b border-border/30">
+        <div className="container mx-auto max-w-[700px]">
           <div className="flex items-center gap-3 mb-3">
             <div className="flex-1">
               <SearchModeSelector activeMode={mode} onChange={handleModeChange} />
@@ -250,34 +250,30 @@ const SearchResults = () => {
 
           {/* Quick Tool Buttons — always visible */}
           {!liteMode && (
-            <div className="flex flex-wrap items-center gap-2 mt-3">
-              <button onClick={() => setShowBlueprint(true)} className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-primary/10 hover:bg-primary/20 text-primary text-xs font-medium transition-colors">
-                <Cpu className="w-3.5 h-3.5" /> Blueprints
-              </button>
-              <button onClick={() => setShowBuildGuide(true)} className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-primary/10 hover:bg-primary/20 text-primary text-xs font-medium transition-colors">
-                <Hammer className="w-3.5 h-3.5" /> Build Guide
-              </button>
-              <button onClick={() => handleTabChange("images")} className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-primary/10 hover:bg-primary/20 text-primary text-xs font-medium transition-colors">
-                <Image className="w-3.5 h-3.5" /> Images
-              </button>
-              <button onClick={() => handleTabChange("videos")} className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-primary/10 hover:bg-primary/20 text-primary text-xs font-medium transition-colors">
-                <Video className="w-3.5 h-3.5" /> Videos
-              </button>
-              <button onClick={() => handleTabChange("news")} className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-primary/10 hover:bg-primary/20 text-primary text-xs font-medium transition-colors">
-                <Newspaper className="w-3.5 h-3.5" /> News
-              </button>
-              <button onClick={() => setShowSummarizer(true)} className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-primary/10 hover:bg-primary/20 text-primary text-xs font-medium transition-colors">
-                <FileText className="w-3.5 h-3.5" /> Summarizer
-              </button>
-              <button onClick={() => setShowLocation(true)} className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-primary/10 hover:bg-primary/20 text-primary text-xs font-medium transition-colors">
-                <MapPin className="w-3.5 h-3.5" /> Location
-              </button>
+            <div className="mt-4 flex flex-col items-center gap-3" aria-label="Search filters">
+              <div className="flex flex-wrap justify-center gap-3">
+                <Button onClick={() => setShowBlueprint(true)} variant="ghost" className="min-h-12 rounded-full bg-secondary px-4 py-2 text-primary hover:bg-secondary/80 hover:text-primary">
+                  <Cpu /> Blueprints
+                </Button>
+                <Button onClick={() => setShowBuildGuide(true)} variant="ghost" className="min-h-12 rounded-full bg-secondary px-4 py-2 text-primary hover:bg-secondary/80 hover:text-primary">
+                  <Hammer /> Build Guide
+                </Button>
+              </div>
+              <div className="flex flex-wrap justify-center gap-3">
+                <Button onClick={() => handleTabChange("images")} variant="ghost" className="min-h-12 rounded-full bg-secondary px-4 py-2 text-primary hover:bg-secondary/80 hover:text-primary"><Image /> Images</Button>
+                <Button onClick={() => handleTabChange("videos")} variant="ghost" className="min-h-12 rounded-full bg-secondary px-4 py-2 text-primary hover:bg-secondary/80 hover:text-primary"><Video /> Videos</Button>
+                <Button onClick={() => handleTabChange("news")} variant="ghost" className="min-h-12 rounded-full bg-secondary px-4 py-2 text-primary hover:bg-secondary/80 hover:text-primary"><Newspaper /> News</Button>
+              </div>
+              <div className="flex flex-wrap justify-center gap-3">
+                <Button onClick={() => setShowSummarizer(true)} variant="ghost" className="min-h-12 rounded-full bg-secondary px-4 py-2 text-primary hover:bg-secondary/80 hover:text-primary"><FileText /> Summarizer</Button>
+                <Button onClick={() => setShowLocation(true)} variant="ghost" className="min-h-12 rounded-full bg-secondary px-4 py-2 text-primary hover:bg-secondary/80 hover:text-primary"><MapPin /> Location</Button>
+              </div>
             </div>
           )}
 
           {/* Search tabs */}
           {!liteMode && (
-            <div className="flex items-center gap-1 mt-3 -mb-4 pb-0">
+            <div className="mt-4 flex flex-wrap items-center justify-center gap-3">
               {TAB_CONFIG.map((tab) => {
                 const Icon = tab.icon;
                 const isActive = activeTab === tab.id;
@@ -285,11 +281,12 @@ const SearchResults = () => {
                   <button
                     key={tab.id}
                     onClick={() => handleTabChange(tab.id)}
-                    className={`flex items-center gap-1.5 px-4 py-2 text-sm font-medium rounded-t-lg transition-colors border-b-2 ${
+                    className={`flex min-h-12 items-center gap-2 rounded-full px-4 py-2 text-sm font-medium transition-colors ${
                       isActive
-                        ? "border-primary text-primary bg-primary/5"
-                        : "border-transparent text-muted-foreground hover:text-foreground hover:bg-accent/10"
+                        ? "bg-primary text-primary-foreground"
+                        : "bg-secondary text-primary hover:bg-secondary/80"
                     }`}
+                    aria-pressed={isActive}
                   >
                     <Icon className="w-3.5 h-3.5" />
                     {tab.label}
@@ -301,7 +298,7 @@ const SearchResults = () => {
         </div>
       </div>
 
-      <main className="container mx-auto max-w-4xl px-4 py-8">
+      <main className="container mx-auto max-w-[700px] px-4 py-8">
         {searchTime && !isStreaming && (
           <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="flex items-center gap-2 text-xs text-muted-foreground mb-6">
             <Clock className="w-3 h-3" />

@@ -35,7 +35,7 @@ const SearchBar = ({ onSearch, isLoading, compact, initialQuery = "" }: SearchBa
     <div className="relative w-full max-w-3xl mx-auto min-w-0">
       <form onSubmit={handleSubmit}>
         <div
-          className={`search-glow relative flex min-h-[72px] items-center gap-2 bg-card/75 backdrop-blur-xl rounded-[24px] border border-border/80 transition-all duration-300 min-w-0 ${
+          className={`search-glow relative flex min-h-[72px] items-center gap-2 bg-card/75 backdrop-blur-xl rounded-2xl border border-border/80 transition-all duration-300 min-w-0 ${
             compact ? "px-3 py-2" : "p-2 sm:min-h-[82px] sm:p-3"
           } ${isFocused ? "glow-border" : ""}`}
         >
