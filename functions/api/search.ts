@@ -1,4 +1,11 @@
 export async function onRequestGet(context) {
+  const apiKey = context.env.SEARCH_POI_INTERNAL_API_KEY;
+  if (!apiKey) {
+    return new Response(JSON.stringify({ error: "Search service is not configured." }), {
+      status: 503,
+      headers: { "Content-Type": "application/json", "Access-Control-Allow-Origin": "*" },
+    });
+  }
   const url = new URL(context.request.url);
   const q = url.searchParams.get("q") || url.searchParams.get("query") || "hello";
   
@@ -7,7 +14,7 @@ export async function onRequestGet(context) {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
-      "x-api-key": "poi_6855a17a24484d6fb8641a7fb38868f4"
+      "x-api-key": apiKey
     },
     body: JSON.stringify({ 
       query: q, 

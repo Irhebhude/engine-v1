@@ -20,7 +20,10 @@ serve(async (req) => {
 
     const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
     const serviceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
+    const internalApiKey = Deno.env.get("SEARCH_POI_INTERNAL_API_KEY");
     const supabase = createClient(supabaseUrl, serviceKey);
+
+    const isInternalRequest = Boolean(internalApiKey) && apiKey === internalApiKey;
 
     // Hash the key to compare
     const encoder = new TextEncoder();
@@ -30,20 +33,22 @@ serve(async (req) => {
     const keyHash = hashArray.map(b => b.toString(16).padStart(2, "0")).join("");
 
     // Look up API key
-    const { data: keyRecord, error: keyError } = await supabase
-      .from("api_keys")
-      .select("*")
-      .eq("key_hash", keyHash)
-      .eq("is_active", true)
-      .single();
+    const { data: keyRecord, error: keyError } = isInternalRequest
+      ? { data: null, error: null }
+      : await supabase
+        .from("api_keys")
+        .select("*")
+        .eq("key_hash", keyHash)
+        .eq("is_active", true)
+        .single();
 
-    if (keyError || !keyRecord) {
+    if (!isInternalRequest && (keyError || !keyRecord)) {
       return new Response(JSON.stringify({ error: "Invalid or inactive API key." }), {
         status: 401, headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
     }
 
-    if (keyRecord.credits_remaining <= 0) {
+    if (!isInternalRequest && keyRecord.credits_remaining <= 0) {
       return new Response(JSON.stringify({ error: "No credits remaining. Please upgrade or add credits." }), {
         status: 402, headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
@@ -93,18 +98,20 @@ Be factual, concise, and business-oriented.`;
     const content = aiData.choices?.[0]?.message?.content || "";
 
     // Deduct credit and log usage
-    await supabase.from("api_keys").update({
-      credits_remaining: keyRecord.credits_remaining - 1,
-      total_calls: keyRecord.total_calls + 1,
-      last_used_at: new Date().toISOString(),
-    }).eq("id", keyRecord.id);
+    if (!isInternalRequest && keyRecord) {
+      await supabase.from("api_keys").update({
+        credits_remaining: keyRecord.credits_remaining - 1,
+        total_calls: keyRecord.total_calls + 1,
+        last_used_at: new Date().toISOString(),
+      }).eq("id", keyRecord.id);
 
-    await supabase.from("api_usage_log").insert({
-      api_key_id: keyRecord.id,
-      query: query.slice(0, 500),
-      mode,
-      tokens_used: content.length,
-    });
+      await supabase.from("api_usage_log").insert({
+        api_key_id: keyRecord.id,
+        query: query.slice(0, 500),
+        mode,
+        tokens_used: content.length,
+      });
+    }
 
     // Try to parse as JSON, otherwise wrap
     let structured;
@@ -126,7 +133,7 @@ Be factual, concise, and business-oriented.`;
       data: structured,
       meta: {
         model_used: model,
-        credits_remaining: keyRecord.credits_remaining - 1,
+        credits_remaining: isInternalRequest ? null : keyRecord.credits_remaining - 1,
         powered_by: "SEARCH-POI Engine v1",
         trademark: "SEARCH-POI™ / POI Foundation™",
         copyright: "© POI FOUNDATION LTD — Owner: Prosper Ozoya Irhebhude. All rights reserved.",
