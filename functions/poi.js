@@ -1,11 +1,18 @@
 export async function onRequest(context) {
+  const apiKey = context.env.SEARCH_POI_INTERNAL_API_KEY;
+  if (!apiKey) {
+    return new Response(JSON.stringify({ error: "Search service is not configured." }), {
+      status: 503,
+      headers: { "Content-Type": "application/json", "Access-Control-Allow-Origin": "*" },
+    });
+  }
   const url = new URL(context.request.url);
   const q = url.searchParams.get("q") || "define accounting";
   
   const res = await fetch("https://gnmliljrkkkomnbraqkp.supabase.co/functions/v1/poi-api", {
     method: "POST",
     headers: {
-      "x-api-key": "poi_6855a17a24484d6fb8641a7fb38868f4",
+      "x-api-key": apiKey,
       "Content-Type": "application/json"
     },
     body: JSON.stringify({ query: q, mode: "business", gps: {lat: 4.8156, lng: 7.0498} })

@@ -44,8 +44,6 @@ const FintechDashboard = () => {
   const [hfModels, setHfModels] = useState<HFModel[]>([]);
   const [spaceWeather, setSpaceWeather] = useState<string | null>(null);
 
-  const NASA_KEY = "FUdXxV5mVP0YhOaOHG1oAHEMJkXX0Ye9V7tXydDA";
-
   const fetchAllData = async () => {
     setLoading(true);
 
@@ -54,9 +52,9 @@ const FintechDashboard = () => {
       // Market data
       fetch("https://api.coingecko.com/api/v3/coins/markets?vs_currency=ngn&order=market_cap_desc&per_page=8&page=1&sparkline=false"),
       // NASA APOD
-      fetch(`https://api.nasa.gov/planetary/apod?api_key=${NASA_KEY}`),
+      fetch("https://api.nasa.gov/planetary/apod?api_key=DEMO_KEY"),
       // NASA DONKI (space weather)
-      fetch(`https://api.nasa.gov/DONKI/notifications?startDate=${new Date(Date.now() - 7 * 86400000).toISOString().split("T")[0]}&type=all&api_key=${NASA_KEY}`),
+      fetch(`https://api.nasa.gov/DONKI/notifications?startDate=${new Date(Date.now() - 7 * 86400000).toISOString().split("T")[0]}&type=all&api_key=DEMO_KEY`),
       // HuggingFace trending
       fetch("https://huggingface.co/api/models?limit=6&sort=downloads&direction=-1"),
       // CoinGecko ping
