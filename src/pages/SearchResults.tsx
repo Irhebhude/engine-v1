@@ -332,9 +332,6 @@ const SearchResults = () => {
           <WebSearchResults
             results={webResults}
             isLoading={isWebLoading}
-            onLoadMore={handleLoadMoreWeb}
-            isLoadingMore={isLoadingMore}
-            hasMore={hasMoreWeb}
             isPremiumUser={isPremium}
             liteMode={liteMode}
             query={query}

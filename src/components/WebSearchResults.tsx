@@ -36,15 +36,12 @@ const getBreadcrumb = (url: string) => {
 interface WebSearchResultsProps {
   results: WebResult[];
   isLoading: boolean;
-  onLoadMore?: () => void;
-  isLoadingMore?: boolean;
-  hasMore?: boolean;
   isPremiumUser?: boolean;
   liteMode?: boolean;
   query?: string;
 }
 
-const WebSearchResults = ({ results, isLoading, onLoadMore, isLoadingMore, hasMore = true, isPremiumUser, liteMode, query }: WebSearchResultsProps) => {
+const WebSearchResults = ({ results, isLoading, isPremiumUser, liteMode, query }: WebSearchResultsProps) => {
   const [summarizing, setSummarizing] = useState<string | null>(null);
   const [summaries, setSummaries] = useState<Record<string, string>>({});
 
