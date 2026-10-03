@@ -65,9 +65,6 @@ const SearchResults = () => {
   const [error, setError] = useState<string | null>(null);
   const [webResults, setWebResults] = useState<WebResult[]>([]);
   const [isWebLoading, setIsWebLoading] = useState(false);
-  const [isLoadingMore, setIsLoadingMore] = useState(false);
-  const [webPage, setWebPage] = useState(1);
-  const [hasMoreWeb, setHasMoreWeb] = useState(true);
   const [imageResults, setImageResults] = useState<ImageResultType[]>([]);
   const [isImageLoading, setIsImageLoading] = useState(false);
   const [videoResults, setVideoResults] = useState<VideoResultType[]>([]);
@@ -146,13 +143,10 @@ const SearchResults = () => {
       if (tab === "web") {
         setWebResults([]);
         setIsWebLoading(true);
-        setWebPage(1);
-        setHasMoreWeb(true);
         const webPromise = webSearch(q).then((r) => {
           setWebResults(r);
           setSources(buildSources(r));
           setIsWebLoading(false);
-          if (r.length < 10) setHasMoreWeb(false);
         }).catch(() => setIsWebLoading(false));
         await Promise.allSettled([webPromise, aiPromise]);
       } else if (tab === "images") {
@@ -178,30 +172,6 @@ const SearchResults = () => {
   useEffect(() => {
     if (query) performSearch(query);
   }, [query, performSearch]);
-
-  const handleLoadMoreWeb = useCallback(async () => {
-    if (!query || isLoadingMore) return;
-    setIsLoadingMore(true);
-    const nextPage = webPage + 1;
-    try {
-      const moreResults = await webSearch(query, 10);
-      if (moreResults.length === 0) {
-        setHasMoreWeb(false);
-      } else {
-        setWebResults((prev) => {
-          const existingUrls = new Set(prev.map(r => r.url));
-          const newResults = moreResults.filter(r => !existingUrls.has(r.url));
-          if (newResults.length === 0) setHasMoreWeb(false);
-          return [...prev, ...newResults];
-        });
-        setWebPage(nextPage);
-      }
-    } catch {
-      // silently fail
-    } finally {
-      setIsLoadingMore(false);
-    }
-  }, [query, webPage, isLoadingMore]);
 
   const handleNewSearch = (newQuery: string) => {
     navigate(`/search?q=${encodeURIComponent(newQuery)}&tab=${activeTab}`);
