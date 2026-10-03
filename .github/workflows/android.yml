@@ -1,4 +1,4 @@
-name: Build Android APK from Web App
+name: SEARCH-POI Android Build
 
 on:
   push:
@@ -15,34 +15,56 @@ jobs:
     - name: Set up Node.js Environment
       uses: actions/setup-node@v4
       with:
-        node-version: '24'
-
-    - name: Install Project Dependencies
-      run: npm install --legacy-peer-deps
-
-    - name: Compile Web App (Vite Build)
-      run: |
-        export TSC_COMPILE_ON_ERROR=true
-        export DISABLE_ESLINT_PLUGIN=true
-        npm run build -- --skipLibCheck || echo "Build forced past warnings"
-
-    - name: Configure and Initialize Mobile Wrapper
-      run: |
-        npm install @capacitor/core @capacitor/cli @capacitor/android
-        echo '{"appId": "com.poifoundation.engine", "appName": "Search POI Engine", "webDir": "dist", "bundledWebRuntime": false}' > capacitor.config.json
-        mkdir -p dist
-        npx cap add android
-
-    - name: Sync Web Code to Android Wrapper
-      run: npx cap sync android
+        node-version: '20'
 
     - name: Set up Java Environment
       uses: actions/setup-java@v4
       with:
         distribution: 'temurin'
-        java-version: '17'
+        java-version: '21'
 
-    - name: Build Executable Android APK
+    - name: Install dependencies
+      run: |
+        export NODE_OPTIONS=--openssl-legacy-provider
+        npm install
+
+    - name: Install Capacitor CLI
+      run: npm install -D @capacitor/core @capacitor/android @capacitor/cli
+
+    - name: Build web app
+      run: |
+        export NODE_OPTIONS=--openssl-legacy-provider
+        npm run build -- --skipLibCheck || npm run build
+
+    - name: Create capacitor.config.ts
+      run: |
+        echo 'import { CapacitorConfig } from "@capacitor/cli";
+        const config: CapacitorConfig = {
+          appId: "com.archpoi.searchpoi",
+          appName: "SEARCH-POI",
+          webDir: "dist",
+          bundledWebRuntime: false
+        };
+        export default config;' > capacitor.config.ts
+
+    - name: Add Android Platform
+      run: npx cap add android || npx cap sync android
+
+    - name: Fix Kotlin duplicates
+      run: |
+        cd android
+        echo 'configurations.all {
+          resolutionStrategy {
+            force "org.jetbrains.kotlin:kotlin-stdlib:1.8.22"
+            exclude group: "org.jetbrains.kotlin", module: "kotlin-stdlib-jdk7"
+            exclude group: "org.jetbrains.kotlin", module: "kotlin-stdlib-jdk8"
+          }
+        }' >> app/build.gradle
+
+    - name: Sync Capacitor
+      run: npx cap sync android
+
+    - name: Build debug APK
       run: |
         cd android
         chmod +x gradlew
@@ -51,5 +73,5 @@ jobs:
     - name: Upload Finished App Artifact
       uses: actions/upload-artifact@v4
       with:
-        name: android-app-debug
-        path: android/app/build/outputs/apk/debug/app-debug.apk
+        name: SEARCH-POI-debug-apk
+        path: android/app/build/outputs/apk/debug/*.apk
