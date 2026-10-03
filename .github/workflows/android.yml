@@ -1,8 +1,8 @@
-name: Build Android APK
+name: Build Android APK from Web App
 
 on:
   push:
-    branches: [ "main", "master" ] # Triggers the build when you push code
+    branches: [ "main", "master" ]
 
 jobs:
   build:
@@ -12,20 +12,42 @@ jobs:
     - name: Checkout Source Code
       uses: actions/checkout@v4
 
+    - name: Set up Node.js Environment
+      uses: actions/setup-node@v4
+      with:
+        node-version: '20'
+        cache: 'npm'
+
+    - name: Install Project Dependencies
+      run: npm install
+
+    - name: Compile Web App (Vite Build)
+      run: npm run build
+
+    - name: Install Mobile Wrapper (Capacitor)
+      run: |
+        npm install @capacitor/core @capacitor/cli
+        npx cap init "Search POI Engine" "com.poifoundation.engine" --web-dir=dist
+        npm install @capacitor/android
+        npx cap add android
+
+    - name: Sync Web Code to Android Wrapper
+      run: npx cap sync android
+
     - name: Set up Java Environment
       uses: actions/setup-java@v4
       with:
         distribution: 'temurin'
         java-version: '17'
 
-    - name: Make Gradle Executable
-      run: chmod +x gradlew
-
-    - name: Build Debug APK
-      run: ./gradlew assembleDebug
+    - name: Build Executable Android APK
+      run: |
+        cd android
+        chmod +x gradlew
+        ./gradlew assembleDebug
 
     - name: Upload Finished App Artifact
       uses: actions/upload-artifact@v4
       with:
         name: android-app-debug
-        path: app/build/outputs/apk/debug/app-debug.apk
+        path: android/app/build/outputs/apk/debug/app-debug.apk
