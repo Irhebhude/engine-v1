@@ -218,9 +218,8 @@ const SearchResults = () => {
           </div>
           <SearchBar onSearch={handleNewSearch} isLoading={isStreaming} compact initialQuery={query} />
 
-          {/* Quick Tool Buttons — always visible */}
-          {!liteMode && (
-            <div className="mt-4 flex flex-col items-center gap-3" aria-label="Search filters">
+          {/* Quick Tool Buttons — always visible, including for signed-in Lite Mode accounts */}
+          <div className="mt-4 flex flex-col items-center gap-3" aria-label="Search filters">
               <div className="flex flex-wrap justify-center gap-3">
                 <Button onClick={() => setShowBlueprint(true)} variant="ghost" className="min-h-12 rounded-full bg-secondary px-4 py-2 text-primary hover:bg-secondary/80 hover:text-primary">
                   <Cpu /> Blueprints
@@ -238,12 +237,10 @@ const SearchResults = () => {
                 <Button onClick={() => setShowSummarizer(true)} variant="ghost" className="min-h-12 rounded-full bg-secondary px-4 py-2 text-primary hover:bg-secondary/80 hover:text-primary"><FileText /> Summarizer</Button>
                 <Button onClick={() => setShowLocation(true)} variant="ghost" className="min-h-12 rounded-full bg-secondary px-4 py-2 text-primary hover:bg-secondary/80 hover:text-primary"><MapPin /> Location</Button>
               </div>
-            </div>
-          )}
+          </div>
 
-          {/* Search tabs */}
-          {!liteMode && (
-            <div className="mt-4 flex flex-wrap items-center justify-center gap-3">
+          {/* Search tabs — always visible */}
+          <div className="mt-4 flex flex-wrap items-center justify-center gap-3">
               {TAB_CONFIG.map((tab) => {
                 const Icon = tab.icon;
                 const isActive = activeTab === tab.id;
@@ -263,8 +260,7 @@ const SearchResults = () => {
                   </button>
                 );
               })}
-            </div>
-          )}
+          </div>
         </div>
       </div>
 
@@ -288,13 +284,11 @@ const SearchResults = () => {
         <AIAnswer answer={answer} isStreaming={isStreaming} query={query} sources={sources} liteMode={liteMode} />
         {answer && <ICSv2Panel query={query} answer={answer} results={webResults} isStreaming={isStreaming} />}
 
-        {/* Commodity Pulse + Premium Analytics */}
-        {!liteMode && (
-          <div className="mt-6 grid grid-cols-1 md:grid-cols-2 gap-4">
-            <CommodityPulse />
-            {isPremium && <PulseAnalytics />}
-          </div>
-        )}
+        {/* Commodity Pulse stays visible for every account; premium analytics remains premium-only. */}
+        <div className="mt-6 grid grid-cols-1 md:grid-cols-2 gap-4">
+          <CommodityPulse />
+          {isPremium && <PulseAnalytics />}
+        </div>
 
         {!liteMode && <AdSense adSlot="9944378861" adFormat="horizontal" className="mb-6" />}
 
