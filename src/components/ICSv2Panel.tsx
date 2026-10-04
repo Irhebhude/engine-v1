@@ -52,7 +52,7 @@ const ICSv2Panel = ({ query, answer, results, isStreaming }: Props) => {
           <p className="text-muted-foreground">Zero-Trust Gateway: {gate.accepted.length} sources accepted, {gate.blocked.length} blocked{gate.blocked.length ? ` (${gate.blocked.map((b) => b.reason).join(", ")})` : ""}.</p>
 
           <div>
-            <p className="mb-2 font-semibold text-foreground"><Sparkles className="mr-1 inline h-3 w-3 text-primary" />POI Proprietary Reasoning Pipeline — Patent Pending <span className="font-normal text-muted-foreground">({chain.ms}ms)</span></p>
+            <p className="mb-2 font-semibold text-foreground"><Sparkles className="mr-1 inline h-3 w-3 text-primary" />POI Proprietary Reasoning Pipeline <span className="font-normal text-muted-foreground">({chain.ms}ms)</span></p>
             <ol className="space-y-1">{chain.steps.map((s, i) => (
               <li key={s.step} className="flex gap-2"><span className="w-5 text-muted-foreground">{i + 1}.</span><span className="w-40 shrink-0 text-foreground">{s.step}</span><span className="w-10 shrink-0 text-primary">{s.score}%</span><span className="text-muted-foreground">{s.why}</span></li>
             ))}</ol>

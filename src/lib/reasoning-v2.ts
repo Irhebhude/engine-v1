@@ -1,5 +1,5 @@
 /**
- * POI Proprietary Reasoning Pipeline — Patent Pending
+ * POI Proprietary Reasoning Pipeline
  * © POI FOUNDATION LTD. Additive validation chain run over existing results.
  */
 import type { WebResult } from "@/lib/search-api";
