@@ -25,6 +25,8 @@ const LiveActivityFeed = () => {
       if (data) setActivities(data as any);
     };
     fetchRecent();
+    const onClear = () => setActivities([]);
+    window.addEventListener("search-history-cleared", onClear);
 
     // Realtime subscription
     const channel = supabase
@@ -40,7 +42,7 @@ const LiveActivityFeed = () => {
       })
       .subscribe();
 
-    return () => { supabase.removeChannel(channel); };
+    return () => { supabase.removeChannel(channel); window.removeEventListener("search-history-cleared", onClear); };
   }, []);
 
   const timeAgo = (dateStr: string) => {
@@ -68,7 +70,7 @@ const LiveActivityFeed = () => {
             <Activity className="h-6 w-6 text-primary" />
             <span className="absolute -top-1 -right-1 w-2 h-2 rounded-full bg-primary animate-ping" />
           </div>
-          <h3 className="font-display text-xl font-semibold text-foreground">Live Search Activity</h3>
+          <h3 className="font-display text-xl font-semibold text-foreground">Your Recent Searches</h3>
         </div>
         <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
           <Zap className="w-3 h-3 text-primary" />
@@ -80,7 +82,7 @@ const LiveActivityFeed = () => {
         <AnimatePresence initial={false}>
           {activities.length === 0 ? (
             <div className="p-6 text-center text-sm text-muted-foreground">
-              No recent searches yet — be the first!
+              Your searches are private. Sign in to see your recent searches here.
             </div>
           ) : (
             activities.slice(0, 5).map((item) => (
