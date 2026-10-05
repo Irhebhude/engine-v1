@@ -27,3 +27,8 @@ describe("web result text cleaning", () => {
       .toBe("Search by name Sample request");
   });
 });
+import { cleanWebDescription as _cwd } from "./clean-web-result";
+import { it as _it, expect as _expect } from "vitest";
+_it("strips unclosed markdown brackets from snippets", () => {
+  _expect(_cwd("## Gemini says hello! [Create your own voices with Gemini]...")).toBe("Gemini says hello! Create your own voices with Gemini...");
+});

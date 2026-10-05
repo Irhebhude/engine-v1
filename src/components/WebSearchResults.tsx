@@ -79,28 +79,6 @@ const WebSearchResults = ({ results, isLoading, isPremiumUser, liteMode, query }
 
   const visibleResults = results.slice(0, 10);
 
-  // Lite mode: text-only minimal layout
-  if (liteMode) {
-    return (
-      <div className="mt-4 space-y-2">
-        <p className="text-xs text-muted-foreground uppercase tracking-wider mb-2">Web Results</p>
-        {visibleResults.map((result, i) => (
-          <div key={i} className="border-b border-border/20 pb-2">
-            <a href={result.url} target="_blank" rel="noopener noreferrer" className="text-sm text-primary hover:underline font-medium">
-              {cleanWebText(result.title) || getDomain(result.url)}
-            </a>
-            <p className="text-xs text-muted-foreground">{getDomain(result.url)}</p>
-            <p className="text-xs text-foreground/70 mt-0.5">{cleanWebDescription(result.description)}</p>
-            {result.isVerified && <BusinessBadge isVerified memberDiscount={result.memberDiscount} isPremiumUser={isPremiumUser} />}
-            {(result.phone || result.whatsapp) && (
-              <ActionButtons phone={result.phone} whatsapp={result.whatsapp} businessName={result.businessName} query={query} />
-            )}
-          </div>
-        ))}
-      </div>
-    );
-  }
-
   return (
     <section className="mt-8" aria-labelledby="web-results-heading">
       <div className="mb-6 flex items-center gap-2">
