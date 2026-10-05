@@ -14,6 +14,24 @@ export type Database = {
   }
   public: {
     Tables: {
+      analytics_settings: {
+        Row: {
+          id: number
+          legacy_visitors: number
+          tracking_started_at: string
+        }
+        Insert: {
+          id?: number
+          legacy_visitors?: number
+          tracking_started_at?: string
+        }
+        Update: {
+          id?: number
+          legacy_visitors?: number
+          tracking_started_at?: string
+        }
+        Relationships: []
+      }
       api_keys: {
         Row: {
           created_at: string
@@ -803,6 +821,30 @@ export type Database = {
         }
         Relationships: []
       }
+      visitors: {
+        Row: {
+          device_id: string
+          first_seen: string
+          ip_hash: string | null
+          last_seen: string
+          user_id: string | null
+        }
+        Insert: {
+          device_id: string
+          first_seen?: string
+          ip_hash?: string | null
+          last_seen?: string
+          user_id?: string | null
+        }
+        Update: {
+          device_id?: string
+          first_seen?: string
+          ip_hash?: string | null
+          last_seen?: string
+          user_id?: string | null
+        }
+        Relationships: []
+      }
       waitlist: {
         Row: {
           company: string | null
@@ -872,6 +914,17 @@ export type Database = {
           status: string
         }[]
       }
+      get_visitor_analytics: {
+        Args: never
+        Returns: {
+          legacy_users: number
+          legacy_visitors: number
+          live_sessions: number
+          registered_users: number
+          tracking_started_at: string
+          unique_visitors: number
+        }[]
+      }
       increment_search_count: { Args: never; Returns: undefined }
       increment_shared_view: { Args: { search_id: string }; Returns: undefined }
       log_search_activity: {
@@ -895,6 +948,7 @@ export type Database = {
           url: string
         }[]
       }
+      track_visitor: { Args: { p_device_id: string }; Returns: undefined }
       update_signup_ip: { Args: { ip_address: string }; Returns: undefined }
       verify_referral: { Args: never; Returns: undefined }
     }
