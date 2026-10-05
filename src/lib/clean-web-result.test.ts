@@ -16,4 +16,14 @@ describe("web result text cleaning", () => {
     expect(cleanWebDescription("|| || **"))
       .toBe("No description - click AI Summary");
   });
+
+  it("removes image links, empty links and bare URLs", () => {
+    expect(cleanWebText("![Google](https://search.google/icon.png) ## How to Use [](https://osmand.net/docs/x#ho"))
+      .toBe("How to Use");
+  });
+
+  it("removes code fences", () => {
+    expect(cleanWebText("# Search by name Sample request ``` {"))
+      .toBe("Search by name Sample request");
+  });
 });
