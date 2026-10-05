@@ -28,6 +28,7 @@ import DeveloperDashboard from "./pages/DeveloperDashboard";
 import AcquisitionControl from "./pages/AcquisitionControl";
 import Pricing from "./pages/Pricing";
 import Insights from "./pages/Insights";
+import VisitorAnalytics from "./pages/VisitorAnalytics";
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -53,6 +54,7 @@ const App = () => (
             <Route path="/referral" element={<Referral />} />
             <Route path="/admin" element={<AdminDashboard />} />
             <Route path="/admin/acquisition-control" element={<AcquisitionControl />} />
+            <Route path="/admin/analytics" element={<VisitorAnalytics />} />
             <Route path="/policies" element={<Policies />} />
             <Route path="/pricing" element={<Pricing />} />
             <Route path="/insights" element={<Insights />} />

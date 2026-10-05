@@ -6,3 +6,4 @@ import { registerServiceWorker } from "./lib/sw-register";
 createRoot(document.getElementById("root")!).render(<App />);
 
 registerServiceWorker();
+import("./lib/visitor-tracking").then((m) => m.startVisitorTracking());
