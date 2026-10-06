@@ -173,7 +173,7 @@ const SearchResults = () => {
 
   const loadMoreWeb = useCallback(async () => {
     try {
-      const more = await webSearch(query, 30);
+      const more = await webSearch(query, 30, false);
       setWebResults((prev) => {
         const seen = new Set(prev.map((r) => r.url));
         return [...prev, ...more.filter((r) => !seen.has(r.url))];
