@@ -312,7 +312,7 @@ const SearchResults = () => {
             isPremiumUser={isPremium}
             liteMode={liteMode}
             query={query}
-            canLoadMore={!webExpanded && webResults.length >= 8}
+            canLoadMore={!webExpanded && webResults.length > 0}
             onLoadMore={loadMoreWeb}
           />
         )}
