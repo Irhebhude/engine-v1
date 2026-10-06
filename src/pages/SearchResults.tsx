@@ -78,6 +78,7 @@ const SearchResults = () => {
   const [showLocation, setShowLocation] = useState(false);
   const [activeTab, setActiveTab] = useState<SearchTab>(initialTab);
   const [sources, setSources] = useState<SourceRef[]>([]);
+  const [webExpanded, setWebExpanded] = useState(false);
 
   const performSearch = useCallback(
     async (q: string, searchMode: SearchMode = mode, tab: SearchTab = activeTab) => {
@@ -142,6 +143,7 @@ const SearchResults = () => {
 
       if (tab === "web") {
         setWebResults([]);
+        setWebExpanded(false);
         setIsWebLoading(true);
         const webPromise = webSearch(q).then((r) => {
           setWebResults(r);
@@ -168,6 +170,17 @@ const SearchResults = () => {
     },
     [toast, mode, activeTab]
   );
+
+  const loadMoreWeb = useCallback(async () => {
+    try {
+      const more = await webSearch(query, 30);
+      setWebResults((prev) => {
+        const seen = new Set(prev.map((r) => r.url));
+        return [...prev, ...more.filter((r) => !seen.has(r.url))];
+      });
+    } catch { /* keep existing results */ }
+    setWebExpanded(true);
+  }, [query]);
 
   useEffect(() => {
     if (query) performSearch(query);
@@ -299,6 +312,8 @@ const SearchResults = () => {
             isPremiumUser={isPremium}
             liteMode={liteMode}
             query={query}
+            canLoadMore={!webExpanded && webResults.length >= 8}
+            onLoadMore={loadMoreWeb}
           />
         )}
         {activeTab === "images" && !liteMode && <ImageSearchResults results={imageResults} isLoading={isImageLoading} />}

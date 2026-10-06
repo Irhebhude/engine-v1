@@ -1,7 +1,8 @@
 import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Activity, Search, Zap } from "lucide-react";
+import { Activity, Search, Trash2, X, Zap } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
+import { clearSearchHistory, deleteSearchFromHistory } from "@/lib/search-context";
 
 interface ActivityItem {
   id: string;
@@ -27,6 +28,7 @@ const LiveActivityFeed = () => {
     fetchRecent();
     const onClear = () => setActivities([]);
     window.addEventListener("search-history-cleared", onClear);
+    window.addEventListener("search-history-changed", fetchRecent);
 
     // Realtime subscription
     const channel = supabase
@@ -42,7 +44,7 @@ const LiveActivityFeed = () => {
       })
       .subscribe();
 
-    return () => { supabase.removeChannel(channel); window.removeEventListener("search-history-cleared", onClear); };
+    return () => { supabase.removeChannel(channel); window.removeEventListener("search-history-cleared", onClear); window.removeEventListener("search-history-changed", fetchRecent); };
   }, []);
 
   const timeAgo = (dateStr: string) => {
@@ -75,6 +77,14 @@ const LiveActivityFeed = () => {
         <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
           <Zap className="w-3 h-3 text-primary" />
           <span>{liveCount} live</span>
+          {activities.length > 0 && (
+            <button
+              onClick={() => { setActivities([]); clearSearchHistory(); }}
+              className="ml-2 flex min-h-12 items-center gap-1 px-2 hover:text-destructive"
+            >
+              <Trash2 className="h-3 w-3" /> Clear all
+            </button>
+          )}
         </div>
       </div>
 
@@ -103,6 +113,13 @@ const LiveActivityFeed = () => {
                     {timeAgo(item.created_at)}
                   </p>
                 </div>
+                <button
+                  onClick={() => { setActivities((a) => a.filter((x) => x.id !== item.id)); deleteSearchFromHistory(item.query); }}
+                  aria-label={`Delete ${item.query} from history`}
+                  className="flex min-h-12 min-w-12 shrink-0 items-center justify-center text-muted-foreground hover:text-destructive"
+                >
+                  <X className="h-4 w-4" />
+                </button>
               </motion.div>
             ))
           )}

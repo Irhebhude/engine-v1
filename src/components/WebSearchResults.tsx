@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { motion } from "framer-motion";
 import { Globe, FileText, Loader2 } from "lucide-react";
 import { summarizeUrl } from "@/lib/search-api";
@@ -39,11 +39,27 @@ interface WebSearchResultsProps {
   isPremiumUser?: boolean;
   liteMode?: boolean;
   query?: string;
+  canLoadMore?: boolean;
+  onLoadMore?: () => Promise<void>;
 }
 
-const WebSearchResults = ({ results, isLoading, isPremiumUser, liteMode, query }: WebSearchResultsProps) => {
+const PAGE_SIZE = 10;
+
+const WebSearchResults = ({ results, isLoading, isPremiumUser, liteMode, query, canLoadMore, onLoadMore }: WebSearchResultsProps) => {
   const [summarizing, setSummarizing] = useState<string | null>(null);
   const [summaries, setSummaries] = useState<Record<string, string>>({});
+  const [visible, setVisible] = useState(PAGE_SIZE);
+  const [loadingMore, setLoadingMore] = useState(false);
+
+  useEffect(() => { setVisible(PAGE_SIZE); }, [query]);
+
+  const handleSeeMore = async () => {
+    if (results.length <= visible && canLoadMore && onLoadMore) {
+      setLoadingMore(true);
+      try { await onLoadMore(); } finally { setLoadingMore(false); }
+    }
+    setVisible((v) => v + PAGE_SIZE);
+  };
 
   const handleSummarize = async (url: string) => {
     if (summaries[url]) {
@@ -77,7 +93,8 @@ const WebSearchResults = ({ results, isLoading, isPremiumUser, liteMode, query }
 
   if (results.length === 0) return null;
 
-  const visibleResults = results.slice(0, 10);
+  const visibleResults = results.slice(0, visible);
+  const hasMore = results.length > visible || !!canLoadMore;
 
   return (
     <section className="mt-8" aria-labelledby="web-results-heading">
@@ -147,6 +164,19 @@ const WebSearchResults = ({ results, isLoading, isPremiumUser, liteMode, query }
         </motion.div>
       ))}
 
+      {hasMore && (
+        <div className="mt-2 flex justify-center">
+          <Button
+            onClick={handleSeeMore}
+            disabled={loadingMore}
+            variant="outline"
+            className="min-h-12 rounded-full border-primary/40 px-6 text-primary hover:bg-primary/10 hover:text-primary"
+          >
+            {loadingMore && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+            See more web results
+          </Button>
+        </div>
+      )}
     </section>
   );
 };
