@@ -10,7 +10,8 @@ serve(async (req) => {
   if (req.method === "OPTIONS") return new Response(null, { headers: corsHeaders });
 
   try {
-    const { query, limit = 10 } = await req.json();
+    const { query, limit: rawLimit = 10, scrape = true } = await req.json();
+    const limit = Math.min(Math.max(Number(rawLimit) || 10, 1), 30);
 
     if (!query) {
       return new Response(
@@ -38,7 +39,7 @@ serve(async (req) => {
       body: JSON.stringify({
         query,
         limit,
-        scrapeOptions: { formats: ["markdown"] },
+        ...(scrape ? { scrapeOptions: { formats: ["markdown"] } } : {}),
       }),
     });
 

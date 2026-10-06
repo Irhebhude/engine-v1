@@ -16,19 +16,19 @@ export interface WebResult {
   markdown?: string;
 }
 
-export async function webSearch(query: string, limit = 10): Promise<WebResult[]> {
+export async function webSearch(query: string, limit = 10, scrape = true): Promise<WebResult[]> {
   const { cached } = await import("@/lib/platform-optimizer");
-  return cached(`web:${query.toLowerCase().trim()}:${limit}`, () => webSearchRaw(query, limit));
+  return cached(`web:${query.toLowerCase().trim()}:${limit}:${scrape}`, () => webSearchRaw(query, limit, scrape));
 }
 
-async function webSearchRaw(query: string, limit = 10): Promise<WebResult[]> {
+async function webSearchRaw(query: string, limit = 10, scrape = true): Promise<WebResult[]> {
   const resp = await fetch(WEB_SEARCH_URL, {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
       Authorization: `Bearer ${KEY}`,
     },
-    body: JSON.stringify({ query, limit }),
+    body: JSON.stringify({ query, limit, scrape }),
   });
 
   if (!resp.ok) {
