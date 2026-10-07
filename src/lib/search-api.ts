@@ -42,7 +42,7 @@ export async function streamSearch({
     }
     onDone();
   } catch (e: any) {
-    onDelta(`Error: ${e.message}. Check VITE_GROQ_API_KEY is set in Cloudflare.`);
+    onDelta(`Error: ${e.message}. Check GROQ_API_KEY is set in Cloudflare Settings -> Variables.`);
     onDone();
   }
 }
