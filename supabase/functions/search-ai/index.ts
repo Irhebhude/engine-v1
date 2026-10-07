@@ -1,5 +1,4 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
-import { aiWithFailover } from "../_shared/ai-failover.ts";
 import { getLiveFacts, factsToPrompt } from "../_shared/live-facts.ts";
 
 const TRUTH_RULES = `
@@ -148,13 +147,68 @@ When answering business queries:
 Be precise with numbers and cite data sources.`,
 };
 
+// Groq API failover with 3 keys
+async function callGroqWithFailover(messages: any[]): Promise<string> {
+  const keys = [
+    Deno.env.get("GROQ_API_KEY"),
+    Deno.env.get("GROQ_API_KEY_2"),
+    Deno.env.get("GROQ_API_KEY_3"),
+  ].filter(Boolean);
+
+  if (keys.length === 0) {
+    throw new Error("No Groq API keys configured (GROQ_API_KEY, GROQ_API_KEY_2, GROQ_API_KEY_3)");
+  }
+
+  let lastError: any = null;
+
+  for (const key of keys) {
+    try {
+      const res = await fetch("https://api.groq.com/openai/v1/chat/completions", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": `Bearer ${key}`,
+        },
+        body: JSON.stringify({
+          model: "llama-3.1-8b-instant",
+          messages,
+          temperature: 0.7,
+          max_tokens: 2048,
+          stream: true,
+        }),
+      });
+
+      if (!res.ok) {
+        const text = await res.text();
+        lastError = { status: res.status, text };
+        const body = text.toLowerCase();
+        
+        // If quota/rate limit, try next key
+        if (res.status === 429 || body.includes("quota") || body.includes("rate") || body.includes("exhausted")) {
+          console.log(`[Groq] Key quota exceeded, trying next...`);
+          continue;
+        }
+        
+        // Otherwise return error
+        throw new Error(`Groq error: ${res.status} - ${text}`);
+      }
+
+      return res.body as any;
+    } catch (e) {
+      lastError = e;
+      console.log(`[Groq] Key failed, trying next... Error: ${e}`);
+      continue;
+    }
+  }
+
+  throw lastError || new Error("All Groq API keys failed");
+}
+
 serve(async (req) => {
   if (req.method === "OPTIONS") return new Response(null, { headers: corsHeaders });
 
   try {
     const { query, mode = "default", context = [] } = await req.json();
-    const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
-    if (!LOVABLE_API_KEY) throw new Error("LOVABLE_API_KEY is not configured");
 
     const systemPrompt = MODE_PROMPTS[mode] || MODE_PROMPTS.default;
     const facts = await liveFactsBlock();
@@ -174,27 +228,10 @@ serve(async (req) => {
 
     messages.push({ role: "user", content: query });
 
-    const chain = mode === "deep_research" ? "powerful" : "fast";
+    const response = await callGroqWithFailover(messages);
 
-    const { response, model } = await aiWithFailover({
-      messages,
-      chain,
-      stream: true,
-      apiKey: LOVABLE_API_KEY,
-    });
-
-    if (!response.ok) {
-      const status = response.status;
-      const t = await response.text();
-      console.error(`AI error (model: ${model}):`, status, t);
-      return new Response(JSON.stringify({ error: status === 429 ? "Rate limit exceeded" : status === 402 ? "Payment required" : "AI gateway error" }), {
-        status,
-        headers: { ...corsHeaders, "Content-Type": "application/json" },
-      });
-    }
-
-    return new Response(response.body, {
-      headers: { ...corsHeaders, "Content-Type": "text/event-stream", "X-AI-Model": model },
+    return new Response(response, {
+      headers: { ...corsHeaders, "Content-Type": "text/event-stream" },
     });
   } catch (e) {
     console.error("search-ai error:", e);
