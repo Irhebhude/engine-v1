@@ -6,7 +6,7 @@ export async function generateAIResponse(prompt: string, context: string = "") {
     body: JSON.stringify({
       prompt: fullPrompt,
       messages: [
-        { role: "system", content: "You are SEARCH-POI ENGINE v1 - intelligent reasoning for point-of-interest and business intelligence." },
+        { role: "system", content: "You are SEARCH-POI ENGINE v1" },
         { role: "user", content: fullPrompt }
       ]
     })
@@ -16,10 +16,8 @@ export async function generateAIResponse(prompt: string, context: string = "") {
     throw new Error(`Groq API error: ${err}`);
   }
   const data = await res.json();
-  return data.choices?.[0]?.message?.content || data.choices?.[0]?.text || JSON.stringify(data);
+  return data.choices?.[0]?.message?.content || JSON.stringify(data);
 }
-
-// Export with BOTH names to fix build
 export const getAIResponse = generateAIResponse;
 export const aiService = { generateAIResponse, getAIResponse };
 export default { generateAIResponse, getAIResponse };
