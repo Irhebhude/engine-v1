@@ -147,22 +147,26 @@ When answering business queries:
 Be precise with numbers and cite data sources.`,
 };
 
-// Groq API failover with 3 keys
-async function callGroqWithFailover(messages: any[]): Promise<string> {
-  const keys = [
-    Deno.env.get("GROQ_API_KEY"),
-    Deno.env.get("GROQ_API_KEY_2"),
-    Deno.env.get("GROQ_API_KEY_3"),
-  ].filter(Boolean);
+// Groq API failover with 3 keys - using correct env variable names
+async function callGroqWithFailover(messages: any[]): Promise<ReadableStream> {
+  // Check for env variable - it's set as VITE_GROQ_KEY in Cloudflare Settings
+  const primaryKey = Deno.env.get("VITE_GROQ_KEY");
+  const secondaryKey = Deno.env.get("VITE_GROQ_KEY_2");
+  const tertiaryKey = Deno.env.get("VITE_GROQ_KEY_3");
+  
+  const keys = [primaryKey, secondaryKey, tertiaryKey].filter(Boolean);
 
   if (keys.length === 0) {
-    throw new Error("No Groq API keys configured (GROQ_API_KEY, GROQ_API_KEY_2, GROQ_API_KEY_3)");
+    throw new Error("No Groq API keys configured. Set VITE_GROQ_KEY, VITE_GROQ_KEY_2, and/or VITE_GROQ_KEY_3 in Cloudflare Settings → Variables");
   }
 
   let lastError: any = null;
 
-  for (const key of keys) {
+  for (let i = 0; i < keys.length; i++) {
     try {
+      const key = keys[i];
+      console.log(`[Groq] Attempting with key ${i + 1}/${keys.length}`);
+      
       const res = await fetch("https://api.groq.com/openai/v1/chat/completions", {
         method: "POST",
         headers: {
@@ -183,25 +187,30 @@ async function callGroqWithFailover(messages: any[]): Promise<string> {
         lastError = { status: res.status, text };
         const body = text.toLowerCase();
         
+        console.error(`[Groq] Key ${i + 1} failed with status ${res.status}: ${text.slice(0, 200)}`);
+        
         // If quota/rate limit, try next key
         if (res.status === 429 || body.includes("quota") || body.includes("rate") || body.includes("exhausted")) {
-          console.log(`[Groq] Key quota exceeded, trying next...`);
+          console.log(`[Groq] Rate limit on key ${i + 1}, trying next...`);
           continue;
         }
         
         // Otherwise return error
-        throw new Error(`Groq error: ${res.status} - ${text}`);
+        throw new Error(`Groq API error: ${res.status} - ${text}`);
       }
 
-      return res.body as any;
+      console.log(`[Groq] Success with key ${i + 1}`);
+      return res.body as ReadableStream;
     } catch (e) {
       lastError = e;
-      console.log(`[Groq] Key failed, trying next... Error: ${e}`);
-      continue;
+      console.error(`[Groq] Key ${i + 1} error: ${e}`);
+      if (i < keys.length - 1) {
+        continue;
+      }
     }
   }
 
-  throw lastError || new Error("All Groq API keys failed");
+  throw lastError || new Error("All Groq API keys failed. Check VITE_GROQ_KEY, VITE_GROQ_KEY_2, VITE_GROQ_KEY_3 in Cloudflare Settings");
 }
 
 serve(async (req) => {
