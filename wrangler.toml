@@ -1,0 +1,11 @@
+name = "engine-v1"
+main = "dist/index.html"
+compatibility_date = "2024-01-15"
+
+[env.production]
+name = "engine-v1-prod"
+
+[build]
+command = "npm install --legacy-peer-deps && npm run build"
+cwd = "./"
+root = "."
