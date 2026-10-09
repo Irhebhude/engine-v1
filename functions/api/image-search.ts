@@ -1,35 +1,27 @@
-export async function onRequest({ request, env }: any) {
-  const cors = { "Content-Type": "application/json", "Access-Control-Allow-Origin": "*", "Access-Control-Allow-Methods": "GET,POST,OPTIONS", "Access-Control-Allow-Headers": "Content-Type, Authorization" };
-  if (request.method === "OPTIONS") return new Response(null, { status: 200, headers: cors });
+export const onRequestGet = async ({ request, env }) => {
+  const url = new URL(request.url);
+  const q = url.searchParams.get('q') || url.searchParams.get('query') || 'Lagos';
+  const per_page = url.searchParams.get('limit') || '20';
   try {
-    const url = new URL(request.url);
-    const q = url.searchParams.get("q") || url.searchParams.get("query") || "Lagos";
-    const enc = encodeURIComponent(q);
-
-    if (!env.PEXELS_API_KEY) {
-      return new Response(JSON.stringify({ success: true, query: q, images: [], total: 0, message: "Configure Pexels API key" }), { status: 200, headers: cors });
-    }
-
-    let images: any[] = [];
-    try {
-      const pexelsRes = await fetch(`https://api.pexels.com/v1/search?query=${enc}&per_page=20`, {
+    if (env.PEXELS_API_KEY) {
+      const r = await fetch(`https://api.pexels.com/v1/search?query=${encodeURIComponent(q)}&per_page=${per_page}`, {
         headers: { Authorization: env.PEXELS_API_KEY }
       });
-      const pexelsData = await pexelsRes.json();
-      if (pexelsData.photos) {
-        images = pexelsData.photos.map((p: any) => ({
-          url: p.src?.large || p.src?.medium || "",
-          alt: p.alt || q,
-          sourceUrl: p.url || "",
-          sourceTitle: p.photographer ? `Photo by ${p.photographer}` : q,
-          domain: "pexels.com",
-          isThumbnail: true,
-        }));
-      }
-    } catch {}
-
-    return new Response(JSON.stringify({ success: true, query: q, images, total: images.length }), { status: 200, headers: cors });
-  } catch (e: any) {
-    return new Response(JSON.stringify({ success: true, query: "error", images: [], total: 0, message: "Configure API key" }), { status: 200, headers: cors });
+      const data = await r.json();
+      const images = (data.photos || []).map(p => ({
+        id: p.id, title: p.alt, url: p.src.large, thumbnail: p.src.medium,
+        source: 'pexels', photographer: p.photographer, width: p.width, height: p.height
+      }));
+      return new Response(JSON.stringify({ images, query: q }), { headers: { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*' } });
+    }
+    // Fallback free lorem picsum
+    const images = Array.from({length: 12}).map((_,i)=>({
+      id: i, url: `https://picsum.photos/seed/${encodeURIComponent(q)}${i}/600/400`,
+      thumbnail: `https://picsum.photos/seed/${encodeURIComponent(q)}${i}/300/200`,
+      title: `${q} ${i+1}`, source: 'picsum'
+    }));
+    return new Response(JSON.stringify({ images, query: q, fallback: true }), { headers: { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*' } });
+  } catch (e) {
+    return new Response(JSON.stringify({ error: e.message, images: [] }), { status: 500 });
   }
 }

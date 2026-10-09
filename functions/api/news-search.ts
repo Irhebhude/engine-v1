@@ -1,14 +1,15 @@
-interface Env { DB: D1Database }
-export const onRequestPost: PagesFunction<Env> = async (ctx) => {
-  const { query } = await ctx.request.json() as {query:string};
-  if(!query) return Response.json({success:false,data:[]});
-  try{
-    const r = await ctx.env.DB.prepare("SELECT url,title,description FROM pages WHERE title LIKE ? LIMIT 20").bind(`%${query}%`).all();
-    return Response.json({success:true,source:"OWNED_NEWS_INDEX",data:r.results});
-  }catch(e){
-    return Response.json({success:false,error:String(e),data:[]});
+export const onRequestGet = async ({ request }) => {
+  const url = new URL(request.url);
+  const q = url.searchParams.get('q') || url.searchParams.get('query') || 'Nigeria';
+  try {
+    const r = await fetch(`https://hn.algolia.com/api/v1/search?query=${encodeURIComponent(q)}&tags=story&hitsPerPage=20`);
+    const data = await r.json();
+    const news = (data.hits || []).map(h => ({
+      id: h.objectID, title: h.title, url: h.url || `https://news.ycombinator.com/item?id=${h.objectID}`,
+      source: 'HackerNews', points: h.points, author: h.author, created_at: h.created_at, snippet: h._highlightResult?.title?.value || h.title
+    }));
+    return new Response(JSON.stringify({ news, query: q, count: news.length }), { headers: { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*' } });
+  } catch (e) {
+    return new Response(JSON.stringify({ error: e.message, news: [] }), { status: 500 });
   }
-}
-export const onRequestOptions: PagesFunction = async () => {
-  return new Response(null,{headers:{"Access-Control-Allow-Origin":"*","Access-Control-Allow-Methods":"POST,OPTIONS","Access-Control-Allow-Headers":"*"}});
 }
