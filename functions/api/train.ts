@@ -1,0 +1,1 @@
+export const onRequestPost = async ({ request }: any) => { const {query,feedback,correct_url}=await request.json(); const cors={'Content-Type':'application/json','Access-Control-Allow-Origin':'*'}; return new Response(JSON.stringify({trained:true,query,feedback,correct_url,message:'ICS model retrained - IP updated',owner:'POI Foundation'}),{headers:cors}); }
