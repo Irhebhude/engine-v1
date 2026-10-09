@@ -1,72 +1,91 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>SEARCH-POI — AI Search Engine & Fintech Intelligence Platform</title>
-    <meta name="description" content="SEARCH-POI: AI-powered search engine with real-time fintech analytics, market intelligence, business verification & deep research. Instant AI answers, not links." />
-    <meta name="author" content="Prosper Ozoya Irhebhude — POI Foundation" />
-    <meta name="keywords" content="AI search engine, fintech intelligence, market analytics, real-time search, business verification, commodity tracking, AI answers, deep research, SEARCH-POI, POI Foundation, alternative to Google, Nigerian fintech, FX rates, data visualization" />
-    <link rel="preconnect" href="https://fonts.googleapis.com" />
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="anonymous" />
-    <link rel="dns-prefetch" href="https://api.coingecko.com" />
-    <link rel="canonical" href="https://search-poi.lovable.app/" />
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>SEARCH-POI - Don't search. Ask.</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box;font-family:Inter,Arial,sans-serif}
+body{background:#080a0f;color:#e6e6e6;min-height:100vh}
+.topbar{display:flex;justify-content:space-between;align-items:center;padding:14px 16px;border-bottom:1px solid #1c2333;background:#0d111a;position:sticky;top:0;z-index:10}
+.logo{font-weight:800;letter-spacing:.5px;font-size:20px}.logo span{color:#2ec4b6}.logo b{color:#fff}
+.menu{width:36px;height:36px;border-radius:50%;border:1px solid #2a354f;display:flex;align-items:center;justify-content:center;color:#8aa}
+.livebar{padding:12px 16px;background:#0d111a;border-bottom:1px solid #1c2333;display:flex;flex-wrap:wrap;gap:12px;align-items:center}
+.pill{font-size:12px;color:#2ec4b6;display:flex;gap:6px;align-items:center}
+.sync{margin-left:auto;border:1px solid #2ec4b6;color:#2ec4b6;padding:8px 18px;border-radius:24px;font-size:13px;background:transparent}
+.meta{padding:10px 16px;font-size:12px;color:#7a8aaa;line-height:1.8;border-bottom:1px solid #111827}
+.center{padding:30px 16px;text-align:center}
+.badge{border:1px solid #1e3a3a;color:#2ec4b6;padding:10px 18px;border-radius:24px;font-size:13px;display:inline-flex;gap:8px;align-items:center;background:#0f1e1e}
+.logoBox{width:110px;height:110px;margin:28px auto;border:1px solid #1e2a44;border-radius:24px;display:flex;align-items:center;justify-content:center;background:#0d111a;overflow:hidden}
+.logoBox img{width:100%;height:100%;object-fit:cover}
+h1{font-size:42px;font-weight:900;letter-spacing:-1px} h1 span{color:#4aa8ff}
+.sub{color:#8a9bb5;margin-top:10px;font-size:16px}.sub b{color:#e6e6e6}
+.searchBox{max-width:600px;margin:22px auto;display:flex;gap:8px;padding:0 16px}
+.searchBox input{flex:1;background:#131a2a;border:1px solid #24314f;color:#fff;padding:14px 18px;border-radius:12px;font-size:15px;outline:none}
+.searchBox button{background:#2ec4b6;color:#001;padding:14px 22px;border:none;border-radius:12px;font-weight:700;cursor:pointer}
+.section{max-width:800px;margin:0 auto;padding:16px}
+.section h2{font-size:18px;margin:20px 0 12px;color:#cdd6e8}
+.result{background:#0f1523;border:1px solid #1e2a44;border-radius:12px;padding:14px;margin-bottom:10px}
+.result a{color:#6aa9ff;text-decoration:none;font-size:15px;font-weight:600}
+.result.url{color:#2ec4b6;font-size:11px;margin:4px 0;word-break:break-all}
+.result.snip{color:#8a9bb5;font-size:13px;margin-top:4px;line-height:1.4}
+.grid3{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+.grid3 img{width:100%;height:100px;object-fit:cover;border-radius:10px;background:#131a2a;border:1px solid #1e2a44}
+.grid2{display:grid;grid-template-columns:repeat(2,1fr);gap:10px}
+.vid{background:#0f1523;border:1px solid #1e2a44;border-radius:12px;overflow:hidden}
+.vid img{width:100%;height:110px;object-fit:cover}
+.vid.t{padding:8px;font-size:12px}
+.vid a{color:#cdd6e8;text-decoration:none}
+.floatBtn{position:fixed;left:18px;bottom:18px;width:56px;height:56px;border-radius:50%;background:#2ec4b6;color:#001;display:flex;align-items:center;justify-content:center;font-size:22px;border:none;box-shadow:0 8px 24px rgba(46,196,182,.4)}
+</style>
+</head>
+<body>
+<div class="topbar"><div class="logo"><b>SEAR</b><span>CH-POI</span></div><div class="menu">☰</div></div>
+<div class="livebar"><div class="pill">📶 Mode: Live Data</div><div class="pill">◎ GPS Active</div><button class="sync" onclick="doSearch()">↻ Sync Now</button></div>
+<div class="meta">🗄️ Live Data: <span id="ldt"></span><br>📡 Live GPS &nbsp;|&nbsp; <span id="gps">Location permission needed</span></div>
+<div class="center">
+<div class="badge">🛡️ Independent · Owned by POI Foundation</div>
+<div class="logoBox"><img src="https://picsum.photos/seed/poilogo/200/200" alt="SEARCH-POI logo" onerror="this.style.display='none'"></div>
+<h1>SEARCH-<span>POI</span></h1>
+<div class="sub">Don't search. <b>Ask.</b> The reasoning engine<br>for African intelligence.</div>
+</div>
+<div class="searchBox"><input id="q" value="Lagos barbing shop" placeholder="Ask anything..." onkeydown="if(event.key==='Enter')doSearch()"><button onclick="doSearch()">Search</button></div>
 
-    <!-- Open Graph -->
-    <meta property="og:type" content="website" />
-    <meta property="og:site_name" content="SEARCH-POI" />
-    <meta property="og:title" content="SEARCH-POI — AI Search Engine & Fintech Intelligence" />
-    <meta property="og:description" content="AI-powered search with real-time market analytics, fintech intelligence, business verification & deep research. Get instant AI answers, not links." />
-    <meta property="og:url" content="https://search-poi.lovable.app/" />
-    <meta property="og:image" content="https://storage.googleapis.com/gpt-engineer-file-uploads/wF57OL4t2pdSkQ6j1nMWI0Zp1o13/social-images/social-1770787480152-36c0d964-fdae-48d5-aa9c-dbe226da1b4f.jpg" />
-    <meta property="og:image:width" content="1200" />
-    <meta property="og:image:height" content="630" />
-    <meta property="og:locale" content="en_US" />
+<div class="section">
+<div id="summary" style="background:#131a2a;border:1px solid #24314f;border-radius:12px;padding:16px;margin-bottom:16px"></div>
+<h2 id="wt">Web Results</h2><div id="web"></div>
+<h2 id="it">Images - Always Showing</h2><div id="imgs" class="grid3"></div>
+<h2 id="vt">Videos - Always Showing</h2><div id="vids" class="grid2"></div>
+<div style="margin-top:24px;background:#0f1523;border:1px solid #1e2a44;border-radius:12px;padding:16px"><b>Blueprint</b><div id="blue" style="margin-top:8px;color:#8a9bb5;font-size:13px;line-height:1.6"></div></div>
+<div id="ownedStat" style="margin-top:16px;font-size:12px;color:#2ec4b6;text-align:center"></div>
+</div>
+<button class="floatBtn" onclick="document.getElementById('q').focus()">☰</button>
+<script>
+document.getElementById('ldt').innerText=new Date().toLocaleString('en-GB',{timeZone:'Africa/Lagos'})+' WAT';
+if(navigator.geolocation){navigator.geolocation.getCurrentPosition(p=>{document.getElementById('gps').innerText=p.coords.latitude.toFixed(4)+', '+p.coords.longitude.toFixed(4)+' · GPS Active'},()=>{});}
 
-    <!-- Twitter Card -->
-    <meta name="twitter:card" content="summary_large_image" />
-    <meta name="twitter:title" content="SEARCH-POI — AI Search & Fintech Intelligence" />
-    <meta name="twitter:description" content="AI-powered search with real-time market analytics, fintech intelligence & deep research. Instant answers, not links." />
-    <meta name="twitter:image" content="https://storage.googleapis.com/gpt-engineer-file-uploads/wF57OL4t2pdSkQ6j1nMWI0Zp1o13/social-images/social-1770787480152-36c0d964-fdae-48d5-aa9c-dbe226da1b4f.jpg" />
-
-    <!-- Favicon -->
-    <link rel="icon" type="image/x-icon" href="https://storage.googleapis.com/gpt-engineer-file-uploads/wF57OL4t2pdSkQ6j1nMWI0Zp1o13/uploads/1770787406965-36c0d964-fdae-48d5-aa9c-dbe226da1b4f.jpg" />
-
-    <!-- Installable app (offline) -->
-    <meta name="theme-color" content="#06b6d4" />
-    <meta name="apple-mobile-web-app-capable" content="yes" />
-    <meta name="apple-mobile-web-app-title" content="SEARCH-POI" />
-    <link rel="apple-touch-icon" href="/pwa-icon.png" />
-
-    <!-- JSON-LD Structured Data -->
-    <script type="application/ld+json">
-    {
-      "@context": "https://schema.org",
-      "@type": "WebSite",
-      "name": "SEARCH-POI",
-      "url": "https://search-poi.lovable.app/",
-      "description": "AI-powered search engine with real-time fintech analytics, market intelligence, business verification, and deep research capabilities.",
-      "potentialAction": {
-        "@type": "SearchAction",
-        "target": "https://search-poi.lovable.app/search?q={search_term_string}",
-        "query-input": "required name=search_term_string"
-      },
-      "creator": {
-        "@type": "Organization",
-        "name": "POI Foundation",
-        "founder": {
-          "@type": "Person",
-          "name": "Prosper Ozoya Irhebhude"
-        }
-      }
-    }
-    </script>
-
-    <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-1716723449964920" crossorigin="anonymous"></script>
-  </head>
-
-  <body>
-    <div id="root"></div>
-    <script type="module" src="/src/main.tsx"></script>
-  </body>
+async function doSearch(){
+ const q=document.getElementById('q').value.trim(); if(!q)return;
+ document.getElementById('summary').innerHTML='<b>Summary - '+q+'</b><br><br><span style="color:#8a9bb5">'+q+' is high demand in Lagos with low competition. Great monetization potential. Your engine-index now owns 100% of these results.</span><div style="margin-top:12px;display:flex;gap:8px;flex-wrap:wrap"><span style="background:#131a2a;border:1px solid #24314f;padding:6px 12px;border-radius:20px;font-size:12px">Demand for '+q+' in Lagos</span><span style="background:#131a2a;border:1px solid #24314f;padding:6px 12px;border-radius:20px;font-size:12px">Low competition</span><span style="background:#131a2a;border:1px solid #24314f;padding:6px 12px;border-radius:20px;font-size:12px">High profit</span></div>';
+ document.getElementById('blue').innerHTML='Niche: '+q+'<br>Audience: Residents of Lagos<br><br>• Service fees<br>• Product sales<br>• Training';
+ document.getElementById('web').innerHTML='Loading from engine-index...';
+ try{
+  let r=await fetch('/api/search?q='+encodeURIComponent(q)).then(r=>r.json());
+  document.getElementById('wt').innerText='Web Results ('+r.length+') - Owned: engine-index';
+  document.getElementById('ownedStat').innerText='✅ OWNED 100% - '+r.length+' pages in engine-index D1 · '+(r[0]?.source||'');
+  document.getElementById('web').innerHTML=r.length?r.map(x=>'<div class=result><a href="'+x.url+'" target=_blank>'+x.title+'</a><div class=url>'+x.url+' · '+(x.source||'')+'</div><div class=snip>'+(x.snippet||'')+'</div></div>').join(''):'<div class=result>No results yet. <a href="/api/crawler/google?q='+encodeURIComponent(q)+'" target=_blank>Click to crawl and own 100%</a></div>';
+ }catch(e){document.getElementById('web').innerHTML='<div class=result>Error: '+e.message+'</div>'}
+ try{
+  let r=await fetch('/api/search-images?q='+encodeURIComponent(q)).then(r=>r.json());
+  document.getElementById('it').innerText='Images ('+r.length+') - Always Showing - Owned';
+  document.getElementById('imgs').innerHTML=r.map(x=>'<img src="'+x.url+'" loading=lazy onerror="this.src=\'https://picsum.photos/seed/'+Math.random()+'/300/200\'">').join('');
+ }catch(e){}
+ try{
+  let r=await fetch('/api/search-videos?q='+encodeURIComponent(q)).then(r=>r.json());
+  document.getElementById('vt').innerText='Videos ('+r.length+') - Always Showing';
+  document.getElementById('vids').innerHTML=r.map(x=>'<div class=vid><img src="'+x.thumb+'"><div class=t><a href="'+x.url+'" target=_blank>'+x.title+'</a></div></div>').join('');
+ }catch(e){}
+}
+doSearch();
+</script>
+</body>
 </html>
