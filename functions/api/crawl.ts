@@ -1,33 +1,8 @@
-interface Env { DB: D1Database }
-export const onRequestPost: PagesFunction<Env> = async (ctx) => {
-  const db = ctx.env.DB;
-  // AUTO MIGRATE FIX FOR TERMUX
-  await db.prepare(`CREATE TABLE IF NOT EXISTS pages (
-    id TEXT PRIMARY KEY,
-    url TEXT UNIQUE NOT NULL,
-    title TEXT,
-    description TEXT,
-    content TEXT,
-    domain TEXT,
-    crawled_at INTEGER,
-    rank_score REAL DEFAULT 0
-  )`).run();
-
-  const { urls } = await ctx.request.json() as {urls:string[]};
-  if(!urls?.length) return new Response(JSON.stringify({error:"No urls"}),{status:400});
-  const results=[];
-  for(const url of urls.slice(0,10)){
-    try{
-      const res=await fetch(url,{headers:{"User-Agent":"EngineV1-Bot/1.0"}});
-      const html=await res.text();
-      const title=html.match(/<title>(.*?)<\/title>/i)?.[1]?.slice(0,200)||url;
-      const desc=html.match(/<meta name="description" content="(.*?)"/i)?.[1]?.slice(0,500)||"";
-      const text=html.replace(/<script[\s\S]*?<\/script>/gi,"").replace(/<[^>]+>/g," ").replace(/\s+/g," ").slice(0,8000);
-      const id=btoa(url).replace(/[^a-zA-Z0-9]/g,"").slice(0,32);
-      const domain=new URL(url).hostname;
-      await db.prepare("INSERT OR REPLACE INTO pages (id,url,title,description,content,domain,crawled_at,rank_score) VALUES (?,?,?,?,?,?,?,?)").bind(id,url,title,desc,text,domain,Date.now(),Math.random()).run();
-      results.push({url,title});
-    }catch(e){ results.push({url,error:String(e)}); }
-  }
-  return new Response(JSON.stringify({success:true,crawled:results.length,results}),{headers:{"Content-Type":"application/json"}});
+export const onRequestPost = async ({ request }: any) => {
+  const { url, depth=1 } = await request.json(); const cors={'Content-Type':'application/json','Access-Control-Allow-Origin':'*'};
+  const visited=new Set(); const results:any[]=[];
+  async function crawl(u:string,d:number){ if(d<0||visited.has(u)||visited.size>50) return; visited.add(u); try{ const html=await fetch(u,{headers:{'User-Agent':'POI-Crawler/1.0 Owned by POI Foundation'}}).then(r=>r.text()); const title=html.match(/<title>([^<]+)<\/title>/)?.[1]||u; results.push({url:u,title,crawled_at:new Date().toISOString()}); const links=[...html.matchAll(/href="(\/[^"]+|https?:\/\/[^"]+)"/g)].map(m=>m[1]).slice(0,20); if(d>0) for(const l of links.slice(0,5)){ const abs=l.startsWith('/')?new URL(l,u).href:l; if(abs.startsWith('http')) await crawl(abs,d-1); } }catch{} }
+  await crawl(url,depth);
+  return new Response(JSON.stringify({crawled:results.length,results,owner:'100% yours'}),{headers:cors});
 }
+export const onRequestOptions = async() => new Response('',{headers:{'Access-Control-Allow-Origin':'*','Access-Control-Allow-Methods':'POST,OPTIONS','Access-Control-Allow-Headers':'Content-Type'}});
