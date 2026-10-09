@@ -1,65 +1,35 @@
-export async function onRequest({ request, env }: any) {
-  const cors = { "Content-Type": "application/json", "Access-Control-Allow-Origin": "*", "Access-Control-Allow-Methods": "GET,POST,OPTIONS", "Access-Control-Allow-Headers": "Content-Type, Authorization" };
-  if (request.method === "OPTIONS") return new Response(null, { status: 200, headers: cors });
-  try {
-    const url = new URL(request.url);
-    const q = (url.searchParams.get("q") || url.searchParams.get("query") || "Fuel price today").trim();
-    const MODEL = env.GROQ_MODEL || "openai/gpt-oss-120b";
-    const qL = q.toLowerCase();
-    let answer = "";
+export const onRequestGet = async ({ request, env }: any) => {
+  const u = new URL(request.url);
+  const q = u.searchParams.get('q') || 'Lagos';
+  const type = u.searchParams.get('type') || 'all';
+  const PIXABAY_KEY = env.PIXABAY_API_KEY || '52173678-0a3d7481896b2907d890ab06b';
+  const cors = { 'Content-Type':'application/json','Access-Control-Allow-Origin':'*','Cache-Control':'public, max-age=300' };
+  let videos:any[]=[], images:any[]=[], news:any[]=[];
+
+  if (type==='video' || type==='all') {
     try {
-      if (env.GROQ_API_KEY) {
-        const r = await fetch("https://api.groq.com/openai/v1/chat/completions", {
-          method: "POST",
-          headers: { Authorization: `Bearer ${env.GROQ_API_KEY}`, "Content-Type": "application/json" },
-          body: JSON.stringify({ model: MODEL, messages: [{ role: "system", content: `You are SEARCH-POI Engine v1. Answer ${q} factually.` }, { role: "user", content: q }], max_tokens: 900 })
-        });
-        const d: any = await r.json();
-        answer = d.choices?.[0]?.message?.content || "";
-      }
+      const r = await fetch(`https://pixabay.com/api/videos/?key=${PIXABAY_KEY}&q=${encodeURIComponent(q)}&per_page=12&safesearch=true`);
+      const d:any = await r.json();
+      videos = (d.hits||[]).map((v:any)=>({ id:`pixabay_${v.id}`, title:v.tags||q, thumbnail:v.videos?.medium?.thumbnail, video_url:v.videos?.medium?.url, embed_url:v.videos?.medium?.url, pageURL:v.pageURL, source:'Pixabay', type:'video' }));
     } catch {}
-    if (!answer || answer.length < 20) {
-      if (qL.includes("fuel") || qL.includes("petrol") || qL.includes("diesel")) {
-        answer = `Fuel price today in Nigeria: PMS ₦1,050-₦1,200/L, Diesel ₦1,300-₦1,450. Source: NMDPRA + SEARCH-POI Commodity Pulse LIVE.`;
-      } else if (qL.includes("prosper")) {
-        answer = `Prosper Ozoya Irhebhude is Founder & CEO POI Foundation, creator SEARCH-POI Engine v1 (5M POIs).`;
-      } else {
-        answer = `${q} - SEARCH-POI Engine v1 analysis via ${MODEL}. Owner: Prosper Ozoya Irhebhude. Confidence 60%.`;
-      }
+    if(videos.length===0){
+      try{
+        const r=await fetch(`https://pipedapi.kavin.rocks/search?q=${encodeURIComponent(q)}&filter=videos`);
+        const d:any=await r.json();
+        videos=(d.items||[]).slice(0,8).map((v:any)=>{ const vid=v.url?.split('=')[1]; return { id:`yt_${vid}`, title:v.title, thumbnail:v.thumbnail||`https://i.ytimg.com/vi/${vid}/mqdefault.jpg`, embed_url:`https://www.youtube.com/embed/${vid}`, video_url:`https://www.youtube.com/watch?v=${vid}`, source:'YouTube', type:'video' }});
+      }catch{}
     }
-
-    const enc = encodeURIComponent(q);
-    let links: any[] = [];
-    if (qL.includes("fuel") || qL.includes("petrol") || qL.includes("price today")) {
-      links = [
-        { title: "Fuel Price Today - NNPC", url: "https://www.nnpclimited.com/", description: "NNPC fuel prices", source: "nnpclimited.com", score: 99 },
-        { title: "PMS Price - NMDPRA", url: "https://www.nmdpra.gov.ng/", description: "NMDPRA petrol price", source: "nmdpra.gov.ng", score: 98 },
-      ];
-    } else if (qL.includes("fx") || qL.includes("usd") || qL.includes("ngn") || qL.includes("dollar")) {
-      links = [
-        { title: "USD to NGN - Xe.com", url: "https://www.xe.com/currencyconverter/convert/?Amount=1&From=USD&To=NGN", description: "Xe live USD NGN", source: "xe.com", score: 99 },
-        { title: "CBN Exchange Rates", url: "https://www.cbn.gov.ng/rates/ExchRateByCurrency.asp", description: "CBN rates", source: "cbn.gov.ng", score: 96 },
-      ];
-    }
-
-    const templates = [
-      { t: `${q} - Wikipedia`, u: `https://en.wikipedia.org/wiki/${enc}`, d: `Wikipedia ${q}`, s: "wikipedia.org" },
-      { t: `${q} - Google News`, u: `https://news.google.com/search?q=${enc}`, d: `News ${q}`, s: "news.google.com" },
-      { t: `${q} - YouTube`, u: `https://www.youtube.com/results?search_query=${enc}`, d: `Videos ${q}`, s: "youtube.com" },
-      { t: `${q} - Google`, u: `https://www.google.com/search?q=${enc}`, d: `Google ${q}`, s: "google.com" },
-      { t: `${q} - Bing`, u: `https://www.bing.com/search?q=${enc}`, d: `Bing ${q}`, s: "bing.com" },
-      { t: `${q} - Reddit`, u: `https://www.reddit.com/search/?q=${enc}`, d: `Reddit ${q}`, s: "reddit.com" },
-      { t: `${q} - Nairaland`, u: `https://www.nairaland.com/search?q=${enc}`, d: `Nairaland ${q}`, s: "nairaland.com" },
-    ];
-    let i = 0;
-    while (links.length < 50) {
-      const tpl = templates[i % templates.length];
-      if (!links.find(l => l.url === tpl.u)) links.push({ title: tpl.t + (i >= 7 ? ` ${i}` : ""), url: tpl.u, description: tpl.d, source: tpl.s, score: 90 - links.length });
-      i++; if (i > 200) break;
-    }
-
-    return new Response(JSON.stringify({ success: true, query: q, answer, content: answer, result: answer, reasoning: `Pipeline ${q} via ${MODEL}`, confidence: 60, model: MODEL, data: links.slice(0, 50), webResults: links.slice(0, 50), totalResults: 50 }), { status: 200, headers: { ...cors, "Cache-Control": "no-cache" } });
-  } catch (e: any) {
-    return new Response(JSON.stringify({ success: true, query: "error", answer: "AI unavailable, fallback", content: "AI unavailable, fallback", result: "AI unavailable, fallback", confidence: 0, data: [], webResults: [], totalResults: 0 }), { status: 200, headers: cors });
   }
+  if (type==='image' || type==='all') {
+    try {
+      const r = await fetch(`https://pixabay.com/api/?key=${PIXABAY_KEY}&q=${encodeURIComponent(q)}&image_type=photo&per_page=20&safesearch=true`);
+      const d:any = await r.json();
+      images = (d.hits||[]).map((h:any)=>({ id:`pixabay_${h.id}`, url:h.largeImageURL, thumb:h.webformatURL, title:h.tags, source:'Pixabay', pageURL:h.pageURL, type:'image' }));
+    } catch {}
+    if(images.length===0){ images=Array.from({length:12}).map((_,i)=>({ id:`picsum_${i}`, url:`https://picsum.photos/seed/${encodeURIComponent(q)}${i}/600/400`, thumb:`https://picsum.photos/seed/${encodeURIComponent(q)}${i}/300/200`, title:`${q} ${i+1}`, source:'Picsum', type:'image' })); }
+  }
+  if (type==='news' || type==='all') {
+    try { const r=await fetch(`https://hn.algolia.com/api/v1/search?query=${encodeURIComponent(q)}&tags=story&hitsPerPage=10`); const d:any=await r.json(); news=(d.hits||[]).map((h:any)=>({ id:`hn_${h.objectID}`, title:h.title, url:h.url, source:'HackerNews', date:h.created_at, type:'news' })); } catch {}
+  }
+  return new Response(JSON.stringify({ query:q, type, counts:{videos:videos.length,images:images.length,news:news.length}, videos, images, news }), { headers:cors });
 }
