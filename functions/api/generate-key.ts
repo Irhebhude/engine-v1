@@ -1,13 +1,1 @@
-export async function onRequest({ request, env }: any) {
-  const cors = { "Content-Type":"application/json", "Access-Control-Allow-Origin":"*", "Access-Control-Allow-Methods":"GET,POST,OPTIONS", "Access-Control-Allow-Headers":"Content-Type, Authorization" };
-  if (request.method === "OPTIONS") return new Response(null, { headers: cors });
-  try {
-    let body:any = {};
-    try { body = await request.json(); } catch { const u = new URL(request.url); body.name = u.searchParams.get("name") || "Default"; }
-    const apiKey = `poi_sk_live_${crypto.randomUUID().replace(/-/g,"").slice(0,20)}${Date.now().toString(36)}`;
-    return new Response(JSON.stringify({ success:true, key: apiKey, apiKey, data:{ name: body.name || "Default", key: apiKey, created_at: new Date().toISOString() } }), { headers: cors });
-  } catch (e:any) {
-    const fallback = `poi_sk_live_${crypto.randomUUID().replace(/-/g,"").slice(0,24)}`;
-    return new Response(JSON.stringify({ success:true, key: fallback, apiKey: fallback }), { headers: cors });
-  }
-}
+export const onRequestPost=async({request,env}:any)=>{const cors={'Content-Type':'application/json','Access-Control-Allow-Origin':'*'};try{const {user_id,name}=await request.json();const res=await fetch(`${env.SUPABASE_URL}/rest/v1/rpc/generate_api_key`,{method:'POST',headers:{'Content-Type':'application/json','apikey':env.SUPABASE_SERVICE_ROLE_KEY,'Authorization':`Bearer ${env.SUPABASE_SERVICE_ROLE_KEY}`},body:JSON.stringify({p_user_id:user_id,p_name:name||'SEARCH-POI ENGINE v1'})});const data=await res.json();const row=Array.isArray(data)?data[0]:data;return new Response(JSON.stringify({success:true,source:'PostgreSQL generate_api_key() - 100% Postgres',api_key:row.full_key,preview:row.key_preview,id:row.id,name:row.name}),{headers:cors});}catch(e:any){return new Response(JSON.stringify({error:e.message}),{status:500,headers:cors});}};export const onRequestOptions=async()=>new Response('',{headers:{'Content-Type':'application/json','Access-Control-Allow-Origin':'*','Access-Control-Allow-Methods':'POST,OPTIONS','Access-Control-Allow-Headers':'Content-Type,Authorization'}});
