@@ -1,0 +1,8 @@
+name = "engine-v1"
+pages_build_output_dir = "dist"
+compatibility_date = "2024-01-01"
+
+[[d1_databases]]
+binding = "DB"
+database_name = "engine-index"
+database_id = "cb1de4e6-afb3-4e74-b6b6-875ad0bb73c2"

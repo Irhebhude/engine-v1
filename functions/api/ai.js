@@ -1,0 +1,1 @@
+export function onRequest(c){ const u=new URL(c.request.url); const q=u.searchParams.get("q")||"poi"; return new Response(JSON.stringify({success:true,answer:`SEARCH-POI ${q}`}),{headers:{"Content-Type":"application/json","Access-Control-Allow-Origin":"*"}})}

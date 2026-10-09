@@ -1,0 +1,359 @@
+import { useState, useEffect, useCallback } from "react";
+import { useSearchParams, useNavigate } from "react-router-dom";
+import { motion } from "framer-motion";
+import { Clock, AlertCircle, Globe, Image, Video, Newspaper, Cpu, Hammer, MapPin, FileText } from "lucide-react";
+import Header from "@/components/Header";
+import { useAuth } from "@/contexts/AuthContext";
+import { supabase } from "@/integrations/supabase/client";
+import SearchBar from "@/components/SearchBar";
+import AIAnswer from "@/components/AIAnswer";
+import WebSearchResults from "@/components/WebSearchResults";
+import ImageSearchResults from "@/components/ImageSearchResults";
+import VideoSearchResults from "@/components/VideoSearchResults";
+import NewsSearchResults from "@/components/NewsSearchResults";
+import SearchModeSelector from "@/components/SearchModeSelector";
+import ToolsMenu from "@/components/ToolsMenu";
+import UrlSummarizer from "@/components/UrlSummarizer";
+import BlueprintGenerator from "@/components/BlueprintGenerator";
+import BuildGuideViewer from "@/components/BuildGuideViewer";
+import LocationSearch from "@/components/LocationSearch";
+import AdSense from "@/components/AdSense";
+import PulseAnalytics from "@/components/PulseAnalytics";
+import CommodityPulse from "@/components/CommodityPulse";
+import ICSv2Panel from "@/components/ICSv2Panel";
+
+import SEOHead from "@/components/SEOHead";
+import { streamSearch, webSearch, imageSearch, videoSearch, newsSearch } from "@/lib/search-api";
+import type { SearchMode, WebResult, ImageResult as ImageResultType, VideoResult as VideoResultType, NewsResult as NewsResultType } from "@/lib/search-api";
+import type { SourceRef } from "@/components/SourceCitations";
+import { addSearchToHistory, getRecentQueries } from "@/lib/search-context";
+import { seedIfEmpty, searchPOIs, formatOfflineAnswer, cacheAnswer, getCachedAnswer } from "@/lib/offline-db";
+import { useToast } from "@/hooks/use-toast";
+import { Button } from "@/components/ui/button";
+
+type SearchTab = "web" | "images" | "videos" | "news";
+
+const TAB_CONFIG: { id: SearchTab; label: string; icon: React.ElementType }[] = [
+  { id: "web", label: "Web", icon: Globe },
+  { id: "images", label: "Images", icon: Image },
+  { id: "videos", label: "Videos", icon: Video },
+];
+
+/** Extract source refs from web results for the citation panel */
+const buildSources = (results: WebResult[]): SourceRef[] => {
+  return results.slice(0, 8).map((r) => {
+    let domain = "";
+    try { domain = new URL(r.url).hostname.replace("www.", ""); } catch { domain = r.url; }
+    return { url: r.url, title: r.title, domain };
+  });
+};
+
+const SearchResults = () => {
+  const [searchParams] = useSearchParams();
+  const navigate = useNavigate();
+  const { toast } = useToast();
+  const { profile } = useAuth();
+  const query = searchParams.get("q") || "";
+  const initialTab = (searchParams.get("tab") as SearchTab) || "web";
+  const initialMode = (searchParams.get("mode") as SearchMode) || "default";
+  const liteMode = profile?.lite_mode ?? false;
+  const isPremium = profile?.is_premium ?? false;
+
+  const [answer, setAnswer] = useState("");
+  const [isStreaming, setIsStreaming] = useState(false);
+  const [searchTime, setSearchTime] = useState<number | null>(null);
+  const [error, setError] = useState<string | null>(null);
+  const [webResults, setWebResults] = useState<WebResult[]>([]);
+  const [isWebLoading, setIsWebLoading] = useState(false);
+  const [imageResults, setImageResults] = useState<ImageResultType[]>([]);
+  const [isImageLoading, setIsImageLoading] = useState(false);
+  const [videoResults, setVideoResults] = useState<VideoResultType[]>([]);
+  const [isVideoLoading, setIsVideoLoading] = useState(false);
+  const [newsResults, setNewsResults] = useState<NewsResultType[]>([]);
+  const [isNewsLoading, setIsNewsLoading] = useState(false);
+  const [mode, setMode] = useState<SearchMode>(initialMode);
+  const [showSummarizer, setShowSummarizer] = useState(false);
+  const [showBlueprint, setShowBlueprint] = useState(false);
+  const [showBuildGuide, setShowBuildGuide] = useState(false);
+  const [showLocation, setShowLocation] = useState(false);
+  const [activeTab, setActiveTab] = useState<SearchTab>(initialTab);
+  const [sources, setSources] = useState<SourceRef[]>([]);
+  const [webExpanded, setWebExpanded] = useState(false);
+
+  const performSearch = useCallback(
+    async (q: string, searchMode: SearchMode = mode, tab: SearchTab = activeTab) => {
+      setAnswer("");
+      setIsStreaming(true);
+      setError(null);
+      setSearchTime(null);
+      setSources([]);
+      const start = performance.now();
+      let accumulated = "";
+
+      addSearchToHistory(q, searchMode);
+      const recentContext = getRecentQueries(5);
+
+      supabase.rpc("increment_search_count" as any).then(() => {});
+      supabase.rpc("log_search_activity" as any, { search_query: q, search_mode: searchMode }).then(() => {});
+
+      const offlineAnswer = async () => {
+        const cached = await getCachedAnswer(q);
+        if (cached) {
+          setAnswer(cached);
+        } else {
+          await seedIfEmpty();
+          const pois = await searchPOIs(q);
+          setAnswer(formatOfflineAnswer(q, pois));
+        }
+        setIsStreaming(false);
+        setSearchTime(Math.round(performance.now() - start));
+      };
+
+      const aiPromise = (async () => {
+        if (!navigator.onLine) {
+          await offlineAnswer();
+          return;
+        }
+        try {
+          await streamSearch({
+            query: q,
+            mode: searchMode,
+            context: recentContext,
+            onDelta: (chunk) => {
+              accumulated += chunk;
+              setAnswer(accumulated);
+            },
+            onDone: () => {
+              setIsStreaming(false);
+              setSearchTime(Math.round(performance.now() - start));
+              cacheAnswer(q, accumulated);
+            },
+          });
+        } catch (e: any) {
+          try {
+            await offlineAnswer();
+            toast({ title: "Offline answer", description: "Live search unavailable — answered from the on-device index." });
+          } catch {
+            setIsStreaming(false);
+            setError(e.message);
+            toast({ title: "Search Error", description: e.message, variant: "destructive" });
+          }
+        }
+      })();
+
+      if (tab === "web") {
+        setWebResults([]);
+        setWebExpanded(false);
+        setIsWebLoading(true);
+        const webPromise = webSearch(q).then((r) => {
+          setWebResults(r);
+          setSources(buildSources(r));
+          setIsWebLoading(false);
+        }).catch(() => setIsWebLoading(false));
+        await Promise.allSettled([webPromise, aiPromise]);
+      } else if (tab === "images") {
+        setImageResults([]);
+        setIsImageLoading(true);
+        const imgPromise = imageSearch(q).then((r) => { setImageResults(r); setIsImageLoading(false); }).catch(() => setIsImageLoading(false));
+        await Promise.allSettled([imgPromise, aiPromise]);
+      } else if (tab === "videos") {
+        setVideoResults([]);
+        setIsVideoLoading(true);
+        const vidPromise = videoSearch(q).then((r) => { setVideoResults(r); setIsVideoLoading(false); }).catch(() => setIsVideoLoading(false));
+        await Promise.allSettled([vidPromise, aiPromise]);
+      } else if (tab === "news") {
+        setNewsResults([]);
+        setIsNewsLoading(true);
+        const newsPromise = newsSearch(q).then((r) => { setNewsResults(r); setIsNewsLoading(false); }).catch(() => setIsNewsLoading(false));
+        await Promise.allSettled([newsPromise, aiPromise]);
+      }
+    },
+    [toast, mode, activeTab]
+  );
+
+  const loadMoreWeb = useCallback(async () => {
+    try {
+      const more = await webSearch(query, 30, false);
+      setWebResults((prev) => {
+        const seen = new Set(prev.map((r) => r.url));
+        return [...prev, ...more.filter((r) => !seen.has(r.url))];
+      });
+    } catch { /* keep existing results */ }
+    setWebExpanded(true);
+  }, [query]);
+
+  useEffect(() => {
+    if (query) performSearch(query);
+  }, [query, performSearch]);
+
+  const handleNewSearch = (newQuery: string) => {
+    navigate(`/search?q=${encodeURIComponent(newQuery)}&tab=${activeTab}`);
+  };
+
+  const handleModeChange = (newMode: SearchMode) => {
+    setMode(newMode);
+    if (query) performSearch(query, newMode, activeTab);
+  };
+
+  const handleTabChange = (tab: SearchTab) => {
+    setActiveTab(tab);
+    if (query) {
+      navigate(`/search?q=${encodeURIComponent(query)}&tab=${tab}`, { replace: true });
+      performSearch(query, mode, tab);
+    }
+  };
+
+  const handleToolAction = (action: string) => {
+    if (action === "summarize") setShowSummarizer(true);
+    if (action === "blueprint") setShowBlueprint(true);
+    if (action === "buildguide") setShowBuildGuide(true);
+    if (action === "location") setShowLocation(true);
+    if (action === "images") handleTabChange("images");
+    if (action === "videos") handleTabChange("videos");
+    if (action === "news") handleTabChange("news");
+  };
+
+  const modeLabel = mode !== "default" ? ` • ${mode.replace("_", " ").toUpperCase()} MODE` : "";
+
+  return (
+    <>
+    <div className={`min-h-screen bg-background ${liteMode ? "lite-mode" : ""}`}>
+      <SEOHead title={`${query} — SEARCH-POI Results`} description={`AI-powered search results for "${query}". Get instant answers, web results, images, videos & news.`} path={`/search?q=${encodeURIComponent(query)}`} />
+      <Header />
+
+      <div className="bg-background px-4 pb-6 pt-20 border-b border-border/30">
+        <div className="container mx-auto max-w-[700px]">
+          <div className="flex items-center gap-3 mb-3">
+            <div className="flex-1">
+              <SearchModeSelector activeMode={mode} onChange={handleModeChange} />
+            </div>
+            <ToolsMenu onSelectMode={handleModeChange} onAction={handleToolAction} />
+          </div>
+          <SearchBar onSearch={handleNewSearch} isLoading={isStreaming} compact initialQuery={query} />
+
+          {/* Quick Tool Buttons — always visible, including for signed-in Lite Mode accounts */}
+          <div className="mt-4 flex flex-col items-center gap-3" aria-label="Search filters">
+              <div className="flex flex-wrap justify-center gap-3">
+                <Button onClick={() => setShowBlueprint(true)} variant="ghost" className="min-h-12 rounded-full bg-secondary px-4 py-2 text-primary hover:bg-secondary/80 hover:text-primary">
+                  <Cpu /> Blueprints
+                </Button>
+                <Button onClick={() => setShowBuildGuide(true)} variant="ghost" className="min-h-12 rounded-full bg-secondary px-4 py-2 text-primary hover:bg-secondary/80 hover:text-primary">
+                  <Hammer /> Build Guide
+                </Button>
+              </div>
+              <div className="flex flex-wrap justify-center gap-3">
+                <Button onClick={() => handleTabChange("images")} variant="ghost" className="min-h-12 rounded-full bg-secondary px-4 py-2 text-primary hover:bg-secondary/80 hover:text-primary"><Image /> Images</Button>
+                <Button onClick={() => handleTabChange("videos")} variant="ghost" className="min-h-12 rounded-full bg-secondary px-4 py-2 text-primary hover:bg-secondary/80 hover:text-primary"><Video /> Videos</Button>
+                <Button onClick={() => handleTabChange("news")} variant="ghost" className="min-h-12 rounded-full bg-secondary px-4 py-2 text-primary hover:bg-secondary/80 hover:text-primary"><Newspaper /> News</Button>
+              </div>
+              <div className="flex flex-wrap justify-center gap-3">
+                <Button onClick={() => setShowSummarizer(true)} variant="ghost" className="min-h-12 rounded-full bg-secondary px-4 py-2 text-primary hover:bg-secondary/80 hover:text-primary"><FileText /> Summarizer</Button>
+                <Button onClick={() => setShowLocation(true)} variant="ghost" className="min-h-12 rounded-full bg-secondary px-4 py-2 text-primary hover:bg-secondary/80 hover:text-primary"><MapPin /> Location</Button>
+              </div>
+          </div>
+
+          {/* Search tabs — always visible */}
+          <div className="mt-4 flex flex-wrap items-center justify-center gap-3">
+              {TAB_CONFIG.map((tab) => {
+                const Icon = tab.icon;
+                const isActive = activeTab === tab.id;
+                return (
+                  <button
+                    key={tab.id}
+                    onClick={() => handleTabChange(tab.id)}
+                    className={`flex min-h-12 items-center gap-2 rounded-full px-4 py-2 text-sm font-medium transition-colors ${
+                      isActive
+                        ? "bg-primary text-primary-foreground"
+                        : "bg-secondary text-primary hover:bg-secondary/80"
+                    }`}
+                    aria-pressed={isActive}
+                  >
+                    <Icon className="w-3.5 h-3.5" />
+                    {tab.label}
+                  </button>
+                );
+              })}
+          </div>
+        </div>
+      </div>
+
+      <main className="container mx-auto max-w-[700px] px-4 py-8">
+        {searchTime && !isStreaming && (
+          <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="flex items-center gap-2 text-xs text-muted-foreground mb-6">
+            <Clock className="w-3 h-3" />
+            AI answer generated in {(searchTime / 1000).toFixed(2)}s{modeLabel}
+          </motion.div>
+        )}
+
+        {error && (
+          <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className="glass rounded-2xl p-6 border-destructive/30 mb-6">
+            <div className="flex items-center gap-3 text-destructive">
+              <AlertCircle className="w-5 h-5" />
+              <p className="font-medium">{error}</p>
+            </div>
+          </motion.div>
+        )}
+
+        <AIAnswer answer={answer} isStreaming={isStreaming} query={query} sources={sources} liteMode={liteMode} />
+        {answer && <ICSv2Panel query={query} answer={answer} results={webResults} isStreaming={isStreaming} />}
+
+        {/* Commodity Pulse stays visible for every account; premium analytics remains premium-only. */}
+        <div className="mt-6 grid grid-cols-1 md:grid-cols-2 gap-4">
+          <CommodityPulse />
+          {isPremium && <PulseAnalytics />}
+        </div>
+
+        {!liteMode && <AdSense adSlot="9944378861" adFormat="horizontal" className="mb-6" />}
+
+        {activeTab === "web" && (
+          <WebSearchResults
+            results={webResults}
+            isLoading={isWebLoading}
+            isPremiumUser={isPremium}
+            liteMode={liteMode}
+            query={query}
+            canLoadMore={!webExpanded && webResults.length > 0}
+            onLoadMore={loadMoreWeb}
+          />
+        )}
+        {activeTab === "images" && !liteMode && <ImageSearchResults results={imageResults} isLoading={isImageLoading} />}
+        {activeTab === "videos" && !liteMode && <VideoSearchResults results={videoResults} isLoading={isVideoLoading} />}
+        {activeTab === "news" && <NewsSearchResults results={newsResults} isLoading={isNewsLoading} />}
+
+        {/* Blueprint buttons */}
+        {query && !isStreaming && !liteMode && (
+          <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="mt-6 flex flex-wrap gap-3">
+            <button
+              onClick={() => setShowBlueprint(true)}
+              className="flex items-center gap-2 px-5 py-3 rounded-xl border border-primary/20 bg-primary/5 hover:bg-primary/10 transition-all text-sm font-medium text-foreground group"
+            >
+              <Cpu className="w-4 h-4 text-primary group-hover:scale-110 transition-transform" />
+              Generate Blueprint
+            </button>
+            <button
+              onClick={() => setShowBuildGuide(true)}
+              className="flex items-center gap-2 px-5 py-3 rounded-xl border border-primary/20 bg-primary/5 hover:bg-primary/10 transition-all text-sm font-medium text-foreground group"
+            >
+              <Hammer className="w-4 h-4 text-primary group-hover:scale-110 transition-transform" />
+              Build Guide Video
+            </button>
+          </motion.div>
+        )}
+
+        {!liteMode && <AdSense adSlot="9944378861" adFormat="auto" className="mt-8" />}
+
+        <div className="text-center mt-12 text-xs text-muted-foreground">
+          Powered by <span className="text-primary font-semibold">SEARCH-POI Engine v1</span> • Intelligent Reasoning • POI Foundation
+        </div>
+      </main>
+
+      <UrlSummarizer isOpen={showSummarizer} onClose={() => setShowSummarizer(false)} />
+      <BlueprintGenerator isOpen={showBlueprint} onClose={() => setShowBlueprint(false)} initialQuery={query} />
+      <BuildGuideViewer isOpen={showBuildGuide} onClose={() => setShowBuildGuide(false)} initialQuery={query} />
+      <LocationSearch isOpen={showLocation} onClose={() => setShowLocation(false)} initialQuery={query} />
+    </div>
+    </>
+  );
+};
+
+export default SearchResults;
