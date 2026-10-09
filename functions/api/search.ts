@@ -1,6 +1,8 @@
 export const onRequestGet = async ({ request, env }: any) => {
   const u = new URL(request.url); const q = u.searchParams.get('q')||'Search POI';
   const cors = {'Content-Type':'application/json','Access-Control-Allow-Origin':'*','Cache-Control':'no-cache'};
+ let trainingMap:any={};
+ try{ if(env.DB){ const rows=await env.DB.prepare(`SELECT url,clicks,dwell,ics_boost FROM training WHERE query=?`).bind(q).all(); rows.results?.forEach((r:any)=>{ trainingMap[`${q.toLowerCase()}::${r.url}`]={clicks:r.clicks,dwell:r.dwell,boost:r.ics_boost}; }); } }catch{}
   let web:any[]=[];
   try{
     const html = await fetch(`https://html.duckduckgo.com/html/?q=${encodeURIComponent(q)}`,{headers:{'User-Agent':'POI-Crawler-v2 100% Owned'}}).then(r=>r.text());
@@ -18,7 +20,7 @@ export const onRequestGet = async ({ request, env }: any) => {
         source: host,
         displayUrl: breadcrumb,
         favicon: `https://www.google.com/s2/favicons?domain=${host}&sz=32`,
-        ics: url.includes('wikipedia')?92:url.includes('mapbox')||url.includes('osmand')||url.includes('aws.amazon')?88:78,
+        ics: (()=>{ let base=url.includes('wikipedia')?92:url.includes('mapbox')||url.includes('osmand')||url.includes('aws.amazon')?88:78; const k=`${q.toLowerCase()}::${url}`; const t=trainingMap[k]||{clicks:0,dwell:0,boost:0}; let ics=base+(t.boost||0)+Math.min(15,t.clicks*2); if(t.dwell>60) ics+=10; if(t.dwell<5&&t.clicks>2) ics-=15; return Math.min(95,Math.max(20,ics)); })(),
         timestamp: new Date().toISOString(),
         aiSummary: true,
         type:'web', live:true, crawler:'POI-v2'
@@ -35,7 +37,8 @@ export const onRequestGet = async ({ request, env }: any) => {
     ].map(r=>({...r, snippet: q.toLowerCase().includes('poi')? r.snippet : `${q} - ${r.snippet}`}))
   }
 
-  const avg = Math.round(web.reduce((a,b)=>a+b.ics,0)/web.length);
+  web=web.sort((a:any,b:any)=>b.ics-a.ics);
+ const avg = Math.round(web.reduce((a:any,b:any)=>a+b.ics,0)/web.length);
   return new Response(JSON.stringify({
     query:q,
     web, news:web,
