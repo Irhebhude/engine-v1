@@ -1,0 +1,1 @@
+export const searchAll = async (q) => { const r = await fetch("/api/web?q="+encodeURIComponent(q)).then(x=>x.json()).catch(()=>[]); return {web:r}; }

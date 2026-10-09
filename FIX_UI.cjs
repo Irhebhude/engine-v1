@@ -1,4 +1,33 @@
+const fs = require('fs');
+const path = require('path');
+function walk(dir){
+  let out=[];
+  if(!fs.existsSync(dir)) return out;
+  for(let f of fs.readdirSync(dir)){
+    let p=path.join(dir,f);
+    if(fs.statSync(p).isDirectory()) out=out.concat(walk(p));
+    else out.push(p);
+  }
+  return out;
+}
+let files = walk('src');
+let target=null;
+for(let file of files){
+  if(!file.match(/\.(tsx|ts|jsx|js)$/)) continue;
+  let c=fs.readFileSync(file,'utf8');
+  if(c.includes('VIDEOS -') && c.includes('IMAGES -')){
+    console.log('FOUND BROKEN ALL TAB:', file);
+    target=file;
+  }
+}
+if(!target){
+  console.log('Not found, checking App.tsx');
+  if(fs.existsSync('src/App.tsx')) target='src/App.tsx';
+  if(fs.existsSync('src/pages/Search.tsx')) target='src/pages/Search.tsx';
+}
+console.log('Will fix:', target);
 
+const newUI = `
 import { useState, useEffect } from 'react';
 
 export default function SearchPage(){
@@ -89,4 +118,13 @@ export default function SearchPage(){
       )}
     </div>
   );
+}
+`;
+
+if(target){
+  fs.writeFileSync(target, newUI);
+  console.log('FIXED FRONTEND:', target);
+} else {
+  console.log('Could not find target, creating src/App.tsx');
+  fs.writeFileSync('src/App.tsx', newUI);
 }
