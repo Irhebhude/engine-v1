@@ -6,3 +6,6 @@ compatibility_date = "2024-01-01"
 binding = "DB"
 database_name = "engine-index"
 database_id = "cb1de4e6-afb3-4e74-b6b6-875ad0bb73c2"
+
+[ai]
+binding = "AI"
